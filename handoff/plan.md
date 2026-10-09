@@ -689,3 +689,33 @@ Tectonic 0.15.0 installed in `~/.local/bin` (Kevin's choice) to test-compile.
 - The suite is **231/231**.
 
 **Next:** JOB 3, the hardware path (handoff/05 HW-5 → G1–G4), **only on Kevin's approval**. Otherwise the project is complete at classically reachable sizes. Push/commit only on Kevin's request.
+
+
+---
+
+## 23. 2026-10-08/09 — Kevin's decisions, repo cleanup, first GitHub push, STANDSTILL brief (handoff/11)
+
+Journal Entries 44–47.
+
+**Decisions (Kevin):**
+- **T-18 → R-15:** the encoded H2 Q3 run uses 6×6 plus the minimal relevant 3×4.
+- **T-17 → R-14:** H2 Q3 curves are always compared with the noise, so 6×6 needs a noise-scaling arm.
+- Both are recorded in `handoff/05` (a decisions block) and in both reports.
+
+**Cleanup:**
+- Deleted: `notes/` (empty), `docs/.gitkeep` and the caches.
+- `drafts/gauss_law_self_mitigation_assessment.md` moved to the gitignored `Conversation history/dump/`.
+- A superseded banner added to `docs/qec_feasibility.md`.
+- `README.md` written. `requirements.txt` header and a stray character in `KIRO.md` fixed.
+
+**Published (one-time permission):** `github.com/KmarH/TFIM_QEC_Frustation`, branch `initial-import`, commit `37e6879`, 171 files. Pushed with a single-repo deploy key; author is the KmarH noreply address.
+
+**Standstill:** `handoff/11-standstill-awaiting-hardware.md` is the snapshot to resume from. It covers state, decisions in force, the ordered hardware steps with their local prerequisites, open items and environment.
+
+**Pre-access prerequisites, not built:**
+- randomized compiling in the encoded programs (D-RC);
+- the 6×6 noise-scaling arm;
+- the Quantinuum client install;
+- the `nexus` backend.
+
+**Local only:** this section and handoff/11 postdate `37e6879` and are not pushed. A push needs Kevin's request. Suite 231/231.
