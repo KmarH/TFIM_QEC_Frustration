@@ -1,0 +1,22 @@
+# Selene acceptance gap — 2026-10-07 12:43; Iceberg 2x2, 3 steps [assumed rates]
+# classical simulators only (Stim / Selene / local-sim) under an ASSUMED noise model; NOT an H2 result
+
+## 1. Is it the first-order approximation or the local engine? (p2=3e-3, p1=pm=p_init=3e-4)
+first-order exp(-D) 0.6700 | Stim sampled 0.6730 | local-sim 0.655±0.015  -> neither
+
+## 2. One channel at a time (rate 3e-3), Selene (3000 shots) vs Stim (200k shots)
+2q          Stim 0.7170 | Selene 0.7330±0.0081 | +2.0 sigma
+1q          Stim 0.5943 | Selene 0.1430±0.0064 | -70.6 sigma
+meas        Stim 0.9247 | Selene 0.9217±0.0049 | -0.6 sigma
+init/reset  Stim 0.9472 | Selene 0.9213±0.0049 | -5.3 sigma
+
+## 3. Operation counts: Selene natives (with_metrics) vs the pytket-level model
+2q: Selene rzz 124 vs model 124
+1q: Selene rxy 355 + rz 369 = 724 vs model 188 (x3.85)
+init/reset events: Selene reset 54 (qalloc 34) vs model 20
+
+## 4. Stim with p1 x3.85 (native 1q count) and p_init x1.5 (fitted from the init-only row)
+p2=0.001 step 3: Stim pytket-level 0.875 | Stim native-matched 0.834 | Selene 0.807±0.009
+p2=0.003 step 3: Stim pytket-level 0.673 | Stim native-matched 0.580 | Selene 0.554±0.011
+p2=0.003 step 1: Stim pytket-level 0.807 | Stim native-matched 0.753 | Selene 0.735±0.010
+p2=0.001 step 1: Stim pytket-level 0.931 | Stim native-matched 0.909 | Selene 0.900±0.007

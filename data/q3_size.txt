@@ -1,0 +1,23 @@
+# generated 2026-10-08 20:28 by scripts/run_q3_size.py (handoff/08 Part B2)
+# CLASSICAL only (MCMC statistics; Stim first-order fault accounting under an ASSUMED noise model, the research/06 H2 prior). NOT quantum hardware, NOT an H2 result. No thermodynamic-limit claim.
+
+## 1. Per-sector ergodic baseline vs size (W0 = (0, 0), 3-sublattice c0; uniform over the flip component; MCMC 32 chains x 4000 sweeps, SE from chain means) [measured]
+   lattice    N    flippable_density           C(r=0.866)         dressing <g> tau_int(mem)
+    3x6      18      0.33044 ± 0.00032     +0.11014 ± 0.00011      0.03884 ± 0.00003         2.09   (6s)
+    6x6      36      0.30884 ± 0.00023     +0.09990 ± 0.00009      0.04065 ± 0.00002         3.69   (10s)
+    9x6      54      0.30260 ± 0.00021     +0.09726 ± 0.00008      0.04118 ± 0.00002         7.04   (16s)
+   12x6      72      0.29958 ± 0.00021     +0.09607 ± 0.00008      0.04144 ± 0.00002         5.19   (21s)
+   12x12    144      0.29467 ± 0.00016     +0.09388 ± 0.00006      0.04185 ± 0.00001        16.92   (77s)
+  flippable_density: weighted fit y = a + b/N on N >= 36 [assumed fit form; inferred extrapolation]: a (N->inf) = +0.2900, b = +0.680; spread of the N >= 36 values 0.0142
+  C(r=0.866): weighted fit y = a + b/N on N >= 36 [assumed fit form; inferred extrapolation]: a (N->inf) = +0.0919, b = +0.288; spread of the N >= 36 values 0.0060
+
+## 2. Noise budget vs size: Stim first-order per-Trotter-step probabilities [derived accounting, ASSUMED noise]
+#   noise: p2=0.0006 (eta=0.05), p1=pm=p_init=6e-05; h=0.3, dt=0.25; Q3 window = 12.0/h = 40 (= 160 steps). H2 has 56 qubits (CompareConfig.n_data).
+#   bare: P(any fault) per step (all unprotected). Iceberg: P(detected -> discarded) and P(undetected logical fault) per step; survival exp(-rate*steps) is the first-order prediction.
+   lattice   N ice phys fits H2 bare fault ice detect  ice undet faults/window bare   t(ice surv=0.5)   t(ice surv=0.1)  t(ice surv=0.01)   t(bare clean=0.5)   t(bare clean=0.1)  t(bare clean=0.01)
+    3x4     12       16     yes     0.0230     0.0543     0.0086               3.69              3.19             10.61             21.21                7.52               24.98               49.97   (3s)
+    3x6     18       22     yes     0.0346     0.0788     0.0130               5.53              2.20              7.31             14.62                5.01               16.66               33.31   (3s)
+    6x6     36       40     yes     0.0691     0.1522     0.0259              11.06              1.14              3.78              7.56                2.51                8.33               16.66   (7s)
+    9x6     54       58      NO     0.1037     0.2256     0.0389              16.59              0.77              2.55              5.10                1.67                5.55               11.10   (11s)
+  Per-site rates (rate / N) [derived]: 3x4: bare 1.92e-03, ice det 4.52e-03, ice undet 7.20e-04; 3x6: bare 1.92e-03, ice det 4.38e-03, ice undet 7.20e-04; 6x6: bare 1.92e-03, ice det 4.23e-03, ice undet 7.20e-04; 9x6: bare 1.92e-03, ice det 4.18e-03, ice undet 7.20e-04
+  Bare and Iceberg-undetected rates are exactly linear in N; the Iceberg detection rate per site drifts down slightly with N: each syndrome round has an N-independent part (the +4 of its 2(N+2) CNOTs, the flag CNOTs, ancilla readout/reset), so its rate is a*N + c and the constant amortises. 'Linear in N' is approximate for it. Time to a fixed survival shrinks ~1/N.

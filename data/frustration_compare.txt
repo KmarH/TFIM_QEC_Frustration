@@ -1,0 +1,32 @@
+# Q2 frustration comparison — triangular vs square, 3x4=12 spins, periodic, J=-1.0 (AFM)
+# H = -J sum ZZ - h sum X; ground state by Lanczos ED. Numbers are measured.
+# geom            h     E/site    |M_z|   mean<ZZ>  defect_dens
+  square       0.00   -1.33333   0.0000   -0.66667          n/a
+  triangular   0.00   -1.00000   0.1238   -0.33333   3.6318e-31
+
+  square       0.10   -1.33542   0.0000   -0.66562          n/a
+  triangular   0.10   -1.03079   0.0000   -0.33270   4.7661e-04
+
+  square       0.30   -1.35258   0.0000   -0.65657          n/a
+  triangular   0.30   -1.10366   0.0000   -0.32775   4.1844e-03
+
+  square       0.60   -1.41520   0.0000   -0.62033          n/a
+  triangular   0.60   -1.24063   0.0000   -0.31106   1.6704e-02
+
+  square       1.00   -1.57615   0.0000   -0.53447          n/a
+  triangular   1.00   -1.47673   0.0000   -0.26941   4.7941e-02
+
+# Interpretation (h=0, classical limit) — energy per bond is basis-independent:
+#   square     E/bond at h=0 = -0.6667 over 24 bonds
+#   triangular E/bond at h=0 = -0.3333 over 36 bonds (less negative -> more frustrated: a triangle satisfies only 1 of 3 bonds)
+#   The h=0 ground state is degenerate on both lattices, so the per-vector |M_z| and
+#   mean<ZZ> columns above are basis-dependent and not interpreted; energy/bond is the
+#   honest frustration signature. The triangular defect density is ~0 in the ground
+#   manifold (= defect-free Gauss-law subspace) and grows as (h/|J|)^2 off it
+#   (data/gauss_law_scaling.txt). The square lattice has no dimer/defect description;
+#   that observable is frustration-specific.
+# CAVEAT (T-19): this 3x4 square torus has an odd periodic length (3), so it is NOT bipartite
+#   and its AFM is itself frustrated (h=0 E/bond -2/3, vs -1 on the bipartite 4x4). It is not a
+#   clean unfrustrated reference; part of the -0.667 vs -0.333 contrast is odd-length frustration.
+#   Within ED <= 20 only the 4x4 square torus is clean: see docs/q2_frustration.md A.2 and
+#   data/frustration_correlations.txt (scripts/compare_frustration_correlations.py).

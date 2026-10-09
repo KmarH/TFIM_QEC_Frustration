@@ -1,0 +1,63 @@
+# Part B encoded-TFIM comparison — 2026-10-07 09:49
+# Standard B (measured accounting, no pass/fail FT bar); budget (ii): H2 ~55 qubits; Stim at budget size; execution (selene) at reduced size <= 24 qubits.
+# CAVEAT: classical predictions under ASSUMED generic depolarizing noise; not H2 results.
+
+## 1. Physical-qubit budget (data + 1 syndrome/rotation ancilla + 1 flag)
+code         1x2     2x2     2x3     2x4     3x4     4x4   (<=24 local | <=55 H2)
+iceberg      6 L     8 L    10 L    12 L    16 L    20 L
+steane      16 L    30 H    44 H    58 x    86 x   114 x
+five        12 L    22 L    32 H    42 H    62 x    82 x
+concat      18 L    18 L    34 H    34 H    50 H    66 x
+   L = runs locally and fits H2; H = fits H2 only (Stim verification only here); x = exceeds ~55
+
+## 2. Logical operation cost (reduced lattice) — physical ops per Trotter step
+iceberg  2x2: weights field Xbar=2, bond ZbarZbar=2, prep Ybar=3; per step: 28 two-qubit, 48 one-qubit, 4 measurements; stabilizers per round 2
+steane   1x2: weights field Xbar=3, bond ZbarZbar=6, prep Ybar=3; per step: 108 two-qubit, 101 one-qubit, 29 measurements; stabilizers per round 12
+five     1x2: weights field Xbar=3, bond ZbarZbar=6, prep Ybar=3; per step: 84 two-qubit, 109 one-qubit, 21 measurements; stabilizers per round 8
+concat   2x2: weights field Xbar=4, bond ZbarZbar=4, prep Ybar=7; per step: 184 two-qubit, 164 one-qubit, 36 measurements; stabilizers per round 12
+bare     2x2: per step 4 two-qubit, 8 one-qubit
+
+## 3. Verification at the reduced (executable) size
+iceberg  2x2: verify_code PASS; clean Stim images silent True; transparency max|dZ2| 1.7e-14; Stim<->local over all 256 logical Paulis (Clifford instance) max|d| 2.5e-14
+steane   1x2: verify_code PASS; clean Stim images silent True; transparency max|dZ2| 4.6e-14; Stim<->local over all 16 logical Paulis (Clifford instance) max|d| 3.5e-14
+five     1x2: verify_code PASS; clean Stim images silent True; transparency max|dZ2| 4.3e-14; Stim<->local over all 16 logical Paulis (Clifford instance) max|d| 2.2e-14
+concat   2x2: verify_code PASS; clean Stim images silent True; transparency max|dZ2| 5.1e-14; Stim<->local over all 256 logical Paulis (Clifford instance) max|d| 5.7e-14
+
+## 4. MEASURED undetected-logical probability per Trotter step (Stim, first order)
+
+### p2=0.001, p1=pm=p_init=0.0001 [assumed]
+1x2: iceberg(n=6) undetected 1.00e-03 acc@3 0.922 | steane(n=16) undetected 8.33e-04 acc@3 0.642 | five(n=12) undetected 8.33e-04 acc@3 0.713 | concat(n=18) undetected 8.33e-04 acc@3 0.581 | bare unprotected 1.40e-03
+2x2: iceberg(n=8) undetected 2.40e-03 acc@3 0.875 | steane(n=30) undetected 2.00e-03 acc@3 0.383 | five(n=22) undetected 2.00e-03 acc@3 0.469 | concat(n=18) undetected 2.00e-03 acc@3 0.472 | bare unprotected 4.80e-03
+2x3: iceberg(n=10) undetected 4.20e-03 acc@3 0.827 | steane(n=44) undetected 3.50e-03 acc@3 0.213 | five(n=32) undetected 3.50e-03 acc@3 0.284 | concat(n=34) undetected 3.50e-03 acc@3 0.226 | bare unprotected 1.02e-02
+
+### p2=0.003, p1=pm=p_init=0.0003 [assumed]
+1x2: iceberg(n=6) undetected 3.00e-03 acc@3 0.783 | steane(n=16) undetected 2.50e-03 acc@3 0.264 | five(n=12) undetected 2.50e-03 acc@3 0.363 | concat(n=18) undetected 2.50e-03 acc@3 0.196 | bare unprotected 4.20e-03
+2x2: iceberg(n=8) undetected 7.20e-03 acc@3 0.670 | steane(n=30) undetected 6.00e-03 acc@3 0.056 | five(n=22) undetected 6.00e-03 acc@3 0.103 | concat(n=18) undetected 6.00e-03 acc@3 0.105 | bare unprotected 1.44e-02
+2x3: iceberg(n=10) undetected 1.26e-02 acc@3 0.565 | steane(n=44) undetected 1.05e-02 acc@3 0.010 | five(n=32) undetected 1.05e-02 acc@3 0.023 | concat(n=34) undetected 1.05e-02 acc@3 0.012 | bare unprotected 3.06e-02
+   acc@3 = exp(-first-order detection probability of the 3-step program incl. prep) [Stim]
+
+## 5. Executed on Selene (Quest) at the reduced size; bare = local-sim, same rates (2026-10-07 10:19)
+iceberg  2x2 p2=0.001 step 1: accept 0.918±0.009 (n=1000) | enc Z2 0.6778±0.0134 | ideal 0.6683 | bare Z2 0.6665±0.0131 (8s)
+iceberg  2x2 p2=0.001 step 2: accept 0.856±0.011 (n=1000) | enc Z2 0.4909±0.0144 | ideal 0.4925 | bare Z2 0.4900±0.0134 (10s)
+iceberg  2x2 p2=0.001 step 3: accept 0.829±0.012 (n=1000) | enc Z2 0.5866±0.0147 | ideal 0.5888 | bare Z2 0.5805±0.0133 (13s)
+iceberg  2x2 p2=0.003 step 1: accept 0.774±0.013 (n=1000) | enc Z2 0.6957±0.0145 | ideal 0.6683 | bare Z2 0.6610±0.0131 (6s)
+iceberg  2x2 p2=0.003 step 2: accept 0.653±0.015 (n=1000) | enc Z2 0.4755±0.0165 | ideal 0.4925 | bare Z2 0.4988±0.0134 (10s)
+iceberg  2x2 p2=0.003 step 3: accept 0.568±0.016 (n=1000) | enc Z2 0.5814±0.0175 | ideal 0.5888 | bare Z2 0.5833±0.0134 (13s)
+steane   1x2 p2=0.001 step 1: accept 0.767±0.024 (n=300) | enc Z2 0.7739±0.0276 | ideal 0.7266 | bare Z2 0.7360±0.0139 (103s)
+steane   1x2 p2=0.001 step 2: accept 0.617±0.028 (n=300) | enc Z2 0.7135±0.0333 | ideal 0.7123 | bare Z2 0.7000±0.0145 (179s)
+steane   1x2 p2=0.001 step 3: accept 0.547±0.029 (n=300) | enc Z2 0.8902±0.0245 | ideal 0.8736 | bare Z2 0.8750±0.0105 (275s)
+steane   1x2 p2=0.003 step 1: accept 0.407±0.028 (n=300) | enc Z2 0.7623±0.0387 | ideal 0.7266 | bare Z2 0.7250±0.0141 (88s)
+steane   1x2 p2=0.003 step 2: accept 0.227±0.024 (n=300) | enc Z2 0.7059±0.0557 | ideal 0.7123 | bare Z2 0.7280±0.0141 (159s)
+steane   1x2 p2=0.003 step 3: accept 0.140±0.020 (n=300) | enc Z2 0.8095±0.0613 | ideal 0.8736 | bare Z2 0.8610±0.0109 (242s)
+five     1x2 p2=0.001 step 1: accept 0.805±0.020 (n=400) | enc Z2 0.7143±0.0252 | ideal 0.7266 | bare Z2 0.7360±0.0139 (27s)
+five     1x2 p2=0.001 step 2: accept 0.690±0.023 (n=400) | enc Z2 0.6812±0.0281 | ideal 0.7123 | bare Z2 0.7000±0.0145 (60s)
+five     1x2 p2=0.001 step 3: accept 0.585±0.025 (n=400) | enc Z2 0.8932±0.0202 | ideal 0.8736 | bare Z2 0.8750±0.0105 (101s)
+five     1x2 p2=0.003 step 1: accept 0.557±0.025 (n=400) | enc Z2 0.7534±0.0289 | ideal 0.7266 | bare Z2 0.7250±0.0141 (29s)
+five     1x2 p2=0.003 step 2: accept 0.315±0.023 (n=400) | enc Z2 0.6508±0.0426 | ideal 0.7123 | bare Z2 0.7280±0.0141 (59s)
+five     1x2 p2=0.003 step 3: accept 0.200±0.020 (n=400) | enc Z2 0.8250±0.0427 | ideal 0.8736 | bare Z2 0.8610±0.0109 (100s)
+concat   2x2 p2=0.001 step 1: accept 0.640±0.039 (n=150) | enc Z2 0.7188±0.0404 | ideal 0.6683 | bare Z2 0.6665±0.0131 (241s)
+concat   2x2 p2=0.001 step 2: accept 0.507±0.041 (n=150) | enc Z2 0.4770±0.0487 | ideal 0.4925 | bare Z2 0.4900±0.0134 (391s)
+concat   2x2 p2=0.001 step 3: accept 0.333±0.038 (n=150) | enc Z2 0.6550±0.0562 | ideal 0.5888 | bare Z2 0.5805±0.0133 (538s)
+concat   2x2 p2=0.003 step 1: accept 0.253±0.036 (n=150) | enc Z2 0.6974±0.0661 | ideal 0.6683 | bare Z2 0.6610±0.0131 (208s)
+concat   2x2 p2=0.003 step 2: accept 0.067±0.020 (n=150) | enc Z2 0.6500±0.1453 | ideal 0.4925 | bare Z2 0.4988±0.0134 (283s)
+concat   2x2 p2=0.003 step 3: accept 0.033±0.015 (n=150) | enc Z2 0.5500±0.1837 | ideal 0.5888 | bare Z2 0.5833±0.0134 (410s)

@@ -1,0 +1,121 @@
+# generated 2026-10-08 22:00 by scripts/compare_frustration_correlations.py (handoff/09 Part A)
+# CLASSICAL exact diagonalization only; every number [measured]; NOT an H2 / hardware result.
+# H = -J sum ZZ - h sum X, J=-1.0 (AFM), periodic tori. Ground state: exact, in the global-spin-flip-EVEN sector (unique and P-even for h > 0 by Perron-Frobenius [derived]; avoids the symmetry-broken Lanczos mixtures a near-degenerate torus produces). dE_ED = E_even - E(src.backends.run_ed) (must be ~0).
+# C(r) = mean over pairs at distance r of the CONNECTED <Z_i Z_j> - <Z_i><Z_j>; [lo, hi] = spread inside the shell (inequivalent directions). Distance = minimal-image EUCLIDEAN site distance, nearest neighbours at 1: square (x,y); triangular x e1 + y e2 with e1=(1,0), e2=(-1/2, sqrt3/2) (the src/dimers.py embedding).
+# h = 0: degenerate ground state on both lattices (massively on the triangular one) -> single-vector C(r) is recorded but NOT interpreted. gaps = E1-E0, E2-E0 in the full space.
+# CAVEAT 1 [measured]: a square torus with an ODD periodic length is not bipartite, so its AFM is itself frustrated (h=0 E/bond -2/3 on 3x4 vs -1 on 4x4): only even x even square tori are the unfrustrated reference. The 3x4 pair (data/frustration_compare.txt) is kept for continuity, flagged.
+# CAVEAT 2 [established]: the repo's triangular embedding (square + one diagonal) sits at the J'=J point of Iglovikov et al., PRB 87, 214415 (arXiv:1303.0883), near a Stephenson disorder line / incommensurate floating phase: triangular C(r) on small tori may be incommensurate, non-monotonic and torus-shape dependent. No 'frustration monotonically weakens order' story is read into it.
+
+## square 4x4 (N=16; square, bipartite = UNFRUSTRATED reference)
+  h=0.0  E/site=-2.00000 E/bond=-1.00000 dE_ED=-7.1e-15 gaps=7.11e-15,8.00e+00 max|<Z_i>|=0.0e+00 (0.4s)   [h=0: degenerate, NOT interpreted]
+      r=1.000000  pairs=32   C(r)=-1.00000  [-1.00000, -1.00000]
+      r=1.414214  pairs=32   C(r)=+1.00000  [+1.00000, +1.00000]
+      r=2.000000  pairs=16   C(r)=+1.00000  [+1.00000, +1.00000]
+      r=2.236068  pairs=32   C(r)=-1.00000  [-1.00000, -1.00000]
+      r=2.828427  pairs=8    C(r)=+1.00000  [+1.00000, +1.00000]
+  h=0.1  E/site=-2.00125 E/bond=-1.00063 dE_ED=-7.1e-15 gaps=1.21e-13,7.99e+00 max|<Z_i>|=1.1e-16 (3.1s)
+      r=1.000000  pairs=32   C(r)=-0.99937  [-0.99937, -0.99937]
+      r=1.414214  pairs=32   C(r)=+0.99937  [+0.99937, +0.99937]
+      r=2.000000  pairs=16   C(r)=+0.99937  [+0.99937, +0.99937]
+      r=2.236068  pairs=32   C(r)=-0.99937  [-0.99937, -0.99937]
+      r=2.828427  pairs=8    C(r)=+0.99937  [+0.99937, +0.99937]
+  h=0.3  E/site=-2.01126 E/bond=-1.00563 dE_ED=+1.1e-13 gaps=4.26e-14,7.93e+00 max|<Z_i>|=1.1e-16 (5.7s)
+      r=1.000000  pairs=32   C(r)=-0.99437  [-0.99437, -0.99437]
+      r=1.414214  pairs=32   C(r)=+0.99436  [+0.99436, +0.99436]
+      r=2.000000  pairs=16   C(r)=+0.99436  [+0.99436, +0.99436]
+      r=2.236068  pairs=32   C(r)=-0.99436  [-0.99436, -0.99436]
+      r=2.828427  pairs=8    C(r)=+0.99436  [+0.99436, +0.99436]
+  h=0.6  E/site=-2.04508 E/bond=-1.02254 dE_ED=-9.9e-14 gaps=1.83e-10,7.74e+00 max|<Z_i>|=1.1e-16 (4.3s)
+      r=1.000000  pairs=32   C(r)=-0.97737  [-0.97737, -0.97737]
+      r=1.414214  pairs=32   C(r)=+0.97727  [+0.97727, +0.97727]
+      r=2.000000  pairs=16   C(r)=+0.97727  [+0.97727, +0.97727]
+      r=2.236068  pairs=32   C(r)=-0.97727  [-0.97727, -0.97727]
+      r=2.828427  pairs=8    C(r)=+0.97727  [+0.97727, +0.97727]
+  h=1.0  E/site=-2.12566 E/bond=-1.06283 dE_ED=-9.9e-14 gaps=5.51e-07,7.29e+00 max|<Z_i>|=1.1e-16 (3.7s)
+      r=1.000000  pairs=32   C(r)=-0.93649  [-0.93649, -0.93649]
+      r=1.414214  pairs=32   C(r)=+0.93573  [+0.93573, +0.93573]
+      r=2.000000  pairs=16   C(r)=+0.93573  [+0.93573, +0.93573]
+      r=2.236068  pairs=32   C(r)=-0.93570  [-0.93570, -0.93570]
+      r=2.828427  pairs=8    C(r)=+0.93570  [+0.93570, +0.93570]
+
+## triangular 4x4 (N=16; triangular, frustrated)
+  h=0.0  E/site=-1.00000 E/bond=-0.33333 dE_ED=+6.8e-14 gaps=0.00e+00,0.00e+00 max|<Z_i>|=0.0e+00 (0.9s)   [h=0: degenerate, NOT interpreted]
+      r=1.000000  pairs=48   C(r)=-0.33333  [-0.85932, +0.29141]
+      r=1.732051  pairs=48   C(r)=+0.07949  [-0.38251, +0.51621]
+      r=2.000000  pairs=24   C(r)=+0.17435  [-0.16337, +0.38655]
+  h=0.1  E/site=-1.00251 E/bond=-0.33417 dE_ED=-2.6e-12 gaps=4.65e-05,4.65e-05 max|<Z_i>|=8.3e-17 (84.5s)
+      r=1.000000  pairs=48   C(r)=-0.33249  [-0.33249, -0.33249]
+      r=1.732051  pairs=48   C(r)=-0.05498  [-0.05498, -0.05498]
+      r=2.000000  pairs=24   C(r)=+0.44244  [+0.44244, +0.44244]
+  h=0.3  E/site=-1.02368 E/bond=-0.34123 dE_ED=-6.4e-13 gaps=5.36e-03,5.36e-03 max|<Z_i>|=5.6e-17 (50.8s)
+      r=1.000000  pairs=48   C(r)=-0.32455  [-0.32455, -0.32455]
+      r=1.732051  pairs=48   C(r)=-0.04454  [-0.04454, -0.04454]
+      r=2.000000  pairs=24   C(r)=+0.41312  [+0.41312, +0.41312]
+  h=0.6  E/site=-1.11916 E/bond=-0.37305 dE_ED=-1.2e-13 gaps=2.17e-01,2.17e-01 max|<Z_i>|=2.8e-17 (10.5s)
+      r=1.000000  pairs=48   C(r)=-0.26788  [-0.26788, -0.26788]
+      r=1.732051  pairs=48   C(r)=+0.02912  [+0.02912, +0.02912]
+      r=2.000000  pairs=24   C(r)=+0.19632  [+0.19632, +0.19632]
+  h=1.0  E/site=-1.39722 E/bond=-0.46574 dE_ED=+9.6e-14 gaps=9.94e-01,1.04e+00 max|<Z_i>|=2.8e-17 (3.4s)
+      r=1.000000  pairs=48   C(r)=-0.20395  [-0.20395, -0.20395]
+      r=1.732051  pairs=48   C(r)=+0.05341  [+0.05341, +0.05341]
+      r=2.000000  pairs=24   C(r)=+0.06811  [+0.06811, +0.06811]
+
+## square 3x4 (N=12; square, odd periodic length = itself FRUSTRATED)
+  h=0.0  E/site=-1.33333 E/bond=-0.66667 dE_ED=+3.4e-14 gaps=1.60e-14,2.13e-14 max|<Z_i>|=0.0e+00 (0.0s)   [h=0: degenerate, NOT interpreted]
+      r=1.000000  pairs=24   C(r)=-0.66667  [-1.00000, +0.57984]
+      r=1.414214  pairs=24   C(r)=+0.33333  [-0.57984, +0.99900]
+      r=2.000000  pairs=6    C(r)=+1.00000  [+1.00000, +1.00000]
+      r=2.236068  pairs=12   C(r)=-0.33333  [-0.99900, +0.57984]
+  h=0.1  E/site=-1.33542 E/bond=-0.66771 dE_ED=+1.4e-14 gaps=3.11e-05,9.34e-05 max|<Z_i>|=1.1e-16 (0.1s)
+      r=1.000000  pairs=24   C(r)=-0.66562  [-0.99811, -0.33312]
+      r=1.414214  pairs=24   C(r)=+0.33312  [+0.33312, +0.33312]
+      r=2.000000  pairs=6    C(r)=+0.99810  [+0.99810, +0.99810]
+      r=2.236068  pairs=12   C(r)=-0.33312  [-0.33312, -0.33312]
+  h=0.3  E/site=-1.35258 E/bond=-0.67629 dE_ED=+1.1e-14 gaps=2.43e-03,2.43e-03 max|<Z_i>|=5.6e-17 (0.2s)
+      r=1.000000  pairs=24   C(r)=-0.65657  [-0.98170, -0.33145]
+      r=1.414214  pairs=24   C(r)=+0.33139  [+0.33139, +0.33139]
+      r=2.000000  pairs=6    C(r)=+0.98120  [+0.98120, +0.98120]
+      r=2.236068  pairs=12   C(r)=-0.33139  [-0.33139, -0.33139]
+  h=0.6  E/site=-1.41520 E/bond=-0.70760 dE_ED=+1.4e-14 gaps=3.31e-02,3.31e-02 max|<Z_i>|=1.1e-16 (0.2s)
+      r=1.000000  pairs=24   C(r)=-0.62033  [-0.91516, -0.32550]
+      r=1.414214  pairs=24   C(r)=+0.32430  [+0.32430, +0.32430]
+      r=2.000000  pairs=6    C(r)=+0.90836  [+0.90836, +0.90836]
+      r=2.236068  pairs=12   C(r)=-0.32408  [-0.32408, -0.32408]
+  h=1.0  E/site=-1.57615 E/bond=-0.78808 dE_ED=+1.1e-14 gaps=1.68e-01,1.68e-01 max|<Z_i>|=5.6e-17 (0.1s)
+      r=1.000000  pairs=24   C(r)=-0.53447  [-0.76050, -0.30844]
+      r=1.414214  pairs=24   C(r)=+0.29864  [+0.29864, +0.29864]
+      r=2.000000  pairs=6    C(r)=+0.73134  [+0.73134, +0.73134]
+      r=2.236068  pairs=12   C(r)=-0.29586  [-0.29586, -0.29586]
+
+## triangular 3x4 (N=12; triangular, frustrated)
+  h=0.0  E/site=-1.00000 E/bond=-0.33333 dE_ED=+3.6e-14 gaps=1.78e-15,1.78e-15 max|<Z_i>|=0.0e+00 (0.0s)   [h=0: degenerate, NOT interpreted]
+      r=1.000000  pairs=36   C(r)=-0.33333  [-0.67210, +0.02943]
+      r=1.732051  pairs=24   C(r)=+0.31810  [+0.05988, +0.60851]
+      r=2.000000  pairs=6    C(r)=-0.18417  [-0.28828, -0.01557]
+  h=0.1  E/site=-1.03079 E/bond=-0.34360 dE_ED=+3.4e-14 gaps=1.27e-02,1.27e-02 max|<Z_i>|=1.1e-16 (0.5s)
+      r=1.000000  pairs=36   C(r)=-0.33270  [-0.66506, -0.00014]
+      r=1.732051  pairs=24   C(r)=+0.46931  [+0.33284, +0.60579]
+      r=2.000000  pairs=6    C(r)=-0.71366  [-0.71366, -0.71366]
+  h=0.3  E/site=-1.10366 E/bond=-0.36789 dE_ED=+3.6e-15 gaps=4.47e-02,4.47e-02 max|<Z_i>|=1.1e-16 (0.3s)
+      r=1.000000  pairs=36   C(r)=-0.32775  [-0.65253, -0.00152]
+      r=1.732051  pairs=24   C(r)=+0.45829  [+0.32844, +0.58815]
+      r=2.000000  pairs=6    C(r)=-0.68759  [-0.68759, -0.68759]
+  h=0.6  E/site=-1.24063 E/bond=-0.41354 dE_ED=-1.6e-14 gaps=1.18e-01,1.18e-01 max|<Z_i>|=1.1e-16 (0.2s)
+      r=1.000000  pairs=36   C(r)=-0.31106  [-0.60858, -0.01031]
+      r=1.732051  pairs=24   C(r)=+0.42531  [+0.31002, +0.54060]
+      r=2.000000  pairs=6    C(r)=-0.61984  [-0.61984, -0.61984]
+  h=1.0  E/site=-1.47673 E/bond=-0.49224 dE_ED=+6.8e-14 gaps=3.38e-01,3.38e-01 max|<Z_i>|=5.6e-17 (0.2s)
+      r=1.000000  pairs=36   C(r)=-0.26941  [-0.48712, -0.05566]
+      r=1.732051  pairs=24   C(r)=+0.33493  [+0.24968, +0.42018]
+      r=2.000000  pairs=6    C(r)=-0.43993  [-0.43993, -0.43993]
+
+## Summary at h > 0: nearest-neighbour C(1) and the farthest shell C(r_max) [measured]. r_max differs between the geometries (it is the largest minimal-image distance of each torus), so the C(r_max) columns are a long-distance indicator per lattice, not a like-for-like distance.
+  cluster    h | square C(1)  C(r_max)  r_max | triang C(1)  C(r_max)  r_max | square more AFM-correlated at r=1?
+  4x4      0.1 |     -0.9994   +0.9994  2.828 |     -0.3325   +0.4424  2.000 | yes
+  4x4      0.3 |     -0.9944   +0.9944  2.828 |     -0.3246   +0.4131  2.000 | yes
+  4x4      0.6 |     -0.9774   +0.9773  2.828 |     -0.2679   +0.1963  2.000 | yes
+  4x4      1.0 |     -0.9365   +0.9357  2.828 |     -0.2040   +0.0681  2.000 | yes
+  3x4      0.1 |     -0.6656   -0.3331  2.236 |     -0.3327   -0.7137  2.000 | yes
+  3x4      0.3 |     -0.6566   -0.3314  2.236 |     -0.3278   -0.6876  2.000 | yes
+  3x4      0.6 |     -0.6203   -0.3241  2.236 |     -0.3111   -0.6198  2.000 | yes
+  3x4      1.0 |     -0.5345   -0.2959  2.236 |     -0.2694   -0.4399  2.000 | yes

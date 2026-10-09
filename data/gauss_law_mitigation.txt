@@ -1,0 +1,199 @@
+# generated 2026-10-06 20:56 by scripts/run_gauss_law.py
+# Mitigation benchmark: 3x3 torus (N=9, 18 triangles), exact density matrix
+# J=-1.0, h=0.3, dt=0.25, initial = most-flippable defect-free product state, Trotter steps 40 (t=10)
+# noise: per Trotter step, per qubit Pauli channel, total prob p split as (px,py,pz) [assumption]
+# ZNE: Richardson on lambda=(1.0, 2.0, 3.0), coeffs=[3.0, -3.0, 1.0], sampling cost 57.0x; shots per circuit for error bars: 10000
+# cost = shot multiplier for equal statistical error; err = sqrt(bias^2 + cost*Var/shots)
+
+## t = 3.25: ideal (noiseless Trotter) values: pattern memory m=+0.4740, dimer-dimer <nn> r=1.73=+0.1973, NNN <ZZ>=+0.7208
+   physics floor: defect/tri=2.8898e-03; noiseless postselection keeps 0.9853 and biases targets by +0.0007, +0.0001, +0.0072
+   single-error defect-detection prob at this time: X/Y=0.543, Z=0.000
+
+## t = 10: ideal (noiseless Trotter) values: pattern memory m=-0.3924, dimer-dimer <nn> r=1.73=+0.2541, NNN <ZZ>=+0.8316
+   physics floor: defect/tri=3.6413e-03; noiseless postselection keeps 0.9789 and biases targets by -0.0096, +0.0018, +0.0135
+   single-error defect-detection prob at this time: X/Y=0.460, Z=0.000
+
+## channel=depolarizing p=0.001 t=3.25: defect/tri=1.1491e-02 (floor 2.8898e-03); F_gauss=0.9652; per-target true F=1.0005, 1.0309, 0.9621
+   method                            pattern memory m              dimer-dimer <nn> r=1.7                            NNN <ZZ>     cost
+   raw                        bias +0.0002 err 0.0022             bias -0.0016 err 0.0019             bias -0.0273 err 0.0274   1x
+   postselect                 bias +0.0029 err 0.0037             bias -0.0020 err 0.0023             bias +0.0029 err 0.0039   1.06x
+   selfmit-oracle             bias +0.0173 err 0.0175             bias -0.0036 err 0.0038             bias -0.0023 err 0.0035   1.07x
+   selfmit-naive              bias +0.0231 err 0.0232             bias -0.0042 err 0.0044             bias +0.0061 err 0.0067   1.1x
+   zne                        bias +0.0000 err 0.0169             bias -0.0000 err 0.0081             bias -0.0000 err 0.0190   57x
+   pec                        bias +0.0000 err 0.0046             bias +0.0000 err 0.0022             bias +0.0000 err 0.0052   4.22x
+
+## channel=depolarizing p=0.001 t=10: defect/tri=2.8932e-02 (floor 3.6413e-03); F_gauss=0.8973; per-target true F=0.7377, -4.2360, 0.8645
+   method                            pattern memory m              dimer-dimer <nn> r=1.7                            NNN <ZZ>     cost
+   raw                        bias +0.1029 err 0.1032             bias -0.0213 err 0.0213             bias -0.1126 err 0.1127   1x
+   postselect                 bias +0.0411 err 0.0418             bias -0.0163 err 0.0164             bias -0.0228 err 0.0231   1.16x
+   selfmit-oracle             bias +0.0698 err 0.0702             bias -0.0233 err 0.0233             bias -0.0304 err 0.0306   1.24x
+   selfmit-naive              bias +0.0650 err 0.0655             bias -0.0235 err 0.0236             bias -0.0186 err 0.0189   1.28x
+   zne                        bias +0.0046 err 0.0525             bias -0.0021 err 0.0084             bias -0.0032 err 0.0242   57x
+   pec                        bias +0.0000 err 0.0142             bias +0.0000 err 0.0022             bias +0.0000 err 0.0065   4.22x
+
+## channel=depolarizing p=0.003 t=3.25: defect/tri=2.7803e-02 (floor 2.8898e-03); F_gauss=0.8992; per-target true F=0.9988, 1.0768, 0.8908
+   method                            pattern memory m              dimer-dimer <nn> r=1.7                            NNN <ZZ>     cost
+   raw                        bias -0.0006 err 0.0023             bias -0.0041 err 0.0042             bias -0.0787 err 0.0787   1x
+   postselect                 bias +0.0076 err 0.0080             bias -0.0061 err 0.0062             bias -0.0051 err 0.0060   1.15x
+   selfmit-oracle             bias +0.0525 err 0.0526             bias -0.0104 err 0.0105             bias -0.0067 err 0.0074   1.24x
+   selfmit-naive              bias +0.0587 err 0.0587             bias -0.0112 err 0.0112             bias +0.0017 err 0.0037   1.27x
+   zne                        bias +0.0007 err 0.0172             bias -0.0005 err 0.0080             bias -0.0011 err 0.0220   57x
+   pec                        bias +0.0000 err 0.0198             bias +0.0000 err 0.0091             bias +0.0000 err 0.0253   75.5x
+
+## channel=depolarizing p=0.003 t=10: defect/tri=7.1904e-02 (floor 3.6413e-03); F_gauss=0.7229; per-target true F=0.3670, -9.8154, 0.6528
+   method                            pattern memory m              dimer-dimer <nn> r=1.7                            NNN <ZZ>     cost
+   raw                        bias +0.2484 err 0.2485             bias -0.0440 err 0.0440             bias -0.2888 err 0.2888   1x
+   postselect                 bias +0.1320 err 0.1322             bias -0.0440 err 0.0440             bias -0.0781 err 0.0783   1.49x
+   selfmit-oracle             bias +0.1932 err 0.1934             bias -0.0593 err 0.0593             bias -0.0807 err 0.0809   1.91x
+   selfmit-naive              bias +0.1902 err 0.1904             bias -0.0601 err 0.0601             bias -0.0696 err 0.0698   1.97x
+   zne                        bias +0.0629 err 0.0794             bias -0.0239 err 0.0252             bias -0.0455 err 0.0540   57x
+   pec                        bias +0.0000 err 0.0558             bias +0.0000 err 0.0091             bias +0.0000 err 0.0333   75.5x
+
+## channel=depolarizing p=0.01 t=3.25: defect/tri=7.6622e-02 (floor 2.8898e-03); F_gauss=0.7016; per-target true F=0.9705, 1.1141, 0.6818
+   method                            pattern memory m              dimer-dimer <nn> r=1.7                            NNN <ZZ>     cost
+   raw                        bias -0.0140 err 0.0142             bias -0.0060 err 0.0061             bias -0.2293 err 0.2294   1x
+   postselect                 bias +0.0242 err 0.0244             bias -0.0177 err 0.0177             bias -0.0283 err 0.0287   1.53x
+   selfmit-oracle             bias +0.1817 err 0.1817             bias -0.0310 err 0.0310             bias -0.0203 err 0.0210   2.03x
+   selfmit-naive              bias +0.1894 err 0.1894             bias -0.0320 err 0.0320             bias -0.0121 err 0.0132   2.08x
+   zne                        bias +0.0137 err 0.0229             bias -0.0092 err 0.0120             bias -0.0255 err 0.0373   57x
+   pec                        bias +0.0000 err 3.3306             bias +0.0000 err 1.3973             bias +0.0000 err 4.9539   1.88e+06x
+
+## channel=depolarizing p=0.01 t=10: defect/tri=1.6620e-01 (floor 3.6413e-03); F_gauss=0.3401; per-target true F=-0.1202, -9.9264, 0.2610
+   method                            pattern memory m              dimer-dimer <nn> r=1.7                            NNN <ZZ>     cost
+   raw                        bias +0.4396 err 0.4396             bias -0.0444 err 0.0444             bias -0.6146 err 0.6146   1x
+   postselect                 bias +0.3689 err 0.3690             bias -0.0899 err 0.0899             bias -0.1699 err 0.1701   3.22x
+   selfmit-oracle             bias +0.5311 err 0.5312             bias -0.1227 err 0.1228             bias -0.1935 err 0.1938   8.64x
+   selfmit-naive              bias +0.5331 err 0.5333             bias -0.1245 err 0.1245             bias -0.1840 err 0.1844   8.9x
+   zne                        bias +0.3762 err 0.3779             bias -0.0804 err 0.0807             bias -0.3513 err 0.3526   57x
+   pec                        bias +0.0000 err 6.3993             bias +0.0000 err 1.4086             bias +0.0000 err 5.3780   1.88e+06x
+
+## channel=dephasing p=0.001 t=3.25: defect/tri=3.0970e-03 (floor 2.8898e-03); F_gauss=0.9992; per-target true F=1.0069, 1.0361, 0.9938
+   method                            pattern memory m              dimer-dimer <nn> r=1.7                            NNN <ZZ>     cost
+   raw                        bias +0.0033 err 0.0039             bias -0.0019 err 0.0022             bias -0.0045 err 0.0050   1x
+   postselect                 bias +0.0040 err 0.0046             bias -0.0018 err 0.0021             bias +0.0035 err 0.0042   1.02x
+   selfmit-oracle             bias +0.0037 err 0.0043             bias -0.0019 err 0.0022             bias -0.0039 err 0.0045   1x
+   selfmit-naive              bias +0.0092 err 0.0095             bias -0.0026 err 0.0028             bias +0.0045 err 0.0050   1.03x
+   zne                        bias +0.0000 err 0.0166             bias -0.0000 err 0.0081             bias -0.0000 err 0.0169   57x
+   pec                        bias +0.0000 err 0.0045             bias +0.0000 err 0.0022             bias +0.0000 err 0.0046   4.23x
+
+## channel=dephasing p=0.001 t=10: defect/tri=4.1637e-03 (floor 3.6413e-03); F_gauss=0.9979; per-target true F=0.8738, -4.4338, 0.9448
+   method                            pattern memory m              dimer-dimer <nn> r=1.7                            NNN <ZZ>     cost
+   raw                        bias +0.0495 err 0.0500             bias -0.0221 err 0.0221             bias -0.0459 err 0.0460   1x
+   postselect                 bias +0.0389 err 0.0395             bias -0.0205 err 0.0205             bias -0.0312 err 0.0312   1.02x
+   selfmit-oracle             bias +0.0488 err 0.0493             bias -0.0221 err 0.0222             bias -0.0443 err 0.0443   1x
+   selfmit-naive              bias +0.0437 err 0.0443             bias -0.0224 err 0.0224             bias -0.0326 err 0.0327   1.03x
+   zne                        bias +0.0011 err 0.0530             bias -0.0013 err 0.0084             bias -0.0026 err 0.0183   57x
+   pec                        bias +0.0000 err 0.0144             bias +0.0000 err 0.0023             bias +0.0000 err 0.0049   4.23x
+
+## channel=dephasing p=0.003 t=3.25: defect/tri=3.5076e-03 (floor 2.8898e-03); F_gauss=0.9975; per-target true F=1.0203, 1.1056, 0.9817
+   method                            pattern memory m              dimer-dimer <nn> r=1.7                            NNN <ZZ>     cost
+   raw                        bias +0.0096 err 0.0099             bias -0.0056 err 0.0057             bias -0.0132 err 0.0134   1x
+   postselect                 bias +0.0106 err 0.0108             bias -0.0054 err 0.0055             bias -0.0037 err 0.0044   1.02x
+   selfmit-oracle             bias +0.0109 err 0.0111             bias -0.0057 err 0.0058             bias -0.0114 err 0.0117   1.01x
+   selfmit-naive              bias +0.0165 err 0.0167             bias -0.0064 err 0.0065             bias -0.0031 err 0.0039   1.03x
+   zne                        bias +0.0000 err 0.0165             bias -0.0000 err 0.0081             bias -0.0000 err 0.0169   57x
+   pec                        bias +0.0000 err 0.0191             bias +0.0000 err 0.0093             bias +0.0000 err 0.0196   76.2x
+
+## channel=dephasing p=0.003 t=10: defect/tri=5.2619e-03 (floor 3.6413e-03); F_gauss=0.9934; per-target true F=0.6608, -11.8769, 0.8675
+   method                            pattern memory m              dimer-dimer <nn> r=1.7                            NNN <ZZ>     cost
+   raw                        bias +0.1331 err 0.1333             bias -0.0524 err 0.0524             bias -0.1102 err 0.1102   1x
+   postselect                 bias +0.1209 err 0.1211             bias -0.0512 err 0.0512             bias -0.0925 err 0.0925   1.03x
+   selfmit-oracle             bias +0.1314 err 0.1316             bias -0.0527 err 0.0527             bias -0.1054 err 0.1055   1.01x
+   selfmit-naive              bias +0.1275 err 0.1277             bias -0.0534 err 0.0534             bias -0.0947 err 0.0947   1.04x
+   zne                        bias +0.0138 err 0.0543             bias -0.0150 err 0.0171             bias -0.0297 err 0.0348   57x
+   pec                        bias +0.0000 err 0.0607             bias +0.0000 err 0.0095             bias +0.0000 err 0.0209   76.2x
+
+## channel=dephasing p=0.01 t=3.25: defect/tri=4.9035e-03 (floor 2.8898e-03); F_gauss=0.9919; per-target true F=1.0648, 1.3219, 0.9435
+   method                            pattern memory m              dimer-dimer <nn> r=1.7                            NNN <ZZ>     cost
+   raw                        bias +0.0307 err 0.0308             bias -0.0170 err 0.0170             bias -0.0408 err 0.0408   1x
+   postselect                 bias +0.0324 err 0.0325             bias -0.0167 err 0.0168             bias -0.0265 err 0.0266   1.03x
+   selfmit-oracle             bias +0.0349 err 0.0349             bias -0.0176 err 0.0176             bias -0.0352 err 0.0352   1.02x
+   selfmit-naive              bias +0.0408 err 0.0409             bias -0.0184 err 0.0184             bias -0.0271 err 0.0272   1.04x
+   zne                        bias +0.0006 err 0.0161             bias -0.0007 err 0.0078             bias -0.0014 err 0.0169   57x
+   pec                        bias +0.0000 err 3.0665             bias +0.0000 err 1.4782             bias +0.0000 err 3.2065   2.08e+06x
+
+## channel=dephasing p=0.01 t=10: defect/tri=9.0773e-03 (floor 3.6413e-03); F_gauss=0.9779; per-target true F=0.1442, -22.1057, 0.7510
+   method                            pattern memory m              dimer-dimer <nn> r=1.7                            NNN <ZZ>     cost
+   raw                        bias +0.3358 err 0.3359             bias -0.0940 err 0.0940             bias -0.2070 err 0.2071   1x
+   postselect                 bias +0.3225 err 0.3226             bias -0.0940 err 0.0940             bias -0.1781 err 0.1781   1.06x
+   selfmit-oracle             bias +0.3345 err 0.3346             bias -0.0960 err 0.0960             bias -0.1930 err 0.1930   1.05x
+   selfmit-naive              bias +0.3337 err 0.3338             bias -0.0974 err 0.0974             bias -0.1835 err 0.1835   1.08x
+   zne                        bias +0.0929 err 0.1056             bias -0.0708 err 0.0711             bias -0.1414 err 0.1424   57x
+   pec                        bias +0.0000 err 9.5959             bias +0.0000 err 1.3159             bias +0.0000 err 3.1697   2.08e+06x
+
+## channel=bitflip p=0.001 t=3.25: defect/tri=1.5582e-02 (floor 2.8898e-03); F_gauss=0.9486; per-target true F=0.9971, 1.0280, 0.9466
+   method                            pattern memory m              dimer-dimer <nn> r=1.7                            NNN <ZZ>     cost
+   raw                        bias -0.0014 err 0.0026             bias -0.0015 err 0.0018             bias -0.0385 err 0.0386   1x
+   postselect                 bias +0.0024 err 0.0034             bias -0.0022 err 0.0025             bias +0.0026 err 0.0038   1.08x
+   selfmit-oracle             bias +0.0242 err 0.0244             bias -0.0044 err 0.0046             bias -0.0015 err 0.0032   1.11x
+   selfmit-naive              bias +0.0301 err 0.0302             bias -0.0051 err 0.0052             bias +0.0069 err 0.0074   1.14x
+   zne                        bias +0.0001 err 0.0170             bias -0.0000 err 0.0081             bias -0.0001 err 0.0199   57x
+   pec                        bias +0.0000 err 0.0046             bias +0.0000 err 0.0022             bias +0.0000 err 0.0054   4.23x
+
+## channel=bitflip p=0.001 t=10: defect/tri=4.0363e-02 (floor 3.6413e-03); F_gauss=0.8509; per-target true F=0.6779, -4.0779, 0.8273
+   method                            pattern memory m              dimer-dimer <nn> r=1.7                            NNN <ZZ>     cost
+   raw                        bias +0.1264 err 0.1266             bias -0.0207 err 0.0207             bias -0.1436 err 0.1437   1x
+   postselect                 bias +0.0426 err 0.0433             bias -0.0142 err 0.0142             bias -0.0185 err 0.0189   1.23x
+   selfmit-oracle             bias +0.0798 err 0.0802             bias -0.0236 err 0.0236             bias -0.0231 err 0.0235   1.38x
+   selfmit-naive              bias +0.0752 err 0.0756             bias -0.0238 err 0.0239             bias -0.0112 err 0.0119   1.42x
+   zne                        bias +0.0089 err 0.0526             bias -0.0028 err 0.0086             bias -0.0044 err 0.0264   57x
+   pec                        bias +0.0000 err 0.0141             bias +0.0000 err 0.0022             bias +0.0000 err 0.0071   4.23x
+
+## channel=bitflip p=0.003 t=3.25: defect/tri=3.9051e-02 (floor 2.8898e-03); F_gauss=0.8537; per-target true F=0.9868, 1.0605, 0.8481
+   method                            pattern memory m              dimer-dimer <nn> r=1.7                            NNN <ZZ>     cost
+   raw                        bias -0.0063 err 0.0067             bias -0.0032 err 0.0034             bias -0.1095 err 0.1096   1x
+   postselect                 bias +0.0063 err 0.0068             bias -0.0065 err 0.0066             bias -0.0060 err 0.0069   1.22x
+   selfmit-oracle             bias +0.0739 err 0.0740             bias -0.0128 err 0.0128             bias -0.0047 err 0.0060   1.37x
+   selfmit-naive              bias +0.0803 err 0.0804             bias -0.0135 err 0.0136             bias +0.0036 err 0.0052   1.4x
+   zne                        bias +0.0016 err 0.0176             bias -0.0010 err 0.0080             bias -0.0023 err 0.0239   57x
+   pec                        bias +0.0000 err 0.0202             bias +0.0000 err 0.0091             bias +0.0000 err 0.0275   76.2x
+
+## channel=bitflip p=0.003 t=10: defect/tri=9.8064e-02 (floor 3.6413e-03); F_gauss=0.6167; per-target true F=0.2687, -8.6166, 0.5681
+   method                            pattern memory m              dimer-dimer <nn> r=1.7                            NNN <ZZ>     cost
+   raw                        bias +0.2870 err 0.2870             bias -0.0391 err 0.0391             bias -0.3592 err 0.3592   1x
+   postselect                 bias +0.1407 err 0.1409             bias -0.0402 err 0.0402             bias -0.0706 err 0.0708   1.76x
+   selfmit-oracle             bias +0.2214 err 0.2216             bias -0.0609 err 0.0609             bias -0.0655 err 0.0659   2.63x
+   selfmit-naive              bias +0.2189 err 0.2191             bias -0.0617 err 0.0617             bias -0.0542 err 0.0546   2.71x
+   zne                        bias +0.1038 err 0.1137             bias -0.0287 err 0.0297             bias -0.0713 err 0.0778   57x
+   pec                        bias +0.0000 err 0.0535             bias +0.0000 err 0.0091             bias +0.0000 err 0.0359   76.2x
+
+## channel=bitflip p=0.01 t=3.25: defect/tri=1.0431e-01 (floor 2.8898e-03); F_gauss=0.5896; per-target true F=0.9163, 1.0105, 0.5764
+   method                            pattern memory m              dimer-dimer <nn> r=1.7                            NNN <ZZ>     cost
+   raw                        bias -0.0397 err 0.0398             bias -0.0006 err 0.0012             bias -0.3054 err 0.3054   1x
+   postselect                 bias +0.0219 err 0.0222             bias -0.0190 err 0.0190             bias -0.0310 err 0.0314   1.84x
+   selfmit-oracle             bias +0.2627 err 0.2627             bias -0.0377 err 0.0377             bias -0.0161 err 0.0174   2.88x
+   selfmit-naive              bias +0.2713 err 0.2713             bias -0.0387 err 0.0388             bias -0.0079 err 0.0103   2.94x
+   zne                        bias +0.0255 err 0.0320             bias -0.0136 err 0.0156             bias -0.0541 err 0.0614   57x
+   pec                        bias +0.0000 err 3.6851             bias +0.0000 err 1.4797             bias +0.0000 err 5.5371   2.08e+06x
+
+## channel=bitflip p=0.01 t=10: defect/tri=2.0054e-01 (floor 3.6413e-03); F_gauss=0.2007; per-target true F=-0.1307, -6.1874, 0.1612
+   method                            pattern memory m              dimer-dimer <nn> r=1.7                            NNN <ZZ>     cost
+   raw                        bias +0.4437 err 0.4437             bias -0.0292 err 0.0292             bias -0.6975 err 0.6975   1x
+   postselect                 bias +0.4056 err 0.4057             bias -0.0896 err 0.0897             bias -0.1694 err 0.1696   4.79x
+   selfmit-oracle             bias +0.6479 err 0.6483             bias -0.1294 err 0.1295             bias -0.1637 err 0.1648   24.8x
+   selfmit-naive              bias +0.6517 err 0.6520             bias -0.1313 err 0.1314             bias -0.1538 err 0.1550   25.6x
+   zne                        bias +0.4381 err 0.4392             bias -0.0620 err 0.0625             bias -0.5016 err 0.5025   57x
+   pec                        bias +0.0000 err 5.9820             bias +0.0000 err 1.5213             bias +0.0000 err 5.4628   2.08e+06x
+
+## sensitivity: d(defect/tri)/dp at t=final vs damage d|target bias|/dp  (p=1e-3, pure channels)
+   pure X: dD/dp=+36.575   dO/dp=+142.700, -22.379, -147.049
+   pure Y: dD/dp=+36.867   dO/dp=+109.600, -18.820, -140.020
+   pure Z: dD/dp=+0.522   dO/dp=+49.527, -22.098, -45.931
+
+## cross-check 3x4 (N=12) Monte-Carlo trajectories, n=400, t=10, p=3e-3; errors = batch-mean standard error
+   ideal: pattern memory m=+0.1149, dimer-dimer <nn> r=2=+0.1546, NNN <ZZ>=+0.5367; floor defect/tri=7.4629e-03
+   depolarizing defect/tri=6.8324e-02+-3.1e-03
+      raw             bias +0.0196+-0.0025, +0.0099+-0.0010, -0.1975+-0.0089
+      postselect      bias +0.0405+-0.0047, +0.0024+-0.0004, +0.0151+-0.0010
+      selfmit-oracle  bias +0.0646+-0.0044, -0.0187+-0.0012, -0.0838+-0.0050
+   dephasing    defect/tri=9.3497e-03+-7.2e-05
+      raw             bias +0.0392+-0.0032, -0.0005+-0.0005, -0.0164+-0.0009
+      postselect      bias +0.0419+-0.0034, +0.0008+-0.0006, +0.0152+-0.0009
+      selfmit-oracle  bias +0.0404+-0.0032, -0.0012+-0.0005, -0.0123+-0.0009
+   bitflip      defect/tri=9.2679e-02+-2.8e-03
+      raw             bias +0.0072+-0.0034, +0.0168+-0.0009, -0.2680+-0.0077
+      postselect      bias +0.0319+-0.0065, +0.0043+-0.0005, +0.0153+-0.0011
+      selfmit-oracle  bias +0.0733+-0.0059, -0.0258+-0.0013, -0.1225+-0.0055
+   PEC sampling overhead gamma^2, depolarizing p=0.001, N=54, 40 steps: 5.67e+03
+   PEC sampling overhead gamma^2, depolarizing p=0.003, N=54, 40 steps: 1.85e+11
+   PEC sampling overhead gamma^2, depolarizing p=0.01, N=54, 40 steps: 4.46e+37

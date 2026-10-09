@@ -1,0 +1,20 @@
+Stage 1 validation — recorded numbers (reproducible, not invented)
+==================================================================
+[1] ED vs dense (6 spins, J=1.0, h=0.7): E0_lanczos=-7.6730915064, E0_dense=-7.6730915064, |diff|=2.58e-14
+[2] Energy conservation (9 spins, T=2.0, 200 steps): E(0)=-12.00000000, E(T)=-11.99955402, |dE|=4.46e-04
+[3] Trotter convergence to exact expm (4 spins, T=1.0):
+    n_steps= 10  ||err||=8.560e-03  (improvement    -)
+    n_steps= 20  ||err||=2.133e-03  (improvement 4.01x)
+    n_steps= 40  ||err||=5.329e-04  (improvement 4.00x)
+    n_steps= 80  ||err||=1.332e-04  (improvement 4.00x)
+    (2nd-order expectation: ~4x error reduction per doubling)
+[4] Statevector memory probe (ru_maxrss, real peak; 2 Trotter steps):
+    N=20 (5x4): maxRSS=159 MB, theo_state=17 MB (ratio 9.5x), norm(final)=1.000000
+    N=22 (11x2): maxRSS=463 MB, theo_state=67 MB (ratio 6.9x), norm(final)=1.000000
+    N=24 (6x4): maxRSS=1543 MB, theo_state=268 MB (ratio 5.7x), norm(final)=1.000000
+    (ru_maxrss is monotonic across sizes; the largest N is the binding peak.)
+[5] ED build+Lanczos probe (sparse builder; ru_maxrss):
+    N=16 (4x4): nnz=1,102,640, E0=-26.860505, maxRSS=1543 MB
+    N=18 (6x3): nnz=4,980,736, E0=-30.198962, maxRSS=1543 MB
+    N=20 (5x4): nnz=22,020,096, E0=-34.448537, maxRSS=1881 MB
+    (Builder previously OOMed at N=16 before the C1 sparse fix.)

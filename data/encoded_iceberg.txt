@@ -1,0 +1,59 @@
+# Encoded TFIM (Iceberg [[8,6,2]]) — 2026-10-07 08:54
+# logical lattice 2x3 periodic, k=6, physical n=10 (k+2 code, 1 ancilla, 1 flag); J=1.0 h=2.0 dt=0.25 theta=0.523599; syndrome round every 1 step(s)
+# CAVEAT [SCOPE §3/§12]: classical prediction under an ASSUMED generic depolarizing model (rates below are declared assumptions, not measurements, not H2-calibrated). Not an H2 result. Stim proves FT facts; local-sim/selene execute the program.
+
+## 1. Verification (Stim; rotations act as identity for Pauli-fault propagation)
+verify_code on the block: PASS
+clean run (Z-basis image, 3 steps): detectors silent True, observables clean True
+clean run (X-basis image, 3 steps): detectors silent True, observables clean True
+every weight-1 X/Y/Z on every code qubit after every Trotter step detected: True []
+single-fault mechanisms that flip a logical observable while firing no detector, per class:
+  rot    mechanisms=  238  undetected-logical=  42  Pauli types=['XX', 'YY', 'ZZ']
+  cx     mechanisms=  612  undetected-logical=   0  Pauli types=[]
+  h      mechanisms=  104  undetected-logical=   0  Pauli types=[]
+  meas   mechanisms=   48  undetected-logical=   0  Pauli types=[]
+  reset  mechanisms=   48  undetected-logical=   0  Pauli types=[]
+  idle   mechanisms=  118  undetected-logical=   0  Pauli types=[]
+VERDICT: syndrome extraction (flagged CX), H, measurement, reset and idle locations are single-fault safe; the LOGICAL ROTATION gates are NOT: a single fault on a logical gate can leave XX, YY or ZZ on that gate's own two qubits, which commutes with S_X and S_Z and is a nontrivial logical operator (distance-2 code, weight-2 logical gates).
+
+## 2. Zero-noise checks
+Clifford instance (J dt=0.7854, h dt=1.5708, theta=0.0):
+  step 1: Stim exact 0.166667 | local-sim exact 0.166667 | bare simulate_z2 0.166667 | selene sampled 0.1716±0.0071 (accepted 1000/1000)
+  step 2: Stim exact 1.000000 | local-sim exact 1.000000 | bare simulate_z2 1.000000 | selene sampled 1.0000±0.0000 (accepted 1000/1000)
+  step 3: Stim exact 0.166667 | local-sim exact 0.166667 | bare simulate_z2 0.166667 | selene sampled 0.1760±0.0073 (accepted 1000/1000)
+  step 4: Stim exact 1.000000 | local-sim exact 1.000000 | bare simulate_z2 1.000000 | selene sampled 1.0000±0.0000 (accepted 1000/1000)
+encoding transparency at the physical parameters: max|Z2_encoded - Z2_bare| = 5.44e-15 over steps [1, 2, 3, 4, 5, 6]
+
+## 3. Noisy runs (post-selected logical Z2 and discard rate per Trotter step)
+columns: ideal = noiseless circuit Z2; enc = encoded, accepted shots only; bare = same logical circuit on k bare qubits at the same per-gate rates (local-sim); errors are 1 SE
+
+### p2=0.001, p1=0.0001, pm=0.0001, p_init=0.0001, p_idle=0  [assumed]
+step   ideal | local-sim accept   local-sim enc Z2  |dev| |    selene accept      selene enc Z2  |dev| |         bare Z2  |dev|
+   1  0.7396 |     0.929±0.008     0.7273±0.0124  0.012 |     0.897±0.010     0.7218±0.0126  0.018 |   0.7334±0.0116  0.006
+   2  0.5970 |     0.870±0.011     0.5966±0.0133  0.000 |     0.870±0.011     0.5897±0.0133  0.007 |   0.6010±0.0122  0.004
+   3  0.5220 |     0.835±0.012     0.4974±0.0145  0.025 |     0.816±0.012     0.5091±0.0143  0.013 |   0.4820±0.0131  0.040
+   4  0.5786 |     0.803±0.013     0.5713±0.0142  0.007 |     0.766±0.013     0.5741±0.0145  0.004 |   0.5492±0.0126  0.029
+   5  0.7072 |     0.783±0.013     0.7014±0.0133  0.006 |     0.763±0.013     0.7089±0.0131  0.002 |   0.6747±0.0121  0.032
+   6  0.7927 |     0.754±0.014     0.7753±0.0122  0.017 |     0.719±0.014     0.7840±0.0121  0.009 |   0.7434±0.0108  0.049
+
+### p2=0.003, p1=0.0003, pm=0.0003, p_init=0.0003, p_idle=0  [assumed]
+step   ideal | local-sim accept   local-sim enc Z2  |dev| |    selene accept      selene enc Z2  |dev| |         bare Z2  |dev|
+   1  0.7396 |     0.789±0.013     0.7192±0.0133  0.020 |     0.770±0.013     0.7258±0.0135  0.014 |   0.7223±0.0116  0.017
+   2  0.5970 |     0.687±0.015     0.6010±0.0150  0.004 |     0.632±0.015     0.5716±0.0159  0.025 |   0.5922±0.0123  0.005
+   3  0.5220 |     0.645±0.015     0.5146±0.0164  0.007 |     0.567±0.016     0.5126±0.0173  0.009 |   0.5083±0.0131  0.014
+   4  0.5786 |     0.554±0.016     0.5752±0.0167  0.003 |     0.487±0.016     0.5469±0.0179  0.032 |   0.5470±0.0126  0.032
+   5  0.7072 |     0.477±0.016     0.6571±0.0180  0.050 |     0.399±0.015     0.6831±0.0194  0.024 |   0.6746±0.0123  0.033
+   6  0.7927 |     0.418±0.016     0.7741±0.0164  0.019 |     0.348±0.015     0.7586±0.0183  0.034 |   0.7008±0.0115  0.092
+
+### p2=0.01, p1=0.001, pm=0.001, p_init=0.001, p_idle=0  [assumed]
+step   ideal | local-sim accept   local-sim enc Z2  |dev| |    selene accept      selene enc Z2  |dev| |         bare Z2  |dev|
+   1  0.7396 |     0.477±0.016     0.7028±0.0174  0.037 |     0.390±0.015     0.6900±0.0194  0.050 |   0.6897±0.0122  0.050
+   2  0.5970 |     0.315±0.015     0.5478±0.0223  0.049 |     0.263±0.014     0.5594±0.0239  0.038 |   0.5268±0.0122  0.070
+   3  0.5220 |     0.205±0.013     0.4883±0.0302  0.034 |     0.162±0.012     0.4609±0.0312  0.061 |   0.4478±0.0128  0.074
+   4  0.5786 |     0.132±0.011     0.4764±0.0358  0.102 |     0.099±0.009     0.5051±0.0402  0.074 |   0.5010±0.0126  0.078
+   5  0.7072 |     0.095±0.009     0.6187±0.0402  0.088 |     0.071±0.008     0.5368±0.0478  0.170 |   0.5601±0.0127  0.147
+   6  0.7927 |     0.053±0.007     0.6184±0.0590  0.174 |     0.037±0.006     0.6396±0.0629  0.153 |   0.5493±0.0124  0.243
+
+## 4. Toggle and ceiling
+nexus backend: NotImplementedError('Nexus backend: requires Quantinuum credentials/credits; flip toggle when access is granted')
+4x6 logical lattice (n_phys=28) refused before allocation: encoded run needs 28 physical qubits (code + syndrome ancillas); the state-vector ceiling is 24 (SCOPE §5). Use a smaller logical lattice.

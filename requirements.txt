@@ -1,0 +1,45 @@
+# Pinned requirements — TFIM Logical-Qubit Simulation (SCOPE §7, §12)
+#
+# Interpreter: Python 3.12 (tested on 3.12.14, Linux aarch64). SCOPE originally pinned 3.11;
+# that pin was dropped (FLAG A, resolved 2026-10-07), so 3.12 is the project interpreter.
+#
+# Install:   pip install -r requirements.txt
+# On ARM Linux without a Stim wheel, install a C++ compiler and Python headers first
+# (e.g. gcc-c++, python3.12-devel); on mainstream platforms everything installs from wheels.
+
+# --- Stage 1 core (installed & tested on 3.12.14, aarch64) ---
+numpy==2.5.3
+scipy==1.18.1
+
+# --- Test tooling (installed & tested) ---
+pytest==9.1.1
+
+# --- Stage 2 QEC: verification oracle (installed & tested on 3.12.14, aarch64) ---
+# Built from source after installing gcc-c++ + python3.12-devel (FLAG B, handoff/plan.md).
+stim==1.16.0
+
+# --- Encoded-TFIM execution stack (handoff/04; installed & imported on 3.12.14) ---
+# pytket = circuit authoring + local simulation; guppylang + hugr = dynamic (mid-circuit
+# measure / reset / feedforward) programs; selene-sim = local emulator for those programs.
+# Stim stays the fault-tolerance verifier; these EXECUTE (handoff/04 "division of labor").
+pytket==2.18.4
+guppylang==1.1.2
+selene-sim==0.3.4
+hugr==0.18.8
+
+# Figures layer (handoff/08 Part B3, FLAG C): scripts/plot_q3.py reads data/*.txt -> figures/ (gitignored).
+# Installed and verified on the 3.12.14 venv; transitive pins as resolved by pip:
+matplotlib==3.11.2
+contourpy==1.4.0
+cycler==0.12.1
+fonttools==4.66.1
+kiwisolver==1.5.1
+pillow==12.3.0
+pyparsing==3.3.3
+python-dateutil==2.9.0.post0
+
+# --- Deferred (SCOPE §7 full stack; add when their stages/cross-checks begin) ---
+# pytket-quantinuum
+# qiskit               # cross-validation
+# qermit               # mitigation on the unencoded reference
+# pandas

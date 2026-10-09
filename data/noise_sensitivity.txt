@@ -1,0 +1,31 @@
+# Noise sensitivity — 2026-10-07 15:09; 2x2 lattice; Stim first-order accounting
+# CLASSICAL PREDICTION under an ASSUMED noise model; NOT an H2 result. No hardware, no Nexus.
+# columns per code: undetected-logical prob per Trotter step / first-order acceptance after 3 steps
+# ratio = code's undetected / bare's unprotected (lower is better; < 1 means encoding helps)
+# zz_bias=eta: each 2q error is uniform w.p. (1-eta) over 15 Paulis plus Z(x)Z w.p. eta, so the total
+#   ZZ share is eta + (1-eta)/15. over-rot: twirled stand-in, adds sin^2(eps) per rotation to code AND bare.
+
+## 1. H2 prior (research/06): p2=0.0006 [inferred], p1=pm=p_init=6e-05 [inferred], eta=0.05 bracket (0.03, 0.08) [inferred, Fig. S3 read-off], sin^2(eps) scanned [assumed; unpublished]
+#   a PREDICTION FROM A PRIOR, not an H2 measurement; eta=0.5/0.9 rows are stress-tests only
+scenario                                                                           |                 iceberg |                  steane |                    five |                  concat |      bare
+uniform depolarizing (eta=0; ZZ share 1/15)                                        | 1.44e-03 / 0.92 (x0.50) | 1.20e-03 / 0.56 (x0.42) | 1.20e-03 / 0.63 (x0.42) | 1.20e-03 / 0.64 (x0.42) | 2.88e-03
+H2 prior eta=0.05, sin^2(eps)=0                                                    | 1.73e-03 / 0.92 (x0.60) | 1.51e-03 / 0.57 (x0.53) | 1.51e-03 / 0.64 (x0.52) | 1.51e-03 / 0.64 (x0.53) | 2.88e-03
+H2 prior eta=0.05, sin^2(eps)=1e-05                                                | 1.85e-03 / 0.92 (x0.62) | 1.63e-03 / 0.57 (x0.54) | 1.63e-03 / 0.64 (x0.54) | 1.63e-03 / 0.64 (x0.54) | 3.00e-03
+H2 prior eta=0.05, sin^2(eps)=0.0001                                               | 2.93e-03 / 0.92 (x0.72) | 2.71e-03 / 0.57 (x0.66) | 2.71e-03 / 0.64 (x0.66) | 2.71e-03 / 0.64 (x0.66) | 4.08e-03
+H2 prior eta=0.05, sin^2(eps)=0.001                                                | 1.37e-02 / 0.92 (x0.92) | 1.35e-02 / 0.57 (x0.91) | 1.35e-02 / 0.64 (x0.91) | 1.35e-02 / 0.64 (x0.91) | 1.49e-02
+H2 bracket eta=0.03                                                                | 1.61e-03 / 0.92 (x0.56) | 1.39e-03 / 0.56 (x0.48) | 1.39e-03 / 0.64 (x0.48) | 1.39e-03 / 0.64 (x0.48) | 2.88e-03
+H2 bracket eta=0.08                                                                | 1.90e-03 / 0.92 (x0.66) | 1.70e-03 / 0.57 (x0.59) | 1.70e-03 / 0.64 (x0.59) | 1.70e-03 / 0.64 (x0.59) | 2.88e-03
+in-range corner eta=0.08, sin^2(eps)=0.001                                         | 1.39e-02 / 0.92 (x0.93) | 1.37e-02 / 0.57 (x0.92) | 1.37e-02 / 0.64 (x0.92) | 1.37e-02 / 0.64 (x0.92) | 1.49e-02
+STRESS-TEST ~10x H2 prior, NOT representative: eta=0.5                             | 4.32e-03 / 0.93 (x1.50) | 4.32e-03 / 0.59 (x1.50) | 4.32e-03 / 0.66 (x1.50) | 4.32e-03 / 0.66 (x1.50) | 2.88e-03
+STRESS-TEST ~10x H2 prior, NOT representative: eta=0.9                             | 6.62e-03 / 0.94 (x2.30) | 6.82e-03 / 0.61 (x2.37) | 6.82e-03 / 0.68 (x2.37) | 6.82e-03 / 0.68 (x2.37) | 2.88e-03
+
+## 2. Original Part B sensitivity table (traceability): p2=0.001, p1=pm=p_init=0.0001 [assumed]
+scenario                                                                           |                 iceberg |                  steane |                    five |                  concat |      bare
+baseline (uniform depolarizing)                                                    | 2.40e-03 / 0.88 (x0.50) | 2.00e-03 / 0.38 (x0.42) | 2.00e-03 / 0.47 (x0.42) | 2.00e-03 / 0.47 (x0.42) | 4.80e-03
+STRESS-TEST ~10x H2 prior, NOT representative: eta=0.5                             | 7.20e-03 / 0.89 (x1.50) | 7.20e-03 / 0.41 (x1.50) | 7.20e-03 / 0.50 (x1.50) | 7.20e-03 / 0.50 (x1.50) | 4.80e-03
+STRESS-TEST ~10x H2 prior, NOT representative: eta=0.9                             | 1.10e-02 / 0.91 (x2.30) | 1.14e-02 / 0.44 (x2.37) | 1.14e-02 / 0.53 (x2.37) | 1.14e-02 / 0.52 (x2.37) | 4.80e-03
+idle noise 0.0001 per idle point                                                   | 2.40e-03 / 0.87 (x0.46) | 2.00e-03 / 0.38 (x0.38) | 2.00e-03 / 0.46 (x0.38) | 2.00e-03 / 0.47 (x0.38) | 5.20e-03
+idle noise 0.001 per idle point                                                    | 2.40e-03 / 0.84 (x0.27) | 2.00e-03 / 0.32 (x0.23) | 2.00e-03 / 0.42 (x0.23) | 2.00e-03 / 0.42 (x0.23) | 8.80e-03
+over-rotation sin^2(eps)=0.0001 (eps~0.01 rad)                                     | 3.60e-03 / 0.88 (x0.60) | 3.20e-03 / 0.38 (x0.53) | 3.20e-03 / 0.47 (x0.53) | 3.20e-03 / 0.47 (x0.53) | 6.00e-03
+over-rotation sin^2(eps)=0.001 (eps~0.03 rad)                                      | 1.44e-02 / 0.88 (x0.86) | 1.40e-02 / 0.38 (x0.83) | 1.40e-02 / 0.47 (x0.83) | 1.40e-02 / 0.47 (x0.83) | 1.68e-02
+STRESS-TEST ~10x H2 prior, NOT representative: eta=0.5+idle 1e-04+over-rot 1e-04   | 8.40e-03 / 0.89 (x1.31) | 8.40e-03 / 0.41 (x1.31) | 8.40e-03 / 0.49 (x1.31) | 8.40e-03 / 0.49 (x1.31) | 6.40e-03

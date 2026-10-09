@@ -1,0 +1,91 @@
+# generated 2026-10-08 22:47 by scripts/run_q3_baseline.py (handoff/07)
+# CLASSICAL statistical reference (uniform ensemble over a winding sector) and classical noiseless state-vector simulation only; NOT quantum hardware, NOT an H2 result.
+# provenance: numeric content IDENTICAL to the file it replaced (generated 2026-10-08 19:57 by scripts/run_q3_baseline.py (handoff/07)); only timestamp/timings differ
+# content-sha256 (numeric lines, i.e. minus generated/provenance/this line and trailing wall times): f38be1cca89e51866f619c2cf5cbbf00d24174c427efbb2de62dbed99ba87d04
+# Frustrated triangular TFIM, J=-1.0 (AFM in our sign), dt=0.25. Ensemble: UNIFORM over the flip-connected component of c0 in its defect-free winding sector W0 [derived].
+# MCMC: 32 independent chains from c0, 500 burn-in + 4000 measured sweeps (1 sweep = N single-site flippable-flip attempts). SE = std(chain means)/sqrt(chains) [autocorrelation-aware]; naive SE and tau_int = (SE/naive)^2/2 shown beside it. Shell correlations: jackknife over chains.
+# Observables (src/dimers.py definitions): defect_density = <sum_t D_t>/2N; flippable_density = <sum_s Pi_s>/N; rho_h/v/d = orientation-mean <n_b>; memory = sum_b n_b(c0)<n_b>/N; C(r) = per-pair connected <n_a n_b> in bond-midpoint distance shell r (Euclidean, as dimer_correlation_by_distance); dressing <g> = O(h^2) dressed-defect coefficient (src/mcmc_baseline.py docstring).
+
+## 1. Sector census (exact enumeration, N <= ED ceiling): W, sector size, #flip components, largest
+3x3 (N=9): W=(0, 0) size 42 comps 1 largest 42
+3x4 (N=12): W=(0, -4) size 6 comps 6 largest 1; W=(0, 2) size 60 comps 1 largest 60; W=(6, -4) size 2 comps 2 largest 1
+3x6 (N=18): W=(0, -6) size 6 comps 6 largest 1; W=(0, 0) size 846 comps 1 largest 846; W=(0, 6) size 6 comps 6 largest 1; W=(6, -6) size 2 comps 2 largest 1
+4x5 (N=20): W=(-4, -2) size 10 comps 10 largest 1; W=(-4, 4) size 20 comps 20 largest 1; W=(-4, 10) size 2 comps 2 largest 1; W=(2, -2) size 680 comps 1 largest 680
+
+## 2. MCMC vs brute-force exact per-sector average [measured]; z = (MCMC - exact)/SE
+##    'global' = uniform over ALL defect-free configurations (winding-blind) — shown to expose the spurious value a whole-space ergodic average would give
+
+3x3 start=3-sublattice W0=(0, 0): component 42 = sector 42 (components in sector: 1), defect-free total 42; acceptance 0.381; 3s
+  defect_density     exact 0.00000  MCMC 0.00000 ± 0.00000 (naive 0.00000, tau_int nan)  z=+0.00  global 0.00000   (fixed by W0 in-sector [derived]; not discriminating)
+  flippable_density  exact 0.38095  MCMC 0.38110 ± 0.00036 (naive 0.00033, tau_int 0.62)  z=+0.42  global 0.38095
+  rho_h              exact 0.33333  MCMC 0.33333 ± 0.00000 (naive 0.00000, tau_int 0.00)  z=+0.00  global 0.33333   (fixed by W0 in-sector [derived]; not discriminating)
+  rho_v              exact 0.33333  MCMC 0.33333 ± 0.00000 (naive 0.00000, tau_int 0.00)  z=+0.00  global 0.33333   (fixed by W0 in-sector [derived]; not discriminating)
+  rho_d              exact 0.33333  MCMC 0.33333 ± 0.00000 (naive 0.00000, tau_int 0.00)  z=+0.00  global 0.33333   (fixed by W0 in-sector [derived]; not discriminating)
+  memory             exact 0.33333  MCMC 0.33228 ± 0.00142 (naive 0.00086, tau_int 1.35)  z=-0.74  global 0.33333
+  dressing <g>       exact 0.03428  MCMC 0.03427 ± 0.00002 (naive 0.00002, tau_int 0.62)  z=-0.42  global 0.03428
+  C(r=0.5     )       exact -0.11111  MCMC -0.11111 ± 0.00000  z=+0.82  global -0.11111   (near-fixed: one dimer per triangle; not discriminating)
+  C(r=0.866025)       exact +0.12698  MCMC +0.12703 ± 0.00012  z=+0.41  global +0.12698
+  C(r=1       )       exact -0.04762  MCMC -0.04765 ± 0.00008  z=-0.41  global -0.04762
+
+3x4 start=flippable W0=(0, 2): component 60 = sector 60 (components in sector: 1), defect-free total 68; acceptance 0.267; 4s
+  defect_density     exact 0.00000  MCMC 0.00000 ± 0.00000 (naive 0.00000, tau_int nan)  z=+0.00  global 0.00000   (fixed by W0 in-sector [derived]; not discriminating)
+  flippable_density  exact 0.26667  MCMC 0.26659 ± 0.00024 (naive 0.00023, tau_int 0.56)  z=-0.32  global 0.23529
+  rho_h              exact 0.33333  MCMC 0.33333 ± 0.00000 (naive 0.00000, tau_int 0.00)  z=+0.00  global 0.35294   (fixed by W0 in-sector [derived]; not discriminating)
+  rho_v              exact 0.50000  MCMC 0.50000 ± 0.00000 (naive 0.00000, tau_int nan)  z=+0.00  global 0.44118   (fixed by W0 in-sector [derived]; not discriminating)
+  rho_d              exact 0.16667  MCMC 0.16667 ± 0.00000 (naive 0.00000, tau_int 0.00)  z=+0.00  global 0.20588   (fixed by W0 in-sector [derived]; not discriminating)
+  memory             exact 0.38889  MCMC 0.38974 ± 0.00111 (naive 0.00066, tau_int 1.40)  z=+0.77  global 0.37255
+  dressing <g>       exact 0.04439  MCMC 0.04439 ± 0.00002 (naive 0.00002, tau_int 0.57)  z=+0.18  global 0.04716
+  C(r=0.5     )       exact -0.10185  MCMC -0.10185 ± 0.00000  z=+1.50  global -0.10640   (near-fixed: one dimer per triangle; not discriminating)
+  C(r=0.866025)       exact +0.09815  MCMC +0.09812 ± 0.00008  z=-0.33  global +0.07987
+  C(r=1       )       exact -0.02963  MCMC -0.02962 ± 0.00007  z=+0.16  global -0.00615
+
+3x6 start=3-sublattice W0=(0, 0): component 846 = sector 846 (components in sector: 1), defect-free total 860; acceptance 0.331; 5s
+  defect_density     exact 0.00000  MCMC 0.00000 ± 0.00000 (naive 0.00000, tau_int nan)  z=+0.00  global 0.00000   (fixed by W0 in-sector [derived]; not discriminating)
+  flippable_density  exact 0.33097  MCMC 0.33085 ± 0.00030 (naive 0.00027, tau_int 0.60)  z=-0.42  global 0.32558
+  rho_h              exact 0.33333  MCMC 0.33333 ± 0.00000 (naive 0.00000, tau_int 0.00)  z=+0.00  global 0.33488   (fixed by W0 in-sector [derived]; not discriminating)
+  rho_v              exact 0.33333  MCMC 0.33333 ± 0.00000 (naive 0.00000, tau_int 0.00)  z=+0.00  global 0.33256   (fixed by W0 in-sector [derived]; not discriminating)
+  rho_d              exact 0.33333  MCMC 0.33333 ± 0.00000 (naive 0.00000, tau_int 0.00)  z=+0.00  global 0.33256   (fixed by W0 in-sector [derived]; not discriminating)
+  memory             exact 0.33333  MCMC 0.33309 ± 0.00129 (naive 0.00062, tau_int 2.16)  z=-0.19  global 0.33333
+  dressing <g>       exact 0.03879  MCMC 0.03880 ± 0.00002 (naive 0.00002, tau_int 0.66)  z=+0.44  global 0.03927
+  C(r=0.5     )       exact -0.11111  MCMC -0.11111 ± 0.00000  z=+1.55  global -0.11111   (near-fixed: one dimer per triangle; not discriminating)
+  C(r=0.866025)       exact +0.11032  MCMC +0.11028 ± 0.00010  z=-0.43  global +0.10827
+  C(r=1       )       exact -0.03126  MCMC -0.03122 ± 0.00009  z=+0.44  global -0.02920
+
+4x5 start=flippable W0=(2, -2): component 680 = sector 680 (components in sector: 1), defect-free total 712; acceptance 0.270; 6s
+  defect_density     exact 0.00000  MCMC 0.00000 ± 0.00000 (naive 0.00000, tau_int nan)  z=+0.00  global 0.00000   (fixed by W0 in-sector [derived]; not discriminating)
+  flippable_density  exact 0.27059  MCMC 0.27052 ± 0.00017 (naive 0.00021, tau_int 0.34)  z=-0.39  global 0.25843
+  rho_h              exact 0.50000  MCMC 0.50000 ± 0.00000 (naive 0.00000, tau_int nan)  z=+0.00  global 0.47753   (fixed by W0 in-sector [derived]; not discriminating)
+  rho_v              exact 0.20000  MCMC 0.20000 ± 0.00000 (naive 0.00000, tau_int 0.00)  z=+0.00  global 0.21348   (fixed by W0 in-sector [derived]; not discriminating)
+  rho_d              exact 0.30000  MCMC 0.30000 ± 0.00000 (naive 0.00000, tau_int 0.00)  z=+0.00  global 0.30899   (fixed by W0 in-sector [derived]; not discriminating)
+  memory             exact 0.38000  MCMC 0.38138 ± 0.00099 (naive 0.00051, tau_int 1.92)  z=+1.39  global 0.37416
+  dressing <g>       exact 0.04384  MCMC 0.04385 ± 0.00001 (naive 0.00002, tau_int 0.34)  z=+0.44  global 0.04493
+  C(r=0.5     )       exact -0.10333  MCMC -0.10333 ± 0.00000  z=+1.28  global -0.10515   (near-fixed: one dimer per triangle; not discriminating)
+  C(r=0.866025)       exact +0.09176  MCMC +0.09171 ± 0.00007  z=-0.75  global +0.08492
+  C(r=1       )       exact -0.02046  MCMC -0.02040 ± 0.00007  z=+0.83  global -0.01160
+
+## 3. MCMC-only per-sector baselines beyond the exact ceiling [measured, MCMC; no exact check possible]
+##    Sector = component of c0 by construction; whether it is the whole W0 sector at this size is [unverified] (true on every torus enumerated, N <= 20).
+
+6x6 (N=36) start=3-sublattice W0=(0, 0): acceptance 0.309; 10s
+  defect_density     MCMC 0.00000 ± 0.00000 (naive 0.00000, tau_int nan)
+  flippable_density  MCMC 0.30851 ± 0.00023 (naive 0.00020, tau_int 0.70)
+  rho_h              MCMC 0.33333 ± 0.00000 (naive 0.00000, tau_int 0.00)
+  rho_v              MCMC 0.33333 ± 0.00000 (naive 0.00000, tau_int 0.00)
+  rho_d              MCMC 0.33333 ± 0.00000 (naive 0.00000, tau_int 0.00)
+  memory             MCMC 0.33436 ± 0.00143 (naive 0.00049, tau_int 4.30)
+  dressing <g>       MCMC 0.04068 ± 0.00002 (naive 0.00002, tau_int 0.66)
+  C(r=0.5     )       MCMC -0.11111 ± 0.00000
+  C(r=0.866025)       MCMC +0.09976 ± 0.00009
+  C(r=1       )       MCMC -0.02039 ± 0.00009
+
+9x6 (N=54) start=3-sublattice W0=(0, 0): acceptance 0.303; 16s
+  defect_density     MCMC 0.00000 ± 0.00000 (naive 0.00000, tau_int nan)
+  flippable_density  MCMC 0.30259 ± 0.00021 (naive 0.00016, tau_int 0.85)
+  rho_h              MCMC 0.33333 ± 0.00000 (naive 0.00000, tau_int 0.00)
+  rho_v              MCMC 0.33333 ± 0.00000 (naive 0.00000, tau_int 0.00)
+  rho_d              MCMC 0.33333 ± 0.00000 (naive 0.00000, tau_int 0.00)
+  memory             MCMC 0.33256 ± 0.00112 (naive 0.00040, tau_int 3.86)
+  dressing <g>       MCMC 0.04118 ± 0.00002 (naive 0.00001, tau_int 0.82)
+  C(r=0.5     )       MCMC -0.11110 ± 0.00000
+  C(r=0.866025)       MCMC +0.09724 ± 0.00009
+  C(r=1       )       MCMC -0.01788 ± 0.00008

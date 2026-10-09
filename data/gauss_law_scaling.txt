@@ -1,0 +1,14 @@
+# generated 2026-10-06 21:00 by scripts/run_gauss_law.py
+# Gauss-law violation vs h/|J|  (noiseless; J=-1)
+# defect density = <sum_t D_t>/(2N) per triangle; leak = P(W != W0); T = 20/|J|, time-averaged
+3x4 stripe       W0=(6, -4) dt=0.25   defect/tri: 8.580e-05 3.420e-04 1.369e-03 5.492e-03 1.243e-02  slope=2.00   leak: 5.80e-04 2.62e-03 1.10e-02 4.49e-02 1.05e-01  slope=2.08
+    stripe first-order prediction (h/|J|)^2/8: 7.813e-05 3.125e-04 1.250e-03 5.000e-03 1.125e-02   measured/predicted at smallest h: 1.098
+3x4 stripe       W0=(6, -4) dt=0.025  defect/tri: 7.895e-05 3.148e-04 1.260e-03 5.066e-03 1.150e-02  slope=2.00   leak: 5.34e-04 2.41e-03 1.01e-02 4.16e-02 9.89e-02  slope=2.09
+    stripe first-order prediction (h/|J|)^2/8: 7.813e-05 3.125e-04 1.250e-03 5.000e-03 1.125e-02   measured/predicted at smallest h: 1.011
+3x4 flippable    W0=(0, 2) dt=0.25   defect/tri: 5.172e-05 2.118e-04 8.395e-04 3.391e-03 7.751e-03  slope=2.01   leak: 4.72e-05 3.24e-04 1.80e-03 7.67e-03 1.83e-02  slope=2.38
+3x6 3-sublattice W0=(0, 0) dt=0.25   defect/tri: 2.923e-05 1.395e-04 5.424e-04 2.150e-03 4.966e-03  slope=2.05   leak: 8.89e-05 4.44e-04 1.75e-03 7.06e-03 1.66e-02  slope=2.08
+3x4 ED ground state     defect/tri: 3.022e-05 1.202e-04 4.766e-04 1.879e-03 4.184e-03  slope=1.98
+3x6 ED ground state     defect/tri: 2.337e-05 9.248e-05 3.626e-04 1.401e-03 3.065e-03  slope=1.96
+h_scan = 0.025 0.05 0.1 0.2 0.3
+3x3 (18 triangles) h=0.3 dt=0.25: noiseless P(zero defects) min over t<= 10 = 0.9556, at t_final = 0.9789
+3x6 (36 triangles) h=0.3 dt=0.25: noiseless P(zero defects) min over t<= 10 = 0.9075, at t_final = 0.9345
