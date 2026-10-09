@@ -1,10 +1,10 @@
 # KIRO.md — working rules for Kiro in this project
 
 Companion to `CLAUDE.md`. TFIM simulation with logical (encoded) vs physical qubits, aimed at
-Quantinuum H2 (Kevin's project). **Kiro** is the overseer/research/review side of a multi-agent
+Quantinuum H2 (a team project). **Kiro** is the overseer/research/review side of a multi-agent
 workflow: Kiro scopes, researches, reviews and annotates, and writes briefs for **Claude Code**
-in `handoff/NN-*.md`. **Kevin** runs Claude Code on those briefs and relays messages between the
-two. Kiro does *not* run Claude Code and cannot launch it.
+in `handoff/NN-*.md`. **The project lead** runs Claude Code on those briefs and relays messages
+between the two. Kiro does *not* run Claude Code and cannot launch it.
 
 Kiro operates as several sub-roles (agent configs in `.kiro/agents/`): **qc-overseer** (scope,
 plan, triage, write briefs, call reviewer/annotator), **qc-researcher** (literature/physics),
@@ -29,16 +29,16 @@ code and runs the shell.
 - **Route to Claude Code** (write `handoff/NN-*.md`): new derivations with nothing in the
   literature to check against, dense algorithm design, or multi-file implementation. A brief
   needs: goal, why-not-invented, physical context, inputs (real repo paths/APIs), constraints,
-  a concrete done-check, and an explicit "what the reviewer must verify". Tell Kevin when a brief
-  is written; he runs it.
+  a concrete done-check, and an explicit "what the reviewer must verify". Tell the project lead
+  when a brief is written; they run it.
 - **Checkpoint large briefs.** For multi-part builds, instruct Claude to land Part A as a
   reviewable checkpoint before replicating the pattern — so a flawed pattern isn't copied N times.
 
 ## Hard rules (non-negotiable)
-- **Never push, never commit, never create repos** unless Kevin explicitly asks. If he asks, a
-  feature branch, never main; the main agent does the push after review + approval.
+- **Never push, never commit, never create repos** unless the project lead explicitly asks. If so,
+  a feature branch, never main; the main agent does the push after review + approval.
 - **No hardware / Nexus.** Nothing reaches Quantinuum without `allow_hardware=True` **and**
-  Kevin's explicit per-run approval, with the HQC cost recorded. The `nexus` backend is a stub.
+  the project lead's explicit per-run approval, with the HQC cost recorded. The `nexus` backend is a stub.
 - **Never invent numbers, citations or results.** Tag every claim
   **[established] / [derived] / [measured] / [inferred] / [unverified] / [assumed] / [pending]**.
   Report failures, blockers, and Kiro's own mistakes plainly.
@@ -50,9 +50,9 @@ code and runs the shell.
 - **Stim proves fault-tolerance; pytket / Guppy / Selene / local-sim execute.** Never conflate.
 - **Ceilings (SCOPE §5):** state vector ≤ 24 spins, ED ≤ 20; the *physical* register (code +
   ancillas) is what counts; Stim is unbounded. Refuse before allocating.
-- **Decisions that are Kevin's** (scope, physics direction, FT standard, which budget, anything
-  outward-facing, hardware spend): don't make them. Give a recommendation *with* the question,
-  and explain jargon briefly (he reads on his phone — lead with the answer).
+- **Decisions that are the project lead's** (scope, physics direction, FT standard, which budget,
+  anything outward-facing, hardware spend): don't make them. Give a recommendation *with* the
+  question, and explain jargon briefly for a non-specialist reader on mobile — lead with the answer.
 
 ## Verify, don't trust (hard-won this session)
 - **Re-run claims.** When Claude reports "suite 169/169" or a result, confirm it with the actual
@@ -111,9 +111,9 @@ code and runs the shell.
 - Update `Conversation history/open-questions.md` (add / resolve / move; keep status tags).
 - A journal entry is Claude Code's habit; Kiro appends when it owns the pass — check the last
   entry number first (both sides append).
-- Give Kevin a short, paste-ready message for the other side: what changed, which files, results,
-  what to run next (reviewer → researcher → annotator), and open items / FLAGs. Lead with the answer.
+- Give the project lead a short, paste-ready message for the other side: what changed, which files,
+  results, what to run next (reviewer → researcher → annotator), and open items / FLAGs. Lead with the answer.
 
-## Still Kevin's (open, as of 2026-10-07)
+## Still the project lead's (open, as of 2026-10-07)
 FLAG A (py3.11 vs 3.12 pin), FLAG B (sudo-installed build deps), K1–K6 (physics-direction items,
 review/06), SCOPE-1 (rewrite SCOPE §1/§2 to the ★ thesis), SWEEP-03. See `open-questions.md` §B.

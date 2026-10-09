@@ -95,7 +95,7 @@ exists but is gitignored.
 
 ---
 
-## 3. FLAGS (require Kevin's decision — not silently resolved)
+## 3. FLAGS (require the project lead's decision — not silently resolved)
 
 ### FLAG A — Python 3.11 pinned, but 3.11 is unavailable on this host
 SCOPE §7 pins **Python 3.11**. The host has only Python **3.9** and **3.12.14**; no
@@ -103,7 +103,7 @@ pyenv/conda to add 3.11 without a system change. **Stage 1 + Stage 2 were built 
 tested on Python 3.12.14.** All 37 tests pass and the physics is verified on 3.12.
 `requirements.txt` documents this and pins the versions actually tested
 (`numpy==2.5.3`, `scipy==1.18.1`, `pytest==9.1.1`, `stim==1.16.0`).
-**Decision for Kevin:** either (a) install Python 3.11 and rebuild `.venv` before the
+**Decision for the project lead:** either (a) install Python 3.11 and rebuild `.venv` before the
 tooling stages (guppylang/pytket-quantinuum pinning), or (b) accept 3.12 as the project
 interpreter and amend SCOPE §7. This is a SCOPE change either way → yours to make.
 
@@ -118,7 +118,7 @@ These are standard, reversible developer packages (`sudo dnf remove` to undo). F
 because it is a host system change, not a repo change. No hardware, network-exfil, or
 production system was touched.
 
-**Pragmatic relevance (added 2026-10-07, Kevin):** this build-deps step is **only needed when
+**Pragmatic relevance (added 2026-10-07, the project lead):** this build-deps step is **only needed when
 `pip install stim` has no prebuilt wheel for the platform and must compile from source** —
 which is what happened on this host (Linux **aarch64** + CPython **3.12**). **On an average local
 machine — a mainstream OS/CPU (x86-64 Linux, macOS, Windows) with a standard Python — Stim ships
@@ -131,7 +131,7 @@ on no-wheel combinations (ARM Linux being the common trigger). The fix in that c
 `pip install`. *(Mechanism certain: wheel ⇒ no build deps; no wheel ⇒ build deps. The exact
 per-platform wheel matrix for stim 1.16.0 was not re-queried against PyPI.)*
 
-**Nota personal de Kevin (2026-10-07):** "Yo es que estoy corriendo esto en una máquina virtual en un servidor externo (Oracle Cloud, es gratis, por si les interesa) porque mi laptop apesta." *(Context: this is why the host is Linux aarch64 — a free Oracle cloud VM — exactly the no-wheel platform that triggered the build-from-source + FLAG B deps.)*
+**Team note (2026-10-07):** the project runs on a virtual machine on an external server (Oracle Cloud, free tier) rather than a local laptop. *(Context: this is why the host is Linux aarch64 — a free Oracle cloud VM — exactly the no-wheel platform that triggered the build-from-source + FLAG B deps.)*
 
 ---
 
@@ -148,7 +148,7 @@ produce, a done-check, and what the reviewer must verify. The distance-check mac
 validate the deliverable on arrival is already in `src/qec/concatenated.py` (with the M2
 caveat: measure *code* distance, excluding stabilizer elements).
 
-**Kevin runs Claude Code on this brief; agents cannot.**
+**The project lead runs Claude Code on this brief; agents cannot.**
 
 ### UPDATE 2026-10-06 — handoff/01 RETURNED from Claude Code, reviewed, APPROVED
 Claude Code delivered the concatenated Iceberg d=4 code. New/changed files:
@@ -203,7 +203,7 @@ Still open (per Claude Code / reviewer — not defects, feed SCOPE Q4 code-ranki
 - Full tooling stack (pytket, pytket-quantinuum, guppylang, qiskit, qermit, pandas,
   matplotlib) — commented in `requirements.txt`, add per their stages after FLAG A is
   resolved.
-- Hardware / Nexus / H2 — stubbed and gated off; untouched (needs `allow_hardware` + Kevin).
+- Hardware / Nexus / H2 — stubbed and gated off; untouched (needs `allow_hardware` + the project lead).
 
 ---
 
@@ -215,7 +215,7 @@ python -m pytest tests/ -q           # 37 passed
 python scripts/validate_stage1.py    # records data/stage1_validation.txt (~1 min)
 python main.py                       # Stage 1 statevector run from config.py
 ```
-Repo is prepared locally only. When Kevin approves, he creates the GitHub repo and pushes
+Repo is prepared locally only. When the project lead approves, they create the GitHub repo and push
 to a feature branch (SCOPE §8) — the agents do not.
 
 ---
@@ -296,7 +296,7 @@ Write-up: `docs/q1_compare.md`. **The harness is built; the real-data comparison
 
 ---
 
-## 10. Claude Code pass — handoff 04 CHECKPOINT 1 (Part A, Iceberg) RETURNED; Part B awaits Kevin's go-ahead
+## 10. Claude Code pass — handoff 04 CHECKPOINT 1 (Part A, Iceberg) RETURNED; Part B awaits the project lead's go-ahead
 
 Write-up: `docs/encoded_tfim.md`; Nexus plan: `docs/nexus_toggle.md`; data: `data/encoded_iceberg.txt`.
 
@@ -317,7 +317,7 @@ Write-up: `docs/encoded_tfim.md`; Nexus plan: `docs/nexus_toggle.md`; data: `dat
 
 ## 11. Claude Code pass — handoff 04 PART B RETURNED (Steane, 5-qubit, concat d=4); awaiting qc-reviewer
 
-Kevin's Part B choices: **standard B** (measured accounting, no FT pass/fail bar), **budget (ii)** (~55 H2 qubits; Stim at budget size; execution ≤ 24), and **measured** residual. Write-up: `docs/encoded_tfim.md` Part B. Data: `data/encoded_codes.txt`.
+The project lead's Part B choices: **standard B** (measured accounting, no FT pass/fail bar), **budget (ii)** (~55 H2 qubits; Stim at budget size; execution ≤ 24), and **measured** residual. Write-up: `docs/encoded_tfim.md` Part B. Data: `data/encoded_codes.txt`.
 
 **New files**
 - `src/encoded_codes.py`: a generic pipeline covering code specs, GF(2) pure errors, feedforward frame correction, minimum-weight representatives, flagged general-Pauli syndrome, parity-gadget rotations, a schedule → local-sim / Stim / generated-Guppy-on-Selene, measured accounting and the bare reference.
@@ -334,7 +334,7 @@ Kevin's Part B choices: **standard B** (measured accounting, no FT pass/fail bar
 - The handoff's expected 5-qubit discard is **not supported** by the measured gate cost.
 - **The main open lever is active correction for the d ≥ 3 codes, which is not built.**
 
-**UPDATE 2026-10-07: noise-sensitivity check** (Kevin asked whether Part B extrapolates to H2). Script `scripts/run_noise_sensitivity.py` → `data/noise_sensitivity.txt`; write-up in `docs/encoded_tfim.md`, final section.
+**UPDATE 2026-10-07: noise-sensitivity check** (the project lead asked whether Part B extrapolates to H2). Script `scripts/run_noise_sensitivity.py` → `data/noise_sensitivity.txt`; write-up in `docs/encoded_tfim.md`, final section.
 - The code ranking (Iceberg ≥ Steane / 5-qubit / concat) is **robust** across ZZ bias, idle noise and over-rotation.
 - **Whether encoding helps at all is NOT robust.** If more than about 25% of the native two-qubit gate error is ZZ-type (crossover η ≈ 0.25), every code's undetected residual exceeds bare's unprotected error. Coherent over-rotation erodes the gain toward ×1.
 - Next measurement needed: H2's native two-qubit gate error composition (η) and its over-rotation.
@@ -343,13 +343,13 @@ Kevin's Part B choices: **standard B** (measured accounting, no FT pass/fail bar
 
 ## 12. 2026-10-07 — Selene gap resolved; handoff 05 created (DEFERRED, hardware-gated); new tracking files
 
-- **Selene acceptance gap → resolved as a noise-model definition difference** (Claude Code; Kevin assigned it to Claude Code rather than Kiro).
+- **Selene acceptance gap → resolved as a noise-model definition difference** (Claude Code; the project lead assigned it to Claude Code rather than Kiro).
   - Selene charges `p_1q` on every native one-qubit op: 724 `rxy` + `rz` vs the model's 188 pytket-level gates, ×3.85. It also charges `p_init` on allocations.
   - The two-qubit counts are identical (124).
   - Matching the counts explains ~60–80%; a 1–3σ residual stays open (T-1).
   - The ranking is unaffected and Iceberg's lead widens.
   - Script `scripts/diagnose_selene_gap.py` → `data/selene_gap.txt`; doc in `docs/encoded_tfim.md`.
-- **Kevin deferred HW-1 (H2 gate-error composition η, ε) and HW-2 (active correction for the d ≥ 3 codes) until hardware access.** Briefed in **`handoff/05-hardware-gated-followups.md`** (status DEFERRED; goals G1 emulator calibration run → G2 measure η and ε → G3 encoded-vs-bare on H2 → G4 active correction).
+- **The project lead deferred HW-1 (H2 gate-error composition η, ε) and HW-2 (active correction for the d ≥ 3 codes) until hardware access.** Briefed in **`handoff/05-hardware-gated-followups.md`** (status DEFERRED; goals G1 emulator calibration run → G2 measure η and ε → G3 encoded-vs-bare on H2 → G4 active correction).
 - **New tracking files:**
   - `Conversation history/open-questions.md`: a living register of pending decisions and questions, companion to the journal.
   - `CLAUDE.md` (repo root): the working rules Claude Code follows in this project.
@@ -385,16 +385,16 @@ Brief: `handoff/06-noise-sensitivity-h2-prior.md`. Inputs: `research/06-h2-noise
 - Section 2 matches the pre-rerun file exactly.
 - Tests: full suite **169/169 pass** (99.7 s), including the 27 in `tests/test_encoded_codes.py`; unchanged.
 
-**Open / next:** D-RC (randomized compiling on encoded H2 runs — Kevin, at handoff/05 time); T-10 (model cannot run the Fig. S3-shaped channel or un-twirled coherent ε; optional). Hardware half of HW-1 stays DEFERRED (handoff/05).
+**Open / next:** D-RC (randomized compiling on encoded H2 runs — the project lead, at handoff/05 time); T-10 (model cannot run the Fig. S3-shaped channel or un-twirled coherent ε; optional). Hardware half of HW-1 stays DEFERRED (handoff/05).
 
-**UPDATE (Kevin, 2026-10-07): D-RC resolved — encoded H2 runs WILL use randomized compiling** (journal Entry 24, open-questions R-7). To be built in when handoff/05 is picked up.
+**UPDATE (the project lead, 2026-10-07): D-RC resolved — encoded H2 runs WILL use randomized compiling** (journal Entry 24, open-questions R-7). To be built in when handoff/05 is picked up.
 
 ---
 
 ## 14. handoff/07 WRITTEN (2026-10-07, qc-overseer) — sector-restricted MCMC ergodic baseline for Q3; DISPATCHED, awaiting Claude Code
 
 **Brief:** `handoff/07-sector-restricted-mcmc-ergodic-baseline.md` (178 lines). **Status: DISPATCHED**
-(written, not yet run — Kevin relays it to Claude Code; agents cannot launch it).
+(written, not yet run — the project lead relays it to Claude Code; agents cannot launch it).
 
 **Why a hard stop → Claude Code (SCOPE §10/§14).** Q3 (thermalization) is zero-progress
 (`docs/findings_vs_questions.md` Q3 = NOT done): the relaxation machinery exists
@@ -465,7 +465,7 @@ Brief: `handoff/07-sector-restricted-mcmc-ergodic-baseline.md`. Classical and lo
 
 **Verification:** internal read-only reviewer sub-agent (own code, reproduced every number): ACCEPT-WITH-FIXES. M1 (C(r) window averaging), m1, m2 (curve guard at the ED ceiling), m3 and the nits all applied, with a regression test. Full suite **195/195**.
 
-**Process note:** a second Claude Code session worked the same brief on the same files at the same time (Entry 26); Kevin assigned the build to this session. One Claude Code session per brief.
+**Process note:** a second Claude Code session worked the same brief on the same files at the same time (Entry 26); the project lead assigned the build to this session. One Claude Code session per brief.
 
 **Next:** qc-reviewer (independent; brief §"What the reviewer must verify") → qc-annotator → Kiro re-verifies → T-6 to Resolved, Q3 row status flip.
 
@@ -475,8 +475,8 @@ Brief: `handoff/07-sector-restricted-mcmc-ergodic-baseline.md`. Classical and lo
 ## 16. handoff/08 WRITTEN (2026-10-08, qc-overseer) — Q3 completion + K2 + figures; DISPATCHED, awaiting Claude Code
 
 **Brief:** `handoff/08-q3-completion-trotter-threshold-curves-figures.md`. **Status: DISPATCHED** (written,
-not run — Kevin relays it; one session per brief, T-13). **Larger two-part brief with a checkpoint** (PROC-1:
-Kevin approved bigger briefs provided Part A lands as a reviewable unit before Part B).
+not run — the project lead relays it; one session per brief, T-13). **Larger two-part brief with a checkpoint** (PROC-1:
+the project lead approved bigger briefs provided Part A lands as a reviewable unit before Part B).
 
 **Scope.** Closes the biggest local, non-hardware loose end — Q3's "done when" (relaxation curves across
 lattices/fields/encodings/noise + a size story) — and folds in two resolved decisions:
@@ -584,7 +584,7 @@ Journal Entry 34. Write-up: `docs/q3_thermalization.md` §9. **Every noisy numbe
 ## 19. handoff/09 WRITTEN (2026-10-08, qc-overseer) — Q2 frustration thickening; DISPATCHED, awaiting Claude Code
 
 **Brief:** `handoff/09-q2-frustration-thickening.md`. **Status: DISPATCHED.** Two-part with a checkpoint
-(PROC-1). Kevin chose Q2 as the next focus (the main remaining local thread; least pre-empted novelty).
+(PROC-1). The project lead chose Q2 as the next focus (the main remaining local thread; least pre-empted novelty).
 
 **Scope.** Closes the defensible part of Q2's "done when" (triangular-vs-square on frustration observables),
 currently PARTLY done (only a 3×4 single-cluster ground-state table exists):
@@ -607,7 +607,7 @@ build). Classical ED/exact only.
 **Resolves/advances on return:** Q2 "done when" toward DONE-at-reachable-sizes. Pre-dispatch suite 217/217.
 Nothing committed or pushed.
 
-**DIRECTION NOTE (Kevin, 2026-10-08, PROC-2, journal Entry 39):** handoff/09 is the **last classical-depth brief**. After it, the next briefs are (1) the LaTeX report (SCOPE §13) and (2) hardware-path preparation, starting with HW-5 (handoff/05 G1, Iceberg H2-emulator calibration). Classical work only where a review, the report or the hardware path needs it.
+**DIRECTION NOTE (the project lead, 2026-10-08, PROC-2, journal Entry 39):** handoff/09 is the **last classical-depth brief**. After it, the next briefs are (1) the LaTeX report (SCOPE §13) and (2) hardware-path preparation, starting with HW-5 (handoff/05 G1, Iceberg H2-emulator calibration). Classical work only where a review, the report or the hardware path needs it.
 
 ---
 
@@ -633,24 +633,24 @@ Journal Entry 40. Write-up: `docs/q2_frustration.md` (Part A). Classical ED only
 
 ## 21. handoff/10 WRITTEN (2026-10-08, qc-overseer) — ROLE TRANSFER to Claude Code; Kiro's final brief
 
-**Brief:** `handoff/10-role-transfer-finish-project.md` (225 lines). **This is Kiro's last brief** — Kevin is out
+**Brief:** `handoff/10-role-transfer-finish-project.md` (225 lines). **This is Kiro's last brief** — the project lead is out
 of Kiro usage for the month, so Claude Code now runs the overseer/review/annotator functions too and finishes the
 project solo (ideally one session, else Claude-Code-only sessions).
 
-**Also:** handoff/09 **Part B CANCELLED** (Kevin, PROC-2) — a banner was added to the Part B section; do not build it.
+**Also:** handoff/09 **Part B CANCELLED** (the project lead, PROC-2) — a banner was added to the Part B section; do not build it.
 
 **handoff/10 transfers:**
 - the **state snapshot** (231/231; Q3 complete+reviewed 09/10/11; Q2 Part A complete+reviewed 12, Part B cancelled;
   Q4 Iceberg recommended; Gauss verdict recorded; report + hardware pending);
 - the **ordered plan (PROC-2):** (1) LaTeX report (SCOPE §13) → (2) relay backlog → (3) hardware HW-5/G1–G4 on
-  Kevin's approval → (4) parked items only if Kevin decides;
+  the project lead's approval → (4) parked items only if the project lead decides;
 - the **SELF-REVIEW PROTOCOL** that replaces the independent qc-reviewer (re-derive load-bearing numbers with fresh
   code/method, re-run the suite, separate verified-vs-could-not, severity verdict, honesty audit, write review/13+);
 - the **LaTeX report spec** (SCOPE §13; new `docs/report/report.tex`, English; explicitly NOT the gitignored Spanish
   `Conversation history/reporte-tecnico-equipo.tex`; findings-table centrepiece; honest tags; reuse `figures/`);
 - the **relay backlog** (T-19; review/11 m1–m3; review/12 m1–m3; T-15 check);
 - the **discipline** (verify-don't-trust, no-invented-numbers, classical-vs-H2 labelling, don't-touch-cores,
-  ceilings, hardware/push/SCOPE = Kevin's, keep registers current);
+  ceilings, hardware/push/SCOPE = the project lead's, keep registers current);
 - ordered **authoritative pointers**.
 
 **Nothing committed or pushed.** Pre-transfer suite 231/231. Kiro is offline after this pass.
@@ -659,15 +659,15 @@ project solo (ideally one session, else Claude-Code-only sessions).
 
 ## 22. Claude Code (overseer, handoff/10) — JOB 1 DONE: SCOPE §13 LaTeX report + relay backlog; review/13; 2026-10-08
 
-Journal Entry 43. Kevin's instructions for this pass: jobs 1–2 only, **hardware NOT approved** (stop and report).
-Tectonic 0.15.0 installed in `~/.local/bin` (Kevin's choice) to test-compile.
+Journal Entry 43. The project lead's instructions for this pass: jobs 1–2 only, **hardware NOT approved** (stop and report).
+Tectonic 0.15.0 installed in `~/.local/bin` (the project lead's choice) to test-compile.
 
 **New:**
 - `docs/report/report.tex`: the SCOPE §13 report (English, 16 pp.).
   - Contents: thesis + K4 framing; methods; Q1; Q4; Q2; Q3 with figures; the Gauss-law verdict; a findings-vs-questions longtable; the hardware plan; limitations; reproducibility; bibliography.
   - Figures load from `../../figures/` or `./figures/`, with a placeholder if absent.
 - `review/13-latex-report-selfreview.md`: the self-review plus an independent read-only sub-agent. ACCEPT-WITH-FIXES → fixes applied.
-- `Conversation history/team-report-en.tex` (gitignored): a plain-language English team report in the structure of Kevin's Spanish team doc. Requested by Kevin; not a deliverable.
+- `Conversation history/team-report-en.tex` (gitignored): a plain-language English team report in the structure of the project lead's Spanish team doc. Requested by the project lead; not a deliverable.
 
 **Relay backlog (handoff/10 §6):** all applied or confirmed (open-questions R-13).
 - `scripts/compare_frustration.py` + `data/frustration_compare.txt`: T-19 caveat, data regenerated.
@@ -688,16 +688,16 @@ Tectonic 0.15.0 installed in `~/.local/bin` (Kevin's choice) to test-compile.
 - The figures are byte-identical on regeneration.
 - The suite is **231/231**.
 
-**Next:** JOB 3, the hardware path (handoff/05 HW-5 → G1–G4), **only on Kevin's approval**. Otherwise the project is complete at classically reachable sizes. Push/commit only on Kevin's request.
+**Next:** JOB 3, the hardware path (handoff/05 HW-5 → G1–G4), **only on the project lead's approval**. Otherwise the project is complete at classically reachable sizes. Push/commit only on the project lead's request.
 
 
 ---
 
-## 23. 2026-10-08/09 — Kevin's decisions, repo cleanup, first GitHub push, STANDSTILL brief (handoff/11)
+## 23. 2026-10-08/09 — the project lead's decisions, repo cleanup, first GitHub push, STANDSTILL brief (handoff/11)
 
 Journal Entries 44–47.
 
-**Decisions (Kevin):**
+**Decisions (the project lead):**
 - **T-18 → R-15:** the encoded H2 Q3 run uses 6×6 plus the minimal relevant 3×4.
 - **T-17 → R-14:** H2 Q3 curves are always compared with the noise, so 6×6 needs a noise-scaling arm.
 - Both are recorded in `handoff/05` (a decisions block) and in both reports.
@@ -718,4 +718,4 @@ Journal Entries 44–47.
 - the Quantinuum client install;
 - the `nexus` backend.
 
-**Local only:** this section and handoff/11 postdate `37e6879` and are not pushed. A push needs Kevin's request. Suite 231/231.
+**Local only:** this section and handoff/11 postdate `37e6879` and are not pushed. A push needs the project lead's request. Suite 231/231.

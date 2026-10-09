@@ -1,17 +1,17 @@
 # Handoff 11 — STANDSTILL: classical work complete, waiting for H2 access
 
-**Written by:** Claude Code (overseer since handoff/10), 2026-10-09, at Kevin's request.
+**Written by:** Claude Code (overseer since handoff/10), 2026-10-09, at the project lead's request.
 **Status:** nothing is in progress and nothing is half-built. This brief is a snapshot of the project while it
 waits for Quantinuum H2 / Nexus access, so that any future session (Claude Code, Kiro or a person) can resume
-without reconstructing context. **Do not start work from it without Kevin's go-ahead**; the next step is
-hardware and needs his explicit approval.
+without reconstructing context. **Do not start work from it without the project lead's go-ahead**; the next step is
+hardware and needs their explicit approval.
 
 ---
 
 ## 1. One-paragraph state
 
 Everything that can be done without hardware is done, tested (**231/231**) and reviewed (`review/01`–`13`). The
-SCOPE §13 report is `docs/report/report.tex`. PROC-2 (Kevin) stopped new classical work. The article's headline,
+SCOPE §13 report is `docs/report/report.tex`. PROC-2 (the project lead) stopped new classical work. The article's headline,
 logical-vs-physical on H2 against 2503.20870's released data, has not been run; no H2 experiment of any kind
 (hardware or emulator) has been done. Every noisy number in the repo is a classical prediction under an assumed
 noise model.
@@ -26,7 +26,7 @@ noise model.
 | Q3 thermalization | Per-sector MCMC baseline; relaxation to the finite-cluster value; dt = 0.25 below the Trotter threshold for h ≤ 0.3; Gauss post-selection is the effective mitigation; noise can mimic thermalization | Matched H2 curves |
 | Gauss-law thread | Mostly no; modest yes for detection against X/Y noise only, floored at O((h/J)²) | — (verdict closed) |
 
-## 3. Decisions in force (all Kevin's; registers: `Conversation history/open-questions.md`)
+## 3. Decisions in force (all the project lead's; registers: `Conversation history/open-questions.md`)
 
 - **D-RC (R-7):** every encoded H2 run uses randomized compiling (Pauli twirling, as 2503.20870 does).
 - **T-18 (R-15):** the encoded Q3 run uses **6×6** (40 physical qubits) and the minimal relevant lattice **3×4**
@@ -34,21 +34,21 @@ noise model.
 - **T-17 (R-14):** an H2 Q3 curve is never called thermalization without comparing it with the noise. 6×6 is
   beyond classical noisy simulation (36 > 24 spins), so the 6×6 run needs a **noise-scaling arm**.
 - **PROC-2:** no new classical depth. **Q2 Part B cancelled.**
-- **Parked (not built; Kevin's call):** K1 active gauge protection, K3 clock-order observable, K5 diffusion
+- **Parked (not built; the project lead's call):** K1 active gauge protection, K3 clock-order observable, K5 diffusion
   observable, K6 Z₂ vs U(1) wording.
-- **Hardware gate (SCOPE §5):** nothing reaches Quantinuum without `allow_hardware=True`, Kevin's explicit
+- **Hardware gate (SCOPE §5):** nothing reaches Quantinuum without `allow_hardware=True`, the project lead's explicit
   per-run approval and a recorded HQC cost estimate. The `nexus` backend is a stub that raises.
 - **Git:**
   - Published at `github.com/KmarH/TFIM_QEC_Frustation`, branch `initial-import`, commit `37e6879` (2026-10-09). That push was a one-time permission.
-  - **Every future commit or push needs Kevin's explicit request.**
+  - **Every future commit or push needs the project lead's explicit request.**
   - Changes made after `37e6879` (this brief, `plan.md` §23) are local only.
 
 ## 4. How to resume when H2 access arrives (order; each step gated)
 
 **Before the first run (local, no credits):**
-1. Get Kevin's approval for the step, and record it.
+1. Get the project lead's approval for the step, and record it.
 2. Install and pin the Quantinuum client (`qnexus` and/or `pytket-quantinuum`); confirm the live versions on
-   Python 3.12. Kevin logs in himself; credentials never go in the repo.
+   Python 3.12. The project lead logs in themself; credentials never go in the repo.
 3. **Build randomized compiling into the encoded programs.** It is not built yet; D-RC requires it and the
    "encoding helps" prediction rests on it. Verify locally that twirled and untwirled agree at zero noise.
 4. Design the **6×6 noise-scaling arm** (T-17), for example by gate folding at 1×/2×/3×. Not designed yet.

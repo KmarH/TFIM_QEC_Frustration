@@ -1,11 +1,11 @@
 # Handoff 10 — ROLE TRANSFER: Claude Code takes over the overseer function and finishes the project
 
-**Written by:** Kiro (qc-overseer), 2026-10-08 — **this is Kiro's last brief for now.** Kevin is out of Kiro
+**Written by:** Kiro (qc-overseer), 2026-10-08 — **this is Kiro's last brief for now.** The project lead is out of Kiro
 usage for the month, so from here **Claude Code runs everything**, including the scoping/review/annotation
 functions Kiro used to perform. This brief transfers that role. Read it in full before doing anything.
 
 **One-line goal:** finish the project — ideally in a single Claude Code session, otherwise across Claude Code
-sessions only — by (1) writing the LaTeX report (SCOPE §13), then (2) preparing and, when Kevin approves hardware,
+sessions only — by (1) writing the LaTeX report (SCOPE §13), then (2) preparing and, when the project lead approves hardware,
 running the H2 path (handoff/05), while **carrying Kiro's discipline and self-reviewing in place of the independent
 reviewer.** Do not wait for Kiro; Kiro will not respond.
 
@@ -19,15 +19,15 @@ work, so you must run the **self-review protocol in §4** on every milestone bef
 real gate, not a formality — it is the only thing standing in for the independent check that caught real errors
 this project (e.g. the 16,248 count, the C_r metric, the T-19 frustrated-reference bug).
 
-**Kevin's role is unchanged:** he approves hardware spend and scope/physics-direction decisions, and runs you. When
-a decision is his (marked below and in `open-questions.md §B`), STOP and ask him — do not make it yourself.
+**The project lead's role is unchanged:** they approve hardware spend and scope/physics-direction decisions, and run you. When
+a decision is theirs (marked below and in `open-questions.md §B`), STOP and ask — do not make it yourself.
 
 ---
 
 ## 1. Where the project stands (verified state, 2026-10-08)
 
 **Test suite: 231/231** (`. .venv/bin/activate && python -m pytest -q`, ~130 s, Python 3.12.14). Keep it green;
-re-run and quote the count in every pass. Nothing is committed or pushed (SCOPE §8; stays that way until Kevin asks).
+re-run and quote the count in every pass. Nothing is committed or pushed (SCOPE §8; stays that way until the project lead asks).
 
 **The thesis (SCOPE §1, journal ★ box):** compute the *same* TFIM observables with LOGICAL qubits on H2 and
 compare head-to-head against 2503.20870's *released physical-qubit data*; priority Q1 > Q2 (frustration) > Q3/Gauss;
@@ -50,25 +50,25 @@ framing is physics + QEC-methodology, **not** beyond-classical dynamics (K4).
 
 **What is PENDING:**
 - **The LaTeX report (SCOPE §13) — NOT started. This is your first job (§3).**
-- **The hardware path (handoff/05, DEFERRED) — HW-5 calibration first, then G1–G4.** Gated on Kevin's hardware
-  approval + `allow_hardware=True` (SCOPE §5). Your second job, when Kevin green-lights it (§5).
+- **The hardware path (handoff/05, DEFERRED) — HW-5 calibration first, then G1–G4.** Gated on the project lead's hardware
+  approval + `allow_hardware=True` (SCOPE §5). Your second job, when the project lead green-lights it (§5).
 - **Q1 matched comparison (T-9):** the article spine; needs H2 data. Hardware-gated.
 
-**Parked (Kevin's optional calls — do NOT build without his yes):** K1 (active gauge protection), K3 (clock-order
+**Parked (the project lead's optional calls — do NOT build without their yes):** K1 (active gauge protection), K3 (clock-order
 observable), K5 (diffusion observable), K6 (Z₂-vs-U(1) wording), T-10. PROC-2 says no new classical depth unless the
 report or hardware path needs it.
 
-**Resolved flags:** FLAG A (Python 3.12), FLAG B (build-deps, Kevin's ARM VM only), FLAG C (figures built). K2
+**Resolved flags:** FLAG A (Python 3.12), FLAG B (build-deps, the project lead's ARM VM only), FLAG C (figures built). K2
 (dt-study, done in Q3), K4 (honest framing, adopted).
 
 ---
 
-## 2. The order of remaining work (PROC-2, Kevin's)
+## 2. The order of remaining work (PROC-2, the project lead's)
 1. **LaTeX report** (SCOPE §13) — §3 below. Do this first; it needs no hardware and consolidates everything done.
 2. **Relay backlog** — §6 below, small doc fixes; fold them in as you touch the relevant files (do them before or
    during the report so the docs you cite are correct).
-3. **Hardware path** — §5 below (HW-5 → G1–G4), **only after Kevin approves hardware**. Until then it stays stubbed.
-4. **Parked items** — only if Kevin decides them.
+3. **Hardware path** — §5 below (HW-5 → G1–G4), **only after the project lead approves hardware**. Until then it stays stubbed.
+4. **Parked items** — only if the project lead decides them.
 
 Do as much as possible in one go. If you must split, split at these numbered boundaries, and update the registers
 (§7) at each boundary so the next session can resume.
@@ -82,7 +82,7 @@ honest framing. SCOPE §13: "LaTeX report compiles on Overleaf; a 'Findings vs q
 to the stage/experiment and the result that counts as its answer."
 
 **IMPORTANT — do not confuse two documents:**
-- `Conversation history/reporte-tecnico-equipo.tex` is **Kevin's team-update doc** (Spanish, gitignored, NOT part of
+- `Conversation history/reporte-tecnico-equipo.tex` is **the project lead's team-update doc** (Spanish, gitignored, NOT part of
   the project, must never be pushed). You may read it for continuity but it is **not** the SCOPE §13 report.
 - The SCOPE §13 report is a **new** file in the tracked tree — put it in `docs/` (e.g. `docs/report/report.tex`), in
   **English**, as the formal deliverable.
@@ -146,8 +146,8 @@ A self-review that just agrees with the work is worthless and worse than none (f
 
 ---
 
-## 5. JOB 2 — the hardware path (handoff/05), ONLY on Kevin's approval
-Everything here is **gated**: nothing contacts Quantinuum without `allow_hardware=True` **and** Kevin's explicit
+## 5. JOB 2 — the hardware path (handoff/05), ONLY on the project lead's approval
+Everything here is **gated**: nothing contacts Quantinuum without `allow_hardware=True` **and** the project lead's explicit
 per-run approval, with the HQC cost estimate recorded first (SCOPE §5). The `nexus` backend raises by design until
 then. Do NOT flip it on your own.
 
@@ -189,7 +189,7 @@ then. Do NOT flip it on your own.
   `trotter_threshold.py`, `noisy_q3.py`, `frustration.py`). Comments-only when annotating.
 - **Ceilings (SCOPE §5):** ED ≤ 20 spins, statevector ≤ 24; the physical register is what counts; Stim unbounded.
   Refuse before allocating.
-- **Hardware/push/repo/SCOPE changes are Kevin's** — gate on his explicit approval.
+- **Hardware/push/repo/SCOPE changes are the project lead's** — gate on their explicit approval.
 - **Keep the registers current** (this is how a session with no memory resumes): after each pass update
   `handoff/plan.md` (registry), `Conversation history/open-questions.md` (add/resolve/move, keep tags),
   `docs/findings_vs_questions.md` (when a Q row changes), and append a `## Entry N` to
@@ -203,7 +203,7 @@ then. Do NOT flip it on your own.
 2. `CLAUDE.md` — your working rules in this repo.
 3. `Conversation history/project-journal.md` — the ★ thesis box, the status board, and the latest entries (up to
    Entry 42, this transfer).
-4. `Conversation history/open-questions.md` — the ★ FLAG-0 banner (the Q1 go/no-go), §A hardware-gated, §B Kevin's
+4. `Conversation history/open-questions.md` — the ★ FLAG-0 banner (the Q1 go/no-go), §A hardware-gated, §B the project lead's
    decisions, §C technical, Resolved (R-1…R-12).
 5. `handoff/plan.md` — the handoff registry (§1–§20).
 6. `docs/findings_vs_questions.md` — the Q1–Q4 + Gauss map; the report's backbone.
@@ -212,14 +212,14 @@ then. Do NOT flip it on your own.
    `docs/nexus_toggle.md`; `handoff/05`.
 8. `Conversation history/sources.md` — the tracked bibliography (status-tagged).
 
-## 9. Done-check for this transfer (how Kevin knows the project is finished)
+## 9. Done-check for this transfer (how the project lead knows the project is finished)
 - The SCOPE §13 LaTeX report exists in `docs/`, compiles on Overleaf, has the findings table, and is honest
   (self-reviewed, review file written).
 - The relay backlog (§6) is applied; suite green.
-- The hardware path is either run (with Kevin's approvals + labels + self-reviews) or clearly left as the
-  documented, gated next step if Kevin has not green-lit hardware.
+- The hardware path is either run (with the project lead's approvals + labels + self-reviews) or clearly left as the
+  documented, gated next step if the project lead has not green-lit hardware.
 - The registers reflect final state; a journal entry records the project's completion status.
-- Nothing invented; classical vs hardware never mixed; nothing pushed without Kevin.
+- Nothing invented; classical vs hardware never mixed; nothing pushed without the project lead.
 
 **That is the whole job. Work through §2 in order, self-review each milestone (§4), keep the registers current, and
-ask Kevin for the decisions marked his. Kiro is offline — you are the overseer now.**
+ask the project lead for the decisions marked theirs. Kiro is offline — you are the overseer now.**

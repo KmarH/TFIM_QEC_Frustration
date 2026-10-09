@@ -73,7 +73,7 @@ Section 5 measures this offset with the exact H_QDM diagonal ensemble (DE). It s
 - The MCMC uses a per-configuration evaluator built from the same `TriangularDimers` geometry. It is tested equal to the dimers.py arrays on **every** basis state of 3×3, 3×4 and 4×3.
 - Both arms compute C(r) through one function, which is tested equal to `dimer_correlation_by_distance`.
 - The C(r) distance metric is Euclidean, as in dimers.py; the graph-distance question (T-7) affects both arms identically and is untouched here.
-- **Not added:** a 3-sublattice/clock order parameter (review/06 K3 is Kevin's scope decision; the brief says reuse dimers.py).
+- **Not added:** a 3-sublattice/clock order parameter (review/06 K3 is the project lead's scope decision; the brief says reuse dimers.py).
 
 ## 5. Design decision 3: leakage, and the operational verdict
 
@@ -175,7 +175,7 @@ Notes on the table:
 
 ## 8. Trotter-threshold / dt-convergence study (handoff/08 Part A1, K2)
 
-**Code:** `src/trotter_threshold.py` · **tests:** `tests/test_trotter_threshold.py` (10) · **script:** `scripts/run_trotter_threshold.py` → `data/trotter_threshold.txt`. Classical, noiseless; NOT an H2 result. This is the same study type as Kevin's earlier hackathon's `run_dt_convergence.py` (journal Entry 30), adapted from the 1D ferromagnet to the frustrated triangular model.
+**Code:** `src/trotter_threshold.py` · **tests:** `tests/test_trotter_threshold.py` (10) · **script:** `scripts/run_trotter_threshold.py` → `data/trotter_threshold.txt`. Classical, noiseless; NOT an H2 result. This is the same study type as the team's earlier hackathon `run_dt_convergence.py` (journal Entry 30), adapted from the 1D ferromagnet to the frustrated triangular model.
 
 **Why.** A Q3 relaxation curve is only meaningful at a dt below the Trotter threshold, above which local observables stop tracking the target dynamics (Heyl–Hauke–Zoller, Sci. Adv. 5, eaau8342 **[established]**; no numbers imported). This section places the working dt = 0.25 relative to that threshold for this model.
 

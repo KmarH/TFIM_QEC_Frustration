@@ -194,7 +194,7 @@ how much of the Q1 logical-vs-physical-observable story is already published, wh
 is (likely directly reusable), and precisely where the trapped-ion / concatenated-code / TFIM / frustration delta
 begins. Then re-read 2602.22211 §(3D-XY simulation) for the Quantinuum-hardware precedent.
 
-## 8. Open questions for Kevin / the overseer
+## 8. Open questions for the project lead / the overseer
 
 1. **Is the H2 campaign still worth the credits** if the generic logical-beats-physical-on-magnetism result is
    already published (IBM) and already shown on Quantinuum hardware (2602.22211, XY)? Is the TFIM + trapped-ion +

@@ -292,7 +292,7 @@ For the overseer:
 - Should the project distinguish *emergent-approximate* vs *engineered* Gauss-law postselection explicitly in its verdict, given
   2608.04290 does the engineered version on the target hardware?
 
-For the user (Kevin):
+For the project lead:
 - Does the project want to claim anything about the Z₂ (vs U(1)) nature of the emergent gauge field, or keep "Gauss law" generic?
 - Is a monitored/feedback error-*correction* variant (2405.18504-style) of interest, or is the Gauss thread deliberately limited to
   passive detection/mitigation?

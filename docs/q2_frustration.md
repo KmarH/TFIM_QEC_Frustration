@@ -62,11 +62,11 @@ Model: H = −J Σ ZZ − h Σ X with **J = −1** (antiferromagnetic in our sig
   - A torus whose lengths are not multiples of 3 (4×4) frustrates the three-sublattice pattern differently from one with a length-3 direction (3×4), so the long-distance signs follow the torus shape.
   - **No "frustration monotonically weakens order" story is read into the long-distance triangular numbers.** Only the like-for-like statements above are made: weaker nearest-neighbour correlation, weaker and field-fragile long-range correlation.
 
-### A.4 Flag for Kevin (do not build): the data point at K3
+### A.4 Flag for the project lead (do not build): the data point at K3
 
 The positive √3 shell on the 3-sublattice-compatible direction (3×4) is the real-space pattern of three-sublattice (clock) correlations. The canonical phase diagram has an order-by-disorder clock phase at small h (Isakov–Moessner, PRB 68, 104409 **[established]**; Humeniuk, PRB 93, 104412 **[fetched]**).
 
-**C(r) alone cannot separate clock correlations from the torus-shape effects of A.3; the observable that would is the clock-order parameter, which is K3 and is undecided.** It is **not built here**, as the brief requires, and per PROC-2 (no new classical depth after handoff/09) it would be Kevin's call anyway. Recorded as T-20.
+**C(r) alone cannot separate clock correlations from the torus-shape effects of A.3; the observable that would is the clock-order parameter, which is K3 and is undecided.** It is **not built here**, as the brief requires, and per PROC-2 (no new classical depth after handoff/09) it would be the project lead's call anyway. Recorded as T-20.
 
 ### A.5 What Part A does not claim
 
@@ -74,4 +74,4 @@ The positive √3 shell on the 3-sublattice-compatible direction (3×4) is the r
 - No clock order.
 - No dimer or defect comparison with the square lattice: that structure is triangular-only. (The presence-vs-absence contrast was planned for Part B, which is cancelled.)
 
-*Part B (size trend, error bars, winding/defect presence-vs-absence) was **CANCELLED** by Kevin under PROC-2 (no new classical depth after handoff/09; journal Entry 42). Part A, reviewed ACCEPT in review/12, is the Q2 result. Within ED ≤ 20 a square size trend would have only one clean (bipartite) point, 4×4 (T-21).*
+*Part B (size trend, error bars, winding/defect presence-vs-absence) was **CANCELLED** by the project lead under PROC-2 (no new classical depth after handoff/09; journal Entry 42). Part A, reviewed ACCEPT in review/12, is the Q2 result. Within ED ≤ 20 a square size trend would have only one clean (bipartite) point, 4×4 (T-21).*

@@ -2,7 +2,7 @@
 
 **Route to:** Claude Code (SCOPE §10/§14 — new derivation with nothing in the literature
 to check against; SCOPE §3 explicitly marks this thread "skeptical — do NOT assume it
-works"). **Agents cannot launch it; Kevin runs it.** Written by qc-overseer.
+works"). **Agents cannot launch it; the project lead runs it.** Written by qc-overseer.
 
 ## Why this is a hard stop (not invented)
 The triangular-lattice TFIM is BUILT and verified in this repo for the solid, checkable part:

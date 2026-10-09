@@ -2,7 +2,7 @@
 
 **Route to:** Claude Code. Multi-observable comparison build on top of existing machinery; larger brief
 allowed (PROC-1) — if it grows, land the distance-resolved correlation comparison (Part A) as a reviewable
-checkpoint before the size trend (Part B). Agents cannot launch Claude Code; Kevin runs it. Written by qc-overseer.
+checkpoint before the size trend (Part B). Agents cannot launch Claude Code; the project lead runs it. Written by qc-overseer.
 
 ## Why this exists
 Q2 (frustration) is the **least pre-empted novelty** (journal Entry 15) and, with Q3 now complete at reachable
@@ -13,7 +13,7 @@ comparison on the frustration observables*; today only a single-cluster (3×4) g
 and winding-distribution contrasts triangular *vs* square, and larger sizes, are not yet tabulated."
 
 This brief closes the defensible part of that gap. **It does NOT build a 3-sublattice / clock-order parameter**
-— that is K3, which Kevin has left INCONCLUSIVE. Do not build clock order here.
+— that is K3, which the project lead has left INCONCLUSIVE. Do not build clock order here.
 
 ## The honest framing to hold throughout (do not overclaim)
 - **Dimers, winding, and defects are triangular constructs** (from the frustrated-triangular Gauss-law/dimer
@@ -59,9 +59,9 @@ by lattice distance**, C(r), for square and triangular at matched size/field, as
 - Full suite green (state the new count). All [measured], classical, no H2.
 - **STOP for a Kiro (qc-reviewer) checkpoint review before Part B.**
 
-## Part B — size trend and error bars  — ❌ CANCELLED (Kevin, 2026-10-08, PROC-2)
+## Part B — size trend and error bars  — ❌ CANCELLED (the project lead, 2026-10-08, PROC-2)
 
-> **DO NOT BUILD PART B.** Kevin cancelled it under PROC-2 (no new classical depth after handoff/09; next work is
+> **DO NOT BUILD PART B.** The project lead cancelled it under PROC-2 (no new classical depth after handoff/09; next work is
 > the LaTeX report, then HW-5). Part A is reviewed and accepted (review/12) and already answers Q2's core
 > like-for-like gap (the nearest-neighbour frustration signature in correlation form). A square size trend would
 > anyway have only one clean bipartite point within the ED ceiling (4×4; T-21), so its added value is limited.
@@ -112,7 +112,7 @@ by lattice distance**, C(r), for square and triangular at matched size/field, as
 - Additive only; do not modify the verified cores except additively (new scripts/tests/docs + optional additive
   observable helpers).
 - **Do NOT build the 3-sublattice / clock-order parameter (K3) or the diffusion observable (K5)** — both are
-  undecided (INCONCLUSIVE). If the physics seems to call for clock order, STOP and flag it for Kevin, don't build it.
+  undecided (INCONCLUSIVE). If the physics seems to call for clock order, STOP and flag it for the project lead, don't build it.
 - Never invent numbers; tag [measured]/[derived]; state the distance metric and the degeneracy handling.
 - One Claude Code session; land Part A before Part B (PROC-1 checkpoint).
 
@@ -129,8 +129,8 @@ by lattice distance**, C(r), for square and triangular at matched size/field, as
 
 ---
 
-## Note appended by Claude Code at Kevin's request (2026-10-08, PROC-2, journal Entry 39)
-**This is the last classical-depth brief.** Kevin decided to stop adding classical depth after handoff/09. The next
+## Note appended by Claude Code at the project lead's request (2026-10-08, PROC-2, journal Entry 39)
+**This is the last classical-depth brief.** The project lead decided to stop adding classical depth after handoff/09. The next
 briefs are (1) the LaTeX report (SCOPE §13) and (2) hardware-path preparation, starting with HW-5 (handoff/05 G1).
 Within this brief, keep to the stated scope: no extra classical studies beyond Parts A and B.
 

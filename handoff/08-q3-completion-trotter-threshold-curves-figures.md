@@ -1,8 +1,8 @@
 # Handoff 08 — Q3 completion: Trotter-threshold study (K2), relaxation curves across the SCOPE axes, size story, and the first figures (FLAG C)
 
-**Route to:** Claude Code. A **larger, two-part brief** (Kevin approved bigger briefs with an explicit
+**Route to:** Claude Code. A **larger, two-part brief** (the project lead approved bigger briefs with an explicit
 checkpoint — PROC-1). **Land Part A as a reviewable checkpoint before starting Part B.** Agents cannot
-launch Claude Code; Kevin runs it, one session per brief (T-13). Written by qc-overseer.
+launch Claude Code; the project lead runs it, one session per brief (T-13). Written by qc-overseer.
 
 ## Why this exists
 Q3 (thermalization) is the biggest **local, non-hardware** loose end. The sector-restricted ergodic
@@ -10,7 +10,7 @@ baseline is built and reviewed (handoff/07, review/09, ACCEPT), but the *compari
 relaxation curves are ideal (noiseless, unencoded), at two fields, on 3×4 / 3×6. SCOPE Q3's "done when"
 asks for relaxation curves **across lattices, fields, encodings, noise**, with a size story. This brief
 closes that gap, and folds in two resolved decisions:
-- **K2 (RESOLVED YES, Entry 30):** add a **dt-convergence / Trotter-threshold study**. Precedent: Kevin's
+- **K2 (RESOLVED YES, Entry 30):** add a **dt-convergence / Trotter-threshold study**. Precedent: the project lead's
   prior hackathon built exactly this. It is also what *justifies trusting* every Q3 relaxation curve — a
   curve is only meaningful at a dt below the Trotter threshold.
 - **FLAG C (Entry 29):** produce the **first figures** from the existing data (no plotting layer exists yet).
@@ -18,7 +18,7 @@ closes that gap, and folds in two resolved decisions:
   frame; never imply beyond-classical advantage from the dynamics.
 
 **Not in this brief (kept out deliberately):** K3 (clock-order observable) and K5 (diffusion) are
-INCONCLUSIVE — Kevin has not decided them — so do NOT build them here. K1/K6 likewise out.
+INCONCLUSIVE — the project lead has not decided them — so do NOT build them here. K1/K6 likewise out.
 
 ## Status tags / discipline (non-negotiable)
 Everything here is **classical**: exact diagonalization, state-vector Trotter, and the classical MCMC
@@ -44,7 +44,7 @@ lattices, both compared to the sector baseline from handoff/07.
 - Report where the project's working dt = 0.25 sits relative to that threshold — this is the credibility
   anchor for every Q3 curve. Cite the threshold theory **[established]**: Heyl–Hauke–Zoller (Sci. Adv. 5,
   eaau8342); Trotter prethermalization Yang et al. (PRX Quantum 4, 030320). Import no numbers from them.
-- This is the SAME study type Kevin's prior hackathon built (`run_dt_convergence.py`), adapted from 1D
+- This is the SAME study type the project lead's prior hackathon built (`run_dt_convergence.py`), adapted from 1D
   ferromagnetic to the triangular frustrated model.
 
 **A2 — Ideal relaxation curves across more fields.**
@@ -70,7 +70,7 @@ lattices, both compared to the sector baseline from handoff/07.
 - The broadened ideal field-scan curves regenerated into the Q3 data files, with the sector baseline and
   leak band, verdict labels sane.
 - Full suite green (state the new count). Everything tagged classical, no H2 claim.
-- **STOP. Report to Kevin for a Kiro review (qc-reviewer) of Part A before starting Part B.** This is the
+- **STOP. Report to the project lead for a Kiro review (qc-reviewer) of Part A before starting Part B.** This is the
   checkpoint: the noisy/encoded machinery in Part B must not be built on an unreviewed Part-A pattern.
 
 ---

@@ -1,7 +1,7 @@
 # Handoff 01 — Concatenated Iceberg (d=4) fault-tolerant syndrome gadget
 
 **Route to:** Claude Code (SCOPE §10/§14 — dense algorithm design / construction
-with no single literature target to check against). **Agents cannot launch it; Kevin
+with no single literature target to check against). **Agents cannot launch it; the project lead
 runs it.** Written by qc-overseer during the hands-off BUILD run.
 
 ## Why this is a hard stop (not invented)

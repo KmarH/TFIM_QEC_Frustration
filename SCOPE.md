@@ -1,7 +1,7 @@
 # SCOPE.md — TFIM Logical-Qubit Simulation on Quantinuum H2
 
-**Status:** APPROVED by Kevin 2026-10-06. Autonomy policy in section 14 applies. **§1/§2 amended 2026-10-08 with Kevin's explicit permission (SCOPE-1) to match the article thesis (journal Entries 14/16); the four questions and their "done when" criteria are unchanged in substance — only framing, priority order, and current status were added.**
-**Project root (box):** `/home/opc/KiroTest-project`  **Origin (laptop):** `C:\Users\kevin\OneDrive\KiroTest`
+**Status:** APPROVED by the project lead 2026-10-06. Autonomy policy in section 14 applies. **§1/§2 amended 2026-10-08 with the project lead's explicit permission (SCOPE-1) to match the article thesis (journal Entries 14/16); the four questions and their "done when" criteria are unchanged in substance — only framing, priority order, and current status were added.**
+**Project root (box):** `/home/opc/KiroTest-project`  **Origin (laptop):** `C:\Users\<user>\OneDrive\KiroTest`
 **Authoritative inputs:** `HANDOFF.md`, the Guppy application PDF (primary scope statement — tooling/QEC/observables/sizes), `drafts/gauss_law_self_mitigation_assessment.md` (UNVERIFIED — to be checked, not trusted).
 
 ---
@@ -9,7 +9,7 @@
 ## 1. Goals
 A reproduction-and-extension quantum simulation of the transverse-field Ising model (TFIM) with logical qubits / error detection on Quantinuum H2 tooling. The deliverable is **evidence answering scientific questions**, not plots alone.
 
-**★ Article thesis / north star (Kevin, journal Entries 14/16; this §1/§2 rewritten to match it, SCOPE-1, 2026-10-08).**
+**★ Article thesis / north star (the project lead, journal Entries 14/16; this §1/§2 rewritten to match it, SCOPE-1, 2026-10-08).**
 The headline contribution is to **compute the *same* physical TFIM observables with LOGICAL (encoded) qubits on
 Quantinuum H2 and compare, head-to-head, against the PHYSICAL-qubit baseline** — closing a named gap in the
 literature: a Nature paper (reproduction target **arXiv:2503.20870**) computes these TFIM observables on
@@ -18,7 +18,7 @@ not compute these physical observables. **The comparison is against 2503.20870's
 data** — same Hamiltonian, same observables, same conventions, encoding as the single varied axis. No
 cross-platform comparison.
 
-**Priority order (Kevin's):** (1) logical-vs-physical on physical observables > (2) **frustration on the
+**Priority order (per the project lead):** (1) logical-vs-physical on physical observables > (2) **frustration on the
 triangular lattice** > (3) thermalization and the emergent Gauss law. The **frustration spine (2) carries the
 least-contested novelty** and is a primary scientific focus alongside (1).
 
@@ -30,7 +30,7 @@ an H2 result.
 
 **Realization.** The classical/local infrastructure (QEC codes, FT gadgets, observables, the Q2 and Q3 baselines,
 the matched-comparison harness) is built and independently reviewed; the headline logical-vs-physical result and
-the matched H2 comparisons are **gated on H2 hardware access** (deferred by Kevin; see `handoff/05`).
+the matched H2 comparisons are **gated on H2 hardware access** (deferred by the project lead; see `handoff/05`).
 
 ## 2. The four questions (definition of done = evidence, with uncertainties, compared to the reference article)
 *Priority per §1: Q1 and Q2 are the spine; Q3 and the §3 Gauss thread are lower-priority. "Done when" criteria below are unchanged; current status is annotated.*
@@ -66,23 +66,23 @@ Physical-vs-logical comparison is on the **non-frustrated** lattice.
 - **On-paper path:** 5-qubit d=3 and Steane d=3 get **Stim-level implementation + written feasibility analysis** (why each can/can't fit a non-trivial lattice), not full lattice sims unless tractable. Steane's qubit cost on a non-trivial lattice is a flagged open risk.
 
 ## 7. Tooling stack (behind the config backend switch)
-pytket (+pytket-quantinuum), Stim, Guppy/guppylang ("Concept Only" -> verify current API before use), Nexus (stubbed), Qiskit (cross-validation), qermit (mitigation on unencoded reference), NumPy/SciPy, pandas, bootstrap, Matplotlib, Git. **Python 3.12 (3.12.14 on the host), hard-pinned `requirements.txt`** (qc-researcher confirms live versions of guppylang / pytket-quantinuum / selene-emulator before pinning). *(FLAG A resolved by Kevin 2026-10-07: the original 3.11 pin was dropped — the project interpreter need not match the reference sources; 3.11 is unavailable on the host and all code is built/tested on 3.12. See journal Entry 28 / open-questions FLAG A.)*
+pytket (+pytket-quantinuum), Stim, Guppy/guppylang ("Concept Only" -> verify current API before use), Nexus (stubbed), Qiskit (cross-validation), qermit (mitigation on unencoded reference), NumPy/SciPy, pandas, bootstrap, Matplotlib, Git. **Python 3.12 (3.12.14 on the host), hard-pinned `requirements.txt`** (qc-researcher confirms live versions of guppylang / pytket-quantinuum / selene-emulator before pinning). *(FLAG A resolved by the project lead 2026-10-07: the original 3.11 pin was dropped — the project interpreter need not match the reference sources; 3.11 is unavailable on the host and all code is built/tested on 3.12. See journal Entry 28 / open-questions FLAG A.)*
 
 ## 8. Repository policy (NON-NEGOTIABLE)
-- New GitHub repo on Kevin's account, unrelated to `challenge3-hackathon`. **NEVER push.** Prepare locally -> Kevin reviews -> Kevin pushes, on a **feature branch, not main**.
-- Prepare scaffold locally (git init, structure: src/, one config.py, main.py, data/, figures/, docs/, `.gitignore`, pinned `requirements.txt`); hand Kevin the exact `gh repo create` command when approved. Nothing leaves the machine.
+- New GitHub repo on the project lead's account, unrelated to `challenge3-hackathon`. **NEVER push.** Prepare locally -> the project lead reviews -> the project lead pushes, on a **feature branch, not main**.
+- Prepare scaffold locally (git init, structure: src/, one config.py, main.py, data/, figures/, docs/, `.gitignore`, pinned `requirements.txt`); hand the project lead the exact `gh repo create` command when approved. Nothing leaves the machine.
 
 ## 9. Agent roles (the multi-agent workflow is the explicit focus)
 - **qc-overseer** — scopes/triages, owns the Claude Code hand-off decision, writes `handoff/` briefs + `handoff/plan.md`, notifies the user. Cannot launch Claude Code.
 - **qc-researcher** — verifies the given/seed sources: reads the section-11 papers, checks the draft's claims and arXiv IDs, confirms live tool APIs, derives key relations. Writes to `research/`; writes no project code.
-- **qc-scout** — WIDE independent literature discovery (added 2026-10-06 at Kevin's request): finds and triages sources *beyond* the seed citations, actively hunting corroborating AND contradicting/reframing work so the project does not become self-contained in its initial sources. Writes status-tagged notes to `research/scout/` (never edits qc-researcher's notes); surfaces/recommends only — the overseer/reviewer decide what graduates into project claims. Writes no project code. Same no-invented-citations discipline.
+- **qc-scout** — WIDE independent literature discovery (added 2026-10-06 at the project lead's request): finds and triages sources *beyond* the seed citations, actively hunting corroborating AND contradicting/reframing work so the project does not become self-contained in its initial sources. Writes status-tagged notes to `research/scout/` (never edits qc-researcher's notes); surfaces/recommends only — the overseer/reviewer decide what graduates into project claims. Writes no project code. Same no-invented-citations discipline.
 - **qc-reviewer** — independent physics-and-code review at each milestone; writes `review/NN-*.md` with critical/major/minor findings; never edits the work.
 - **qc-annotator** — theory-/intent-focused comments and docstrings only, after an implementation; never changes logic/config.
 
 ## 10. Claude Code hand-off boundaries (prevent scope creep)
-Hand to Claude Code ONLY: new derivations with nothing in the literature to check against, and dense algorithm design (e.g. a modified error-detection scheme). Format: `handoff/NN-task.md` with goal, physical context, inputs, constraints, equations, a done-check, and a pointer to what the reviewer must verify. Recorded in `handoff/plan.md`; agents cannot launch Claude Code — Kevin runs it.
+Hand to Claude Code ONLY: new derivations with nothing in the literature to check against, and dense algorithm design (e.g. a modified error-detection scheme). Format: `handoff/NN-task.md` with goal, physical context, inputs, constraints, equations, a done-check, and a pointer to what the reviewer must verify. Recorded in `handoff/plan.md`; agents cannot launch Claude Code — the project lead runs it.
 
-## 11. Sources to fetch (qc-researcher; Kevin does not have them)
+## 11. Sources to fetch (qc-researcher; the project lead does not have them)
 1. Haghshenas et al., arXiv:2503.20870 (Nature 653, 56, 2026) — reproduction target.
 2. Chertkov et al., arXiv:2509.25326 (+ supplement).
 3. Quantinuum, arXiv:2602.22211 (beyond break-even).
@@ -106,7 +106,7 @@ The agents MAY, without asking:
 - Call `qc-reviewer` after each milestone and `qc-annotator` after each implementation, per the scaffold.
 
 The agents MUST stop and write a brief in `handoff/NN-task.md` + note it in `handoff/plan.md` (do NOT attempt it) for:
-- **new derivations with nothing in the literature to check against, or dense algorithm design** (e.g. a modified error-detection scheme) → these route to **Claude Code**, which the agents cannot launch; Kevin runs them.
+- **new derivations with nothing in the literature to check against, or dense algorithm design** (e.g. a modified error-detection scheme) → these route to **Claude Code**, which the agents cannot launch; the project lead runs them.
 - anything needing `allow_hardware` / Nexus / H2 credits.
 - any `git push` or `gh repo create`.
 - raising a size ceiling beyond section 5 without a memory probe first.
@@ -115,4 +115,4 @@ The agents MUST stop and write a brief in `handoff/NN-task.md` + note it in `han
 **Build priority order:** repo scaffold + config.py → Stage 1 code + tests (fully working) → Stage 1 small-size validation vs ED → Stage 2 scaffold + Stim QEC gadgets → stop at the first point requiring a Claude Code hand-off and continue on any other unblocked stage. Never invent numbers/results; mark everything established/inferred/unverified. If blocked on one item, note it and CONTINUE building elsewhere — never wait idle.
 
 ---
-**APPROVED — section 14 is a hands-off BUILD mandate. Build maximal local code; route hard derivations to Claude Code (brief only); hardware, GitHub push, and SCOPE changes still require Kevin.**
+**APPROVED — section 14 is a hands-off BUILD mandate. Build maximal local code; route hard derivations to Claude Code (brief only); hardware, GitHub push, and SCOPE changes still require the project lead.**

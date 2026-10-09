@@ -249,7 +249,7 @@ cannot be closed from the source with current tooling and are correctly left fla
 ## Addendum (overseer, 2026-10-06) — arXiv:2608.04290 verified
 
 Context: review/06 (scout adjudication) **parked** scout item 01-4 because the reviewer could not open
-2608.04290. Kevin asked for it to be verified. Done, directly from the arXiv abstract page:
+2608.04290. The project lead asked for it to be verified. Done, directly from the arXiv abstract page:
 
 - **Resolves.** arXiv:2608.04290, "Measurement-based simulation of lattice gauge theory dynamics with
   adaptive quantum circuits on a trapped-ion processor," **Sukeno, Rinaldi, Okuda**, submitted **4 Aug

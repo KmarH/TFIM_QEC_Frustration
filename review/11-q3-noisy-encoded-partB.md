@@ -4,14 +4,14 @@
 annotation and resolve FLAG C. All fixes below are minor (doc/data wording) and are Claude Code's
 to apply — the reviewer edits nothing.
 
-**T-17 (one line, → Kevin):** honestly stated as a *caveat*, not a finding — the sector-conditioned
+**T-17 (one line, → project lead):** honestly stated as a *caveat*, not a finding — the sector-conditioned
 late noisy values drift toward B_W₀ (3×3 0.427 vs ideal 0.477, B_W₀ 0.381; 3×4 0.276 vs 0.284, B_W₀
 0.267), direction/size are in the data, and the doc says plainly "a noisy hardware curve landing on
 B_W₀ is not, by itself, evidence of thermalization". **Accept the framing.**
 
-**T-18 (one line, → Kevin):** independently confirmed — Iceberg physical register is 16 / 22 / 40 /
+**T-18 (one line, → project lead):** independently confirmed — Iceberg physical register is 16 / 22 / 40 /
 **58** for 3×4 / 3×6 / 6×6 / **9×6**, so the reference 9×6 Q3 lattice needs 58 > 56 H2 qubits and does
-not fit; a smaller torus (6×6 = 40, 6×8 = 52) is required. **Decision is Kevin's (scope at hardware).**
+not fit; a smaller torus (6×6 = 40, 6×8 = 52) is required. **Decision is the project lead's (scope at hardware).**
 
 Reviewer: qc-reviewer (independent). Environment: `.venv`, Python 3.12.14. Full suite re-run by me
 (not reported): **217 passed in 123.35 s**; the 12 Part B tests (`tests/test_noisy_q3.py` 8 +
@@ -197,5 +197,5 @@ additivity hold, and review/10 m1–m3 + T-15 are applied. The 12 Part B tests a
 are green on my own run.
 
 **ACCEPT-WITH-FIXES — no Critical/Major; proceed to annotation and resolve FLAG C.** The three minor
-items are Claude Code's to apply and do not gate release. T-17 and T-18 are decisions for Kevin (one-line
+items are Claude Code's to apply and do not gate release. T-17 and T-18 are decisions for the project lead (one-line
 notes at the top).

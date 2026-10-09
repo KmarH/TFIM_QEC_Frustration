@@ -112,7 +112,7 @@ Source: `data/encoded_iceberg.txt`.
 
 # Part B — Steane [[7,1,3]], 5-qubit [[5,1,3]], concatenated Iceberg [[16,4,4]]
 
-**Decisions recorded by Kevin (2026-10-07):**
+**Decisions recorded by the team (2026-10-07):**
 - **Standard B:** measured fault accounting, with **no pass/fail FT bar**.
 - **Budget (ii):** build or discard is judged against **~55 physical qubits (H2 scale)**. Stim analysis runs at budget size; noisy execution runs only at the reduced size that fits the 24-qubit state-vector ceiling.
 - **Residual:** the undetected-logical rate is **measured** in Stim, and Iceberg is re-measured with the same machinery.

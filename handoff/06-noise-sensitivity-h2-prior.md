@@ -1,7 +1,7 @@
 # Handoff 06 — Noise sensitivity at the researched H2 prior + review/08 doc fixes
 
 **Route to:** Claude Code. Small, well-scoped follow-up (a rerun at researched values + doc
-nits), not a build. **Agents cannot launch it; Kevin runs it.** Written by qc-overseer.
+nits), not a build. **Agents cannot launch it; the project lead runs it.** Written by qc-overseer.
 
 ## Why this exists
 ★ FLAG-0 / HW-1 (`Conversation history/open-questions.md`) is the project's headline go/no-go:

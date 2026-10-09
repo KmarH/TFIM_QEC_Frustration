@@ -284,7 +284,7 @@ Our `scripts/run_noise_sensitivity.py` + `src/encoded_codes.py` (`NoiseRates`,
 
 ---
 
-## 9. One-paragraph summary for the overseer / Kevin
+## 9. One-paragraph summary for the overseer / project lead
 
 H2's native 2Q gate is the arbitrary-angle `U_ZZ(θ)` partial entangler (phase-sensitive MS),
 current infidelity ≈6×10⁻⁴ (99.94%). The reference experiment (2503.20870) learns its error as

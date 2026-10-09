@@ -1,6 +1,6 @@
 """Part B (handoff/04): Steane, 5-qubit, concatenated-d4 (and Iceberg via the same pipeline).
 
-Decisions recorded by Kevin (2026-10-07): FT standard B = measured accounting, no pass/fail bar;
+Decisions recorded by the team (2026-10-07): FT standard B = measured accounting, no pass/fail bar;
 budget (ii) = H2 ~55 physical qubits for build/discard, Stim at budget size, execution only at
 reduced size <= statevector ceiling; residual = MEASURED (Stim) undetected-logical rate.
 Writes data/encoded_codes.txt line by line. Every noisy number is a classical prediction under

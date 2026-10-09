@@ -2,8 +2,8 @@
 
 **Reviewer:** qc-reviewer (independent checkpoint). **Date:** 2026-10-08.
 **Scope:** Part A ONLY (checkpoint before Part B). Per PROC-2 (open-questions §B, journal Entry 39)
-Kevin stopped new classical depth after handoff/09; whether Part B (size trend) is released is the
-overseer's call with Kevin, not mine. This review judges Part A on its merits.
+The project lead stopped new classical depth after handoff/09; whether Part B (size trend) is released is the
+overseer's call with the project lead, not mine. This review judges Part A on its merits.
 **Deliverables reviewed:** `src/frustration.py`, `tests/test_frustration.py` (14), `scripts/compare_frustration_correlations.py`
 → `data/frustration_correlations.txt`, `docs/q2_frustration.md` (Part A), `config.py:Q2FrustrationConfig`,
 `docs/findings_vs_questions.md` Q2 row, journal Entry 40, `handoff/plan.md` §20, open-questions T-19/T-20/T-21.
@@ -110,7 +110,7 @@ triangular ≈1.6|J|, with the triangular value tagged "[unverified — recalled
 ### A6 — K3 / K5 not built (checklist item 6) ✓
 No clock/3-sublattice order parameter and no diffusion observable exist in `src/frustration.py` (I read
 the full module — only energy, gaps, C(r), max|⟨Z_i⟩|, bipartite check). A.4 flags where clock order
-*would* be needed and defers it to Kevin via **T-20**; h=0 degenerate single-vector correlators are
+*would* be needed and defers it to the project lead via **T-20**; h=0 degenerate single-vector correlators are
 printed in the data file but explicitly "NOT interpreted" (data header + A.1 + the `[h=0: ... NOT
 interpreted]` tags in every h=0 row). Correct.
 
@@ -183,7 +183,7 @@ Suite **231/231** — **VERIFIED** (A8).
   is open and routed to **Kiro** in open-questions — Part A correctly did not touch those files.
 - **Part B / T-21:** 4×4 is the only clean square point ≤20; a square size-trend cannot be assembled from
   square tori within the ceiling without mixing in odd-length-frustrated tori. This materially constrains
-  Part B — but whether Part B runs at all is the overseer's call with Kevin per PROC-2, not mine.
+  Part B — but whether Part B runs at all is the overseer's call with the project lead per PROC-2, not mine.
 
 **Checkpoint result: ACCEPT-WITH-FIXES. Part A is a correct, honest, independently reproduced checkpoint;
 the three minor items are Claude Code's to apply and do not block proceeding.**

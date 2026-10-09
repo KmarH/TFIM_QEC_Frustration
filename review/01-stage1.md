@@ -176,7 +176,7 @@ ED N=16 (4x4): FAIL MemoryError: Unable to allocate 16.0 GiB for shape (10737418
 
 **m1 — Python version mismatch vs SCOPE §7 (flagged, not resolved).** `requirements.txt` documents this
 clearly: SCOPE pins Python 3.11, but the host has only 3.9/3.12 and Stage 1 was built/tested on 3.12.14.
-This is correctly surfaced and is a Kevin decision, not a defect. No action by the build agents required
+This is correctly surfaced and is a project-lead decision, not a defect. No action by the build agents required
 beyond the existing note. **[verified as flagged]**
 
 **m2 — Dangling reference to `handoff/plan.md`.** `requirements.txt` and SCOPE repeatedly point to
@@ -238,6 +238,6 @@ not use the ED builder.
 - ED builder sparsity fix + re-probe before freezing `ed_max_spins` (C1).
 - Statevector probe at N=22/24 with maxRSS; freeze `statevector_max_spins` (M1, M2).
 - Create `handoff/plan.md`; resolve the dangling references (m2).
-- Python 3.11 vs 3.12 interpreter decision — Kevin (m1).
+- Python 3.11 vs 3.12 interpreter decision — the project lead (m1).
 - Reproduction continuity: exercise `neel`/`record_every` relaxation path and compare to Haghshenas
   curves at a later milestone (m4) — deferred, out of Stage 1 scope.

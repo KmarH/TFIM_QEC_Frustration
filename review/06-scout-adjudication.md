@@ -111,14 +111,14 @@ correction" row, status stays [derived]+[measured] for the NO, new clause tagged
 > engineered monitored scheme the project did not model, not correction from the bare emergent constraint.)*
 
 ### 01-2. Add active gauge protection (energy-penalty / pseudo-generator) as an explicitly-considered, scoped option.
-**RULING: DEFER-TO-KEVIN** (scope/physics-direction), with a note.
+**RULING: DEFER-TO-LEAD** (scope/physics-direction), with a note.
 Adding a defect-penalty term to `GaussLawConfig` and simulating active protection is a *new scheme* and a new simulation — SCOPE
-§3's benchmark list does not include it, and SCOPE §10/§14 route "new scheme design" to a Claude Code hand-off / Kevin decision.
+§3's benchmark list does not include it, and SCOPE §10/§14 route "new scheme design" to a Claude Code hand-off / project-lead decision.
 This is not a correctness fix to an existing claim; it is a new lever. The three protection sources (2007.00668 / 2108.02203 /
 2204.13709) are **[scout-asserted, not re-verified by me]** and all concern protection against **coherent/unitary** gauge-breaking,
 whereas the project's threat model is stochastic Pauli noise + Trotter leakage — so even if adopted, the claim must be narrowly
 scoped. Recommend: the overseer may add a **one-sentence "not modelled" note** to `docs/gauss_law_dimers.md §5.5` (limits) listing
-active protection as an untested lever (caveated to coherent breaking); building it is Kevin's call.
+active protection as an untested lever (caveated to coherent breaking); building it is the project lead's call.
 
 ### 01-3. State the gauge group (Z₂, non-bipartite) explicitly in the ice-states framing.
 **RULING: ACCEPT-WITH-MODIFICATION.**
@@ -139,11 +139,11 @@ never claimed U(1). Do **not** let it graduate as a bare "triangular is Z₂, sq
 of what 0103396 actually says.
 
 ### 01-4. Reconcile the platform line with 2608.04290 (Gauss-law postselection benefit realized on H2).
-**RULING: DEFER-TO-KEVIN / PARK** — because I could **not** verify 2608.04290 this session.
+**RULING: DEFER-TO-LEAD / PARK** — because I could **not** verify 2608.04290 this session.
 2608.04290 is the single load-bearing source for this item and for the scout's headline "most important source," and it is a
 **future-dated 2026 ID** (2608 = Aug 2026) that I did not independently open. Per SCOPE §12 / never-trust-unverified, I will not
 graduate a change to the platform verdict on an unconfirmed source. The current doc already correctly leaves the platform ranking
-[inferred]/[unverified]; that is the honest state. **Flagged scout claim I could not confirm.** If/when the overseer or Kevin
+[inferred]/[unverified]; that is the honest state. **Flagged scout claim I could not confirm.** If/when the overseer or the project lead
 verifies 2608.04290's full text (acceptance rates, which observables, how the one-form syndrome is extracted), the reconciliation
 the scout proposes (distinguish *emergent-approximate* vs *engineered one-form syndrome*) is a reasonable framing to add — but as a
 [fetched] note, still not overturning the [unverified] H2-worst line. Until then: no edit.
@@ -190,7 +190,7 @@ sectors leak at the project's own measured O((h/|J|)²) rate (P(W≠W₀) ∝ h^
 - `docs/findings_vs_questions.md` Q3 "relaxation curves… vs ergodic reference values" row: note the MCMC baseline (still [pending]/
   not built) **must be sector-restricted**; a whole-configuration-space MCMC would manufacture a spurious non-thermalization (the
   scout's G1 — correct).
-- SCOPE §2 Q3 wording is Kevin's to change (see §4/Kevin list); the docs change above does not require a SCOPE edit, it refines the
+- SCOPE §2 Q3 wording is the project lead's to change (see §4/project-lead list); the docs change above does not require a SCOPE edit, it refines the
   "done-when" interpretation already recorded in `findings_vs_questions.md`.
 
 **Does the Q3 finding make the current `findings_vs_questions.md` Q3 row WRONG (not just incomplete)?**
@@ -208,10 +208,10 @@ ACCEPT-WITH-MODIFICATION (add the qualifier), **not** "the row is wrong."
   the correct, canonical license for finite-dt 2nd-order Trotter (local observables faithful below a sharp dt threshold; coarse
   Trotter still prethermalizes tracking the target model). Approved: add both [established] to `research/01-stage1-conventions.md`
   (Trotter section) and to the Q3 context in `docs/findings_vs_questions.md` as the expected-results theory. No numbers imported.
-- **Adding a dt-convergence/Trotter-threshold study to the Stage-1/3 validation plan: DEFER-TO-KEVIN.** This is new scope/work (the
+- **Adding a dt-convergence/Trotter-threshold study to the Stage-1/3 validation plan: DEFER-TO-LEAD.** This is new scope/work (the
   repo currently validates vs ED at fixed small dt). It is a sensible validation and well-supported, but it is a build decision, and
   the *model-specific* threshold for the triangular TFIM has nothing in the literature to check against (scout G3) — that part would
-  be a SCOPE §10 Claude Code hand-off. Reviewer recommendation: worth doing; Kevin/overseer decides whether it is in scope now.
+  be a SCOPE §10 Claude Code hand-off. Reviewer recommendation: worth doing; the project lead/overseer decides whether it is in scope now.
 
 ### 02-3. Adopt cond-mat/0302105 (phase diagram) + 1602.02979 (clock-order pattern) for any 3-sublattice/clock-order statement.
 **RULING: split.**
@@ -221,8 +221,8 @@ ACCEPT-WITH-MODIFICATION (add the qualifier), **not** "the row is wrong."
 - **1602.02979 clock-order pattern (M, −M/2, −M/2): ACCEPT-AS-[fetched]** — I did not re-verify it this session; enter tagged
   [fetched]. **Important guard:** the project currently measures only *ground-state energy/bond, M_z, ⟨ZZ⟩, defect density* and does
   **not** compute a 3-sublattice/clock order parameter. The citation may be added as context, but **no clock-order claim may be
-  graduated as [measured]** until such an observable is actually built. Adding the observable is a scope decision → Kevin (see 02 of
-  "Kevin decides"). So: cite yes; claim clock order only if/when measured.
+  graduated as [measured]** until such an observable is actually built. Adding the observable is a scope decision → the project lead (see 02 of
+  "project lead decides"). So: cite yes; claim clock order only if/when measured.
 
 ### 02-4. Record 2308.05077 + 2306.14887 + 2308.03082 as the classical frontier; frame the contribution as physics+QEC methodology; optionally run a classical baseline.
 **RULING: split.**
@@ -231,10 +231,10 @@ ACCEPT-WITH-MODIFICATION (add the qualifier), **not** "the row is wrong."
   `docs/findings_vs_questions.md` (Q2/Q3 context or a new caveat line) stating that local observables of Trotterized 2D-Ising
   dynamics at ~50–130 qubits are, so far, classically reachable (2308.05077 [established], Sci. Adv. 10, eadk4321), so the project's
   defensible contribution is **frustration/sector physics + the logical-qubit/QEC methodology**, not beyond-classical dynamics.
-- **"Frame the headline contribution as physics+methodology, not quantum advantage": DEFER-TO-KEVIN.** This reframes the project's
+- **"Frame the headline contribution as physics+methodology, not quantum advantage": DEFER-TO-LEAD.** This reframes the project's
   headline claim — a scope/positioning decision, not a correctness fix. The caveat (above) should be recorded regardless; how the
-  *headline* is phrased is Kevin's.
-- **Running a BP / sparse-Pauli classical baseline: DEFER-TO-KEVIN** (new build, new scope).
+  *headline* is phrased is the project lead's.
+- **Running a BP / sparse-Pauli classical baseline: DEFER-TO-LEAD** (new build, new scope).
 
 ### 02-5. Flag 1303.0883: the triangular embedding is the J′=J point of a model with a disorder line + incommensurate floating phase; Q2 ⟨ZZ⟩ contrast may be incommensurate/non-monotonic and finite-size-sensitive.
 **RULING: ACCEPT.** VERIFIED verbatim — J′=J is exactly the project's "square + one diagonal" embedding. This is a genuine
@@ -256,8 +256,8 @@ sector-restricted MCMC and relaxation curves exist**, not as a present result. C
 `docs/gauss_law_dimers.md §5` (which stands).
 
 ### 02-7. If the project adds the inhomogeneous-quench / diffusion observable, cite 2405.16975 (ETH↔hydrodynamics) + 1909.01351 (long-range⇒Lévy).
-**RULING: DEFER-TO-KEVIN (conditional).** The diffusion/hydrodynamics observable is **not built** (the project is currently
-ground-state + constrained-dynamics observables). Adding it to match the reproduction target is a scope decision for Kevin/overseer.
+**RULING: DEFER-TO-LEAD (conditional).** The diffusion/hydrodynamics observable is **not built** (the project is currently
+ground-state + constrained-dynamics observables). Adding it to match the reproduction target is a scope decision for the project lead/overseer.
 The two citations (both [fetched], not re-verified) are appropriate context **only if** that observable is added; they graduate
 nothing on their own. No edit now.
 
@@ -296,7 +296,7 @@ Each edit keeps the never-invent-numbers rule; imported citations carry the tag 
 | A9 | `docs/gauss_law_dimers.md §5.4`/§5.5 | One-line corroboration: bias-floor-vs-acceptance-cost tradeoff formalized as certified finite-shot operating windows | 2606.15464 [fetched] |
 | A10 | `docs/gauss_law_dimers.md §2` | Add Henley as canonical ice/Coulomb-phase review citation for defects-as-charges / divergence-free-flux / winding=flux-sector | Henley 0912.4531 [fetched] |
 | A11 | `docs/findings_vs_questions.md` Q3 context | Expected-behaviour note (NOT a result): inexact constraint ⇒ anomalously slow/bottlenecked relaxation; dephasing as within-sector equilibration probe; to be tested once sector MCMC + curves exist | 2401.11294 [fetched]; 2506.13856 [fetched] |
-| A12 | `docs/gauss_law_dimers.md §5.5` (limits) | One-sentence "not modelled" note: active gauge protection (energy-penalty/pseudo-generator) is an untested lever, caveated to *coherent* gauge-breaking | 2007.00668/2108.02203/2204.13709 [fetched] — note only; *building it* is a Kevin decision (see K-list) |
+| A12 | `docs/gauss_law_dimers.md §5.5` (limits) | One-sentence "not modelled" note: active gauge protection (energy-penalty/pseudo-generator) is an untested lever, caveated to *coherent* gauge-breaking | 2007.00668/2108.02203/2204.13709 [fetched] — note only; *building it* is a project-lead decision (see K-list) |
 
 **[established] vs [fetched] in the apply list:** only A1, A2, A3 (2308.05077 part), A4, A5, A6 (0302105 part), A7 (0103396 part)
 rest on sources I verified verbatim this session. Everything tagged [fetched] above is a scout assertion I did **not** re-verify
@@ -308,14 +308,14 @@ and must enter the docs with the [fetched] tag; none of them import a number.
 
 - **K1 (01-2 / A12 build):** Is **active gauge protection** (add a defect-penalty term to `GaussLawConfig` and simulate leakage
   suppression) in scope for the Gauss thread? It is the largest unexplored lever but a *new scheme* (SCOPE §10 → likely a Claude
-  Code hand-off). The one-line "not modelled" note (A12) can go in regardless; building it needs Kevin.
+  Code hand-off). The one-line "not modelled" note (A12) can go in regardless; building it needs the project lead.
 - **K2 (02-2):** Add a **dt-convergence / Trotter-threshold study** to Stage-1/3 validation? Well-supported; the model-specific
   triangular-TFIM threshold has nothing to check against (would be a Claude Code derivation).
 - **K3 (02-3 / A6):** Add a **3-sublattice / clock-order order parameter** (M, −M/2, −M/2) observable to connect to the phase
   diagram, or keep the project purely dynamical? No clock-order claim can graduate until this is built.
 - **K4 (02-4):** Reframe the **headline contribution** as physics/sector insight + logical-qubit/QEC methodology (given the classical
   frontier), and/or run a **BP/sparse-Pauli classical baseline** to bound the project's own observables? The caveat (A3) stands
-  regardless; the headline framing and the extra build are Kevin's.
+  regardless; the headline framing and the extra build are the project lead's.
 - **K5 (02-7):** Add the **inhomogeneous-quench / diffusion (hydrodynamics)** observable to match the reproduction target? If yes,
   2405.16975 / 1909.01351 become relevant context.
 - **K6 (01-3 / A7):** Does the project want to **commit to the Z₂ (vs U(1)) characterization** in print, or keep "Gauss law"
@@ -327,7 +327,7 @@ and must enter the docs with the [fetched] tag; none of them import a number.
 
 - **PARKED — 01-4 (reconcile platform line with 2608.04290):** I could **not** independently verify 2608.04290 (future-dated 2026
   ID, not opened this session). It is the sole basis for the item and for the scout's "most important source." Per SCOPE §12, no
-  platform-verdict change graduates on an unconfirmed source. **No edit.** Reopen if the overseer/Kevin verifies the full text; even
+  platform-verdict change graduates on an unconfirmed source. **No edit.** Reopen if the overseer/project lead verifies the full text; even
   then it enters as a [fetched] framing note, not an overturn of the [unverified] "H2-worst" line.
 - **PARKED — any upgrade of [fetched] sources to [established]:** 2001.00024, 2606.15464, 2007.00668, 2108.02203, 2204.13709,
   2510.05222, 2401.11294, 1602.02979, 0007378, Henley 0912.4531, 2506.13856, 2306.14887, 2308.03082, 2608.04290, Semeghini Science
@@ -342,10 +342,10 @@ and must enter the docs with the [fetched] tag; none of them import a number.
 
 ## 8. Verdict
 
-**Per item:** 01-1 ACCEPT-WITH-MOD · 01-2 DEFER-TO-KEVIN · 01-3 ACCEPT-WITH-MOD (framing corrected) · 01-4 PARK (unverified source)
+**Per item:** 01-1 ACCEPT-WITH-MOD · 01-2 DEFER-TO-LEAD · 01-3 ACCEPT-WITH-MOD (framing corrected) · 01-4 PARK (unverified source)
 · 01-5 ACCEPT-WITH-MOD ([fetched]) · 01-6 ACCEPT-WITH-MOD · 01-7 ACCEPT-WITH-MOD ([fetched]) · 02-1 ACCEPT-WITH-MOD (**highest
 impact**) · 02-2 ACCEPT (citations) + DEFER (dt study) · 02-3 ACCEPT (0302105) + conditional (clock-order observable) · 02-4 ACCEPT
-(caveat) + DEFER (headline/baseline build) · 02-5 ACCEPT · 02-6 ACCEPT-WITH-MOD ([fetched] context) · 02-7 DEFER-TO-KEVIN.
+(caveat) + DEFER (headline/baseline build) · 02-5 ACCEPT · 02-6 ACCEPT-WITH-MOD ([fetched] context) · 02-7 DEFER-TO-LEAD.
 
 **Overall: APPROVE WITH CONDITIONS.** The scout's load-bearing sources that I could reach (1706.02601, 2405.18504, cond-mat/0302105,
 cond-mat/0103396, 1303.0883, 2308.05077, 2303.08461, 1806.11123) are all accurately represented. The highest-value recommendation
@@ -354,11 +354,11 @@ attached. Conditions: (i) the Q3 baseline change must carry the "approximate sec
 qualifier, not a hard-conserved-sector claim; (ii) nothing resting on an unverified 2026-dated source (notably 2608.04290) graduates
 — 01-4 is parked; (iii) all [fetched] citations enter the docs with the [fetched] tag and import no numbers; (iv) new observables /
 schemes / headline reframes (active protection, dt-threshold study, clock-order parameter, diffusion observable, quantum-advantage
-framing) are Kevin/overseer scope decisions, not reviewer-approved edits.
+framing) are project-lead/overseer scope decisions, not reviewer-approved edits.
 
 **On the specific question asked — is the current `findings_vs_questions.md` Q3 row WRONG?** No. It is **incomplete** (missing the
 sector-restriction qualifier) in a way that could have led to a wrong result once the MCMC is built, but as written it states
 nothing false. Fix = add the qualifier (A1), not retract the row.
 
-**Open items for the overseer:** apply A1–A11 as worded (A12 as a note only); route K1–K6 to Kevin; verify 2608.04290 before
+**Open items for the overseer:** apply A1–A11 as worded (A12 as a note only); route K1–K6 to the project lead; verify 2608.04290 before
 reopening 01-4; upgrade [fetched] citations to [established] only after full-text reads.

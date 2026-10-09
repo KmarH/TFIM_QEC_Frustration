@@ -1,10 +1,10 @@
 # Handoff 05 — Hardware-gated follow-ups to handoff 04: H2 gate-error composition, active correction, first Nexus run
 
-**Status: DEFERRED (Kevin, 2026-10-07)** until Quantinuum Nexus / H2 access exists and SCOPE §5 is satisfied: `allow_hardware=True` plus explicit per-run approval.
-**Written by:** Claude Code, at Kevin's request. Normally qc-overseer writes briefs, so the overseer may adopt, rework or split it. The registry entry is `handoff/plan.md` §12. Open items are also tracked in `Conversation history/open-questions.md` (HW-1 … HW-5).
+**Status: DEFERRED (the project lead, 2026-10-07)** until Quantinuum Nexus / H2 access exists and SCOPE §5 is satisfied: `allow_hardware=True` plus explicit per-run approval.
+**Written by:** Claude Code, at the project lead's request. Normally qc-overseer writes briefs, so the overseer may adopt, rework or split it. The registry entry is `handoff/plan.md` §12. Open items are also tracked in `Conversation history/open-questions.md` (HW-1 … HW-5).
 
 ## Why this exists
-Handoff 04 delivered the classical encoded-TFIM baseline and its build/discard decisions (`docs/encoded_tfim.md`). Two of its questions can't be settled classically, and Kevin chose to answer them on hardware rather than from literature or simulation alone:
+Handoff 04 delivered the classical encoded-TFIM baseline and its build/discard decisions (`docs/encoded_tfim.md`). Two of its questions can't be settled classically, and the project lead chose to answer them on hardware rather than from literature or simulation alone:
 
 1. **Does encoding help on H2 at all? (HW-1)**
    - The Stim sensitivity check shows the code *ranking* (Iceberg over Steane / 5-qubit / concat d=4) is robust.
@@ -13,7 +13,7 @@ Handoff 04 delivered the classical encoded-TFIM baseline and its build/discard d
 2. **Can active correction rescue the d ≥ 3 codes? (HW-2)** Run as detect-and-discard, they keep 3–5× fewer shots than Iceberg for only ~1.2× less undetected error.
 
 ## Goals (in order, each gated as stated)
-- **G1 — calibration run (HW-5).** Flip `backend="nexus"` for **Iceberg 2×2, 1 Trotter step, on the H2 emulator**. Compare the discard rate and logical Z2 against the Selene and Stim predictions *before* any hardware HQC. Then repeat on hardware once Kevin approves the cost.
+- **G1 — calibration run (HW-5).** Flip `backend="nexus"` for **Iceberg 2×2, 1 Trotter step, on the H2 emulator**. Compare the discard rate and logical Z2 against the Selene and Stim predictions *before* any hardware HQC. Then repeat on hardware once the project lead approves the cost.
 - **G2 — measure the inputs that decide HW-1.**
   - Obtain H2's native two-qubit gate error composition (η = ZZ share, over-rotation ε) from the best available source, labelled as such: the H2 emulator's noise model; device benchmarking; the published characterization in arXiv:2503.20870 (qc-researcher, full text; currently [unverified]).
   - Then **rerun `scripts/run_noise_sensitivity.py` at those values** and state whether encoding is predicted to help.
@@ -23,7 +23,7 @@ Handoff 04 delivered the classical encoded-TFIM baseline and its build/discard d
   - Verify it in Stim (logical failure rate and acceptance) and on Selene (real-time feedforward), then test on hardware.
   - Report whether it changes the Part B ranking.
 
-## Decisions recorded since this brief (Kevin, 2026-10-08; open-questions R-7, R-14, R-15)
+## Decisions recorded since this brief (the project lead, 2026-10-08; open-questions R-7, R-14, R-15)
 - **Randomized compiling** on every encoded H2 run (R-7).
 - **Q3 lattices for the encoded H2 run:** **6×6** (40 physical) and the minimal relevant **3×4** (16 physical). 9×6 does not fit Iceberg on 56 qubits (R-15).
 - **T-17 rule:** an H2 Q3 curve is never called thermalization without comparing it with the noise. At 3×4 the classical noisy prediction exists (`data/q3_noisy.txt`); at 6×6 it cannot be computed (36 > 24 spins), so the run **includes a noise-scaling arm** (R-14).
@@ -37,7 +37,7 @@ Handoff 04 delivered the classical encoded-TFIM baseline and its build/discard d
 - Data: `data/encoded_iceberg.txt`, `data/encoded_codes.txt`, `data/noise_sensitivity.txt`, `data/selene_gap.txt`.
 
 ## Constraints
-- **SCOPE §5:** nothing reaches Nexus or hardware without `allow_hardware=True` **and** Kevin's per-run approval, with the HQC cost estimate recorded. Credentials never go in the repo.
+- **SCOPE §5:** nothing reaches Nexus or hardware without `allow_hardware=True` **and** the project lead's per-run approval, with the HQC cost estimate recorded. Credentials never go in the repo.
 - **Dependencies:** pin `qnexus` and/or `pytket-quantinuum` after confirming the live versions. FLAG A (Python 3.11 vs 3.12) must be decided first.
 - **Labelling:** every number states whether it is a classical prediction, an H2-*emulator* result or an H2-*hardware* result. Never mix them.
 - Stim remains the fault-tolerance verifier. Hardware data does not prove fault tolerance.

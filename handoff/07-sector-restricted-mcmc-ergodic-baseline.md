@@ -3,7 +3,7 @@
 **Route to:** Claude Code. This is **algorithm design** (a constrained Markov-chain sampler plus a
 sector-leakage treatment) with **no single literature target to copy** — SCOPE §10/§14 routes it
 here, not to Kiro, which would otherwise have to invent the construction. **Agents cannot launch
-Claude Code; Kevin runs it.** Written by qc-overseer.
+Claude Code; the project lead runs it.** Written by qc-overseer.
 
 ## Why this exists (Q3 is currently zero-progress)
 SCOPE Q3 (thermalization) is **NOT done** (`docs/findings_vs_questions.md` Q3 row): the relaxation

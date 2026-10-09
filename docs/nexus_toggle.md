@@ -6,7 +6,7 @@
 
 Flipping the toggle is integration work, not a rewrite. It requires the following, in order. Items marked **[unverified]** must be confirmed against the live documentation before use; none were exercised here.
 
-1. **Gate on SCOPE §5.** Set `HardwareConfig.allow_hardware = True` **and** get Kevin's explicit per-run approval, because every submission spends credits. The stub must remain the default.
+1. **Gate on SCOPE §5.** Set `HardwareConfig.allow_hardware = True` **and** get the project lead's explicit per-run approval, because every submission spends credits. The stub must remain the default.
 2. **Dependencies.** Add and pin the Quantinuum client stack: `qnexus` and/or `pytket-quantinuum` **[unverified: package names and versions current for Nexus submission; Python 3.12 vs pinned 3.11, FLAG A]**. Neither is installed or pinned now.
 3. **Nexus project and authentication.** Log in to Nexus (interactive or token) and select or create a Nexus project for these jobs **[unverified: exact login and project API]**. Credentials never enter the repo or `config.py`.
 4. **Target.** Choose an **H2 emulator** first, then hardware, by the device name the account actually exposes **[unverified: device identifiers]**. The emulator should be compared against our `selene` curves before any hardware HQC is spent.

@@ -4,7 +4,7 @@
 M1 also corrected in `docs/encoded_tfim.md`, `docs/findings_vs_questions.md` and the FLAG-0 banner of `open-questions.md`.
 
 **Reviewed:** `docs/report/report.tex` (new, 16 pp.), the relay-backlog edits (handoff/10 §6), and, for consistency,
-`Conversation history/team-report-en.tex` (a plain-language team version requested by Kevin; gitignored, not a
+`Conversation history/team-report-en.tex` (a plain-language team version requested by the project lead; gitignored, not a
 deliverable).
 **Who:** Claude Code (overseer since handoff/10) **plus an independent read-only sub-agent** that re-derived the
 load-bearing numbers with its own numpy/scipy code (repo `src/` not imported, except for one gate count), audited
