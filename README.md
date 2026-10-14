@@ -91,7 +91,8 @@ python -I scripts/plot_q3.py                    # regenerates figures/ from data
 | `data/` | Results as plain text, each with a header naming the script that wrote it and whether it is a classical prediction under assumed noise. |
 | `figures/` | Generated figures (not committed; run `scripts/plot_q3.py`). |
 | `docs/` | One write-up per result (what was done, how it was verified, what it means, with status tags), the findings map, and the LaTeX report in `docs/report/`. |
-| `review/` | Numbered independent reviews of each milestone. A reviewer re-derived the key numbers with its own code and graded findings critical / major / minor; several real errors were caught this way. |
+| `review/` | Numbered independent reviews of each milestone. A reviewer re-derived the key numbers with its own code and graded findings critical / major / minor; several real errors were caught this way. `review/14-three-machine-peer-review.md` is the broadest: three independent reviewers on three machines, operating systems and Python versions, over three rounds, with every disagreement adjudicated by a decisive check. |
+| `DECISIONS.md` | The decisions that are the project lead's to make and are still open, plus the scope corrections already applied. Read it before trusting any claim that this work matches the reference experiment. |
 | `research/` | Research notes: source and citation checks, the map of the reference dataset, the H2 noise prior, and a wide literature sweep in `research/scout/` that also looked for work contradicting this one. |
 | `handoff/` | The briefs that drove the work, one per task, plus `handoff/plan.md`, the registry of what each pass delivered. |
 | `CLAUDE.md`, `KIRO.md`, `.kiro/` | The rules and agent configurations of the two AI agents used (see below). |

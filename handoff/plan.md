@@ -719,3 +719,63 @@ Journal Entries 44–47.
 - the `nexus` backend.
 
 **Local only:** this section and handoff/11 postdate `37e6879` and are not pushed. A push needs the project lead's request. Suite 231/231.
+
+## 24. Three-machine peer review and the fixes it produced, 2026-10-12/14
+
+**Pass type:** independent review, then repair. Not a build pass; no new physics.
+
+**Reviewers.** Three Claude Code instances, each on its own machine, each with its own
+subagents: **R-Oracle** (Oracle Cloud VM, Linux aarch64, Python 3.12 — the reference platform,
+and the only host with the Zenodo dataset and the private journal), **R-Laptop** (home server,
+Linux x86_64, Python 3.14), **R-Main** (Windows 11, Python 3.13, also orchestrator). Three
+rounds: independent review with separate focus areas, mutual cross-verification of every
+finding, then adjudication of each disagreement with a decisive check. About 40 numbers were
+re-derived from code that does not import this project. Reports: `review/14-three-machine-peer-review.md`
+(consolidated) and `review/14-three-machine-peer-review/` (all nine per-round reports, the
+Round-3b cover, and the dispute assignments).
+
+**Headline.** No fabricated number and no arithmetic error. Every independent re-derivation
+matched; every reproduction that ran matched its committed data file, often byte for byte. The
+real problems were about which experiment the numbers describe.
+
+**Three MAJOR findings, each confirmed by all three reviewers.**
+1. The triangular reference field is unreconciled: `h/|J| = 0.3` here, **2** in the reference's
+   own released quench4 QASM (signed angles read from all 80 files). `research/05` found this and
+   it never reached `GaussLawConfig`/`Q3BaselineConfig`; `research/04` independently confirmed 0.3
+   from the paper's prose, whose §V body was never read. At `h/|J| = 2` the sector framework is
+   not a controlled approximation at all. **No constant was changed** — recorded as `DECISIONS.md`
+   OPEN-1, the project lead's decision.
+2. The dt = 0.25 defect-density and `P_out` "Trotter inflation" figures were attributed to the
+   reference circuit; in that circuit's own ordering the bias has the **opposite sign** (3×6
+   defect density 1.390 ZZ-outside vs 0.604 circuit-order). Fixed additively:
+   `src/trotter.circuit_trotter2_step`, a regression test, and
+   `scripts/run_trotter_order_compare.py` → `data/trotter_order_compare.txt`.
+   The threshold brackets, O(dt²), the π/6 resonance and the sector-conditioned verdicts survive
+   and are ordering-invariant.
+3. Q1's "encoding is the only axis that varies" against the released data is infeasible: Iceberg
+   needs k+4 physical qubits, so 7×8 needs 60 > 56. Reframed to encoded vs bare on one reduced
+   lattice (6×8 = 52 physical), released data as external reference; `compare.Series` gained
+   shot/acceptance/estimator fields. `DECISIONS.md` OPEN-2.
+
+**Also fixed.** The project did not run on Windows (28 file-I/O sites had no explicit encoding;
+`python -I main.py` was broken). `verify_circuits` was sign-blind while `report.tex` claimed
+otherwise — now checks the signed triple against the gauge set. `--skip-exec` truncated
+`data/encoded_codes.txt` §5. A 5-shot Gaussian error bar became a labelled t-interval, and
+acceptance a Wilson interval. The "Néel" state was column stripes for even `Lx`. Three test gaps
+closed, including a sector-escape guard test that passed with the mover stubbed out. A dozen
+documented numbers corrected against the data (6.6–8.6× not 3–7×; 32× not 13×; ≈2.0σ not ≈3σ;
+7 of 24 cells not "one early point"; slopes 1.97–2.04).
+
+**Two reviewer findings were refuted** by the other reviewers and withdrawn: that the first-order
+Stim accounting breaks down at low acceptance (exact Monte Carlo agrees to ≤1.1e-3 even at 1%
+acceptance, confirmed three times), and a "63 vs 42" doc/data mismatch (two different, both
+correct metrics with similar names — now disambiguated in the docs).
+
+**Suite:** 231 → **274 passing**, identical count on all three platforms. No test removed or
+weakened. No existing `data/` file modified; one added. No physics constant changed — every
+`config.py` edit is inside its comment block and the enforced ceilings are untouched.
+
+**Still not built (hardware prerequisites, unchanged by this pass):** randomized compiling
+(D-RC, `DECISIONS.md` OPEN-3) — the Q1 "encoding helps" GO rests on it; the 6×6 noise-scaling
+arm; the Quantinuum client; the `nexus` backend. **Not regenerated:**
+`data/encoded_codes.txt` §5 (hours of Selene) and `data/q1_compare.txt` (needs the dataset).
