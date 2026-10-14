@@ -1,0 +1,17 @@
+# generated 2026-10-14 19:26 by scripts/run_trotter_order_compare.py (peer-review ordering fix)
+# CLASSICAL noiseless simulation only (exact Chebyshev evolution vs the TWO 2nd-order Strang orderings); NOT quantum hardware, NOT an H2 result. No noise model.
+# Frustrated triangular TFIM, J=-1.0, dt=0.25; total_time = 12.0/h per the Q3 convention; late window = last 50% of the curve, same snapshot grid as data/q3_relaxation.txt / data/trotter_threshold.txt. defect_density = <sum_t D_t>/2N (RAW, full state, src/dimers.py definition). P_out = weight outside the defect-free, same-winding-as-c0 sector (RAW). Both are evaluated on the exact (Chebyshev) curve and on BOTH Trotter orderings: 'zz' = src/trotter.trotter2_step (ZZ-outside, the ordering the rest of this repo's docs used), 'circuit' = src/trotter.circuit_trotter2_step (X-outside, what the published H2 circuits implement; src/compare.py).
+
+cluster                    h observable          exact         zz  zz/exact    circuit  circuit/exact
+  3x3 3-sublattice    0.10 defect_density    0.00030    0.00045     1.530    0.00014          0.485
+  3x3 3-sublattice    0.10 p_out             0.00183    0.00241     1.318    0.00118          0.646
+  3x3 3-sublattice    0.30 defect_density    0.00297    0.00456     1.535    0.00159          0.536
+  3x3 3-sublattice    0.30 p_out             0.01875    0.02448     1.305    0.01298          0.692
+  3x4 flippable       0.10 defect_density    0.00069    0.00082     1.185    0.00051          0.739
+  3x4 flippable       0.10 p_out             0.00740    0.00838     1.134    0.00584          0.790
+  3x4 flippable       0.30 defect_density    0.00656    0.00772     1.177    0.00495          0.754
+  3x4 flippable       0.30 p_out             0.06945    0.07804     1.124    0.05599          0.806
+  3x6 3-sublattice    0.30 defect_density    0.00355    0.00493     1.390    0.00214          0.604
+  3x6 3-sublattice    0.30 p_out             0.04816    0.05890     1.223    0.03556          0.738
+
+# Reading: 'zz/exact' > 1 ('circuit/exact' < 1) reproduces the documented sign flip - the ZZ-outside ordering INFLATES these quantities at dt=0.25, h*dt=0.5, while the published circuit's own ordering DEFLATES them relative to continuous time. This affects only which frame an absolute number is read in; it does not change the dt=0.25 Trotter-threshold location (src/trotter_threshold.py), which is a quasienergy statement and is the same in both orderings.
