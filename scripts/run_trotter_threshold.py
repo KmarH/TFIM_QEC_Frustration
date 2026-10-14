@@ -171,7 +171,7 @@ def main():
         err = f"; error at dt=0.25 {e:.2e}" if e is not None else ""
         log(f"  {name:20s} h={h:4.2f}: absolute in ({b}, {a}]; relative in ({rel[0]}, {rel[1]}]; "
             f"lowest c0 resonance {res:.3f}{err}")
-    with open(os.path.join(REPO, CONFIG.data_dir, "trotter_threshold.txt"), "w") as fh:
+    with open(os.path.join(REPO, CONFIG.data_dir, "trotter_threshold.txt"), "w", encoding="utf-8") as fh:
         fh.write("\n".join(out) + "\n")
     print("wrote data/trotter_threshold.txt")
 

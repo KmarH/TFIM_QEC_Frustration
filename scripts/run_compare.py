@@ -34,7 +34,7 @@ from src.operators import tfim_hamiltonian  # noqa: E402
 
 def is_synthetic(root: str) -> bool:
     p = os.path.join(root, "README.md")
-    return os.path.isfile(p) and "SYNTHETIC" in open(p).read()
+    return os.path.isfile(p) and "SYNTHETIC" in open(p, encoding="utf-8").read()
 
 
 def _same_up_to_sign(vals, target, tol=1e-6) -> bool:
@@ -141,7 +141,7 @@ def main() -> None:
     else:
         out_dir = os.path.join(REPO, CONFIG.data_dir)   # repo-relative, whatever the cwd
         os.makedirs(out_dir, exist_ok=True)
-        with open(os.path.join(out_dir, "q1_compare.txt"), "w") as fh:
+        with open(os.path.join(out_dir, "q1_compare.txt"), "w", encoding="utf-8") as fh:
             fh.write("\n".join(out) + "\n")
 
 

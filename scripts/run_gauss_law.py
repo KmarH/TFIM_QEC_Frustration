@@ -222,12 +222,12 @@ def main() -> None:
     if "--skip-scaling" not in sys.argv:
         log(f"# generated {stamp} by scripts/run_gauss_law.py")
         scaling(log)
-        with open(os.path.join(CONFIG.data_dir, "gauss_law_scaling.txt"), "w") as fh:
+        with open(os.path.join(CONFIG.data_dir, "gauss_law_scaling.txt"), "w", encoding="utf-8") as fh:
             fh.write("\n".join(out) + "\n")
         out.clear()
     log(f"# generated {stamp} by scripts/run_gauss_law.py")
     mitigation(log)
-    with open(os.path.join(CONFIG.data_dir, "gauss_law_mitigation.txt"), "w") as fh:
+    with open(os.path.join(CONFIG.data_dir, "gauss_law_mitigation.txt"), "w", encoding="utf-8") as fh:
         fh.write("\n".join(out) + "\n")
 
 

@@ -43,7 +43,7 @@ def main():
     skip_exec = "--skip-exec" in sys.argv
     exec_only = "--exec-only" in sys.argv
     path = os.path.join(REPO, CONFIG.data_dir, "encoded_codes.txt")
-    fh = open(path, "a" if exec_only else "w")
+    fh = open(path, "a" if exec_only else "w", encoding="utf-8")
 
     def log(s=""):
         print(s, flush=True)

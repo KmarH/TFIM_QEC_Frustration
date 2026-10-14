@@ -110,7 +110,7 @@ def main() -> None:
 
     os.makedirs(os.path.join(ROOT, "data"), exist_ok=True)
     path = os.path.join(ROOT, "data", "frustration_compare.txt")
-    with open(path, "w") as fh:
+    with open(path, "w", encoding="utf-8") as fh:
         fh.write("\n".join(out) + "\n")
     print(f"\nwritten to {path}")
 

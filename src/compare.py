@@ -178,7 +178,7 @@ def read_qasm(path: str) -> Dict[str, list]:
     """Return {'rzz': [(a, b, angle)], 'rx': [(q, angle)], 'ry': [(q, angle)]} from a QASM file."""
     out: Dict[str, list] = {"rzz": [], "rx": [], "ry": []}
     arity = {"rzz": 2, "rx": 1, "ry": 1}
-    with open(path) as fh:
+    with open(path, encoding="utf-8") as fh:
         for lineno, line in enumerate(fh, 1):
             m = _GATE.match(line)
             if not m:

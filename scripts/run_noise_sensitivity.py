@@ -106,7 +106,7 @@ def main():
     p2 = S.p2_legacy
     log(f"## 2. Original Part B sensitivity table (traceability): p2={p2:g}, p1=pm=p_init={p2 * S.p1_ratio:g} [assumed]")
     table(p2, legacy_scenarios())
-    with open(os.path.join(REPO, CONFIG.data_dir, "noise_sensitivity.txt"), "w") as fh:
+    with open(os.path.join(REPO, CONFIG.data_dir, "noise_sensitivity.txt"), "w", encoding="utf-8") as fh:
         fh.write("\n".join(out) + "\n")
 
 

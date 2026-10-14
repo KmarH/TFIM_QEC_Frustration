@@ -11,17 +11,25 @@ Usage:
 
 from __future__ import annotations
 
-import numpy as np
+import os
+import sys
 
-from config import CONFIG, RunConfig
-from src.backends import (
+# Same as every script in scripts/: makes `python -I main.py` work, since -I implies -P
+# and so drops the script's own directory from sys.path.
+REPO = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, REPO)
+
+import numpy as np  # noqa: E402
+
+from config import CONFIG, RunConfig  # noqa: E402
+from src.backends import (  # noqa: E402
     EDResult,
     EvolutionResult,
     product_state,
     run_ed,
     run_statevector,
 )
-from src.observables import (
+from src.observables import (  # noqa: E402
     energy,
     magnetization_variance_z,
     total_magnetization_x,
