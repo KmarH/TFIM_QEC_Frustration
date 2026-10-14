@@ -80,13 +80,36 @@ def run_ed(cfg: RunConfig, k: int = 1) -> EDResult:
     return EDResult(vals[order], vecs[:, order], bonds)
 
 
-def product_state(n_sites: int, spec: str = "all_up") -> np.ndarray:
+def product_state(n_sites: int, spec: str = "all_up", Lx: Optional[int] = None) -> np.ndarray:
     """Build a computational-basis product state.
 
     spec:
       "all_up"   -> |00...0>  (all Z = +1)
       "all_down" -> |11...1>  (all Z = -1)
-      "neel"     -> |0101...> (staggered), site 0 = MSB.
+      "neel"     -> staggered (checkerboard / antiferromagnetic), site 0 = MSB.
+
+    `Lx` is the row length of the row-major site index n = y*Lx + x (the project
+    convention, CLAUDE.md). It is only used by "neel", which flips the spins on
+    the sublattice (x + y) % 2 == 1, i.e. a true two-dimensional checkerboard.
+    With `Lx=None` the sites are treated as a 1D chain (Lx = n_sites), giving the
+    alternating |0101...> chain Néel state.
+
+    Review fix: the staggered state used to be selected by `site % 2`, which on a
+    row-major lattice with EVEN Lx reduces to `x % 2` — column stripes, not a
+    checkerboard. On a 4x4 periodic lattice that state has sum_<ij> <Z_iZ_j> = 0
+    over the 32 bonds (half the bonds aligned, half anti-aligned) instead of the
+    -32 of a true Néel state [measured, tests/test_observables.py].
+
+    Honest caveat for PERIODIC lattices with an ODD row length (odd Lx, or odd Ly
+    for the vertical wrap): a perfect checkerboard does not exist on an odd
+    periodic axis — the (x + y) % 2 pattern leaves a frustrated seam at the wrap,
+    where a line of bonds is aligned rather than anti-aligned. The state returned
+    is still a legitimate inhomogeneous product state (and still has the maximum
+    possible staggered magnetization pattern for that geometry), but it is NOT a
+    perfect Néel state and sum_<ij> <Z_iZ_j> will not reach -n_bonds. Nothing in
+    the current code base calls it that way; `run_statevector` passes the config's
+    Lx, and the only test caller (tests/test_observables.py) needs any product
+    state. Use an even Lx and Ly if you need a true periodic Néel state.
 
     Physical intent: "all_up"/"all_down" are eigenstates of the Ising (ZZ) term
     and carry <X>=0, so they are useful as cheap smoke tests but show little
@@ -102,9 +125,13 @@ def product_state(n_sites: int, spec: str = "all_up") -> np.ndarray:
     elif spec == "all_down":
         index = dim - 1
     elif spec == "neel":
+        row = n_sites if Lx is None else int(Lx)
+        if row <= 0:
+            raise ValueError(f"Lx must be positive, got {Lx!r}")
         bits = 0
         for site in range(n_sites):
-            if site % 2 == 1:
+            x, y = site % row, site // row
+            if (x + y) % 2 == 1:
                 bits |= 1 << (n_sites - 1 - site)
         index = bits
     else:
@@ -127,7 +154,8 @@ def run_statevector(
             f"{cfg.ceilings.statevector_max_spins} (SCOPE §5; probe before raising)."
         )
     bonds = _bonds_for(cfg)
-    psi0 = initial_state if initial_state is not None else product_state(n, init_spec)
+    psi0 = (initial_state if initial_state is not None
+            else product_state(n, init_spec, Lx=cfg.lattice.Lx))
 
     final, snaps = evolve(
         psi0,

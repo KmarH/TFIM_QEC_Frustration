@@ -353,6 +353,6 @@ def test_yielded_states_are_not_aliased():
 @pytest.mark.parametrize("line", ["ry(-(pi/18)) q[1];", "rx(0.5) q;", "rzz(0.5) q[0];"])
 def test_qasm_parser_fails_loudly(tmp_path, line):
     p = tmp_path / "bad.qasm"
-    p.write_text("OPENQASM 2.0;\nqreg q[2];\n" + line + "\n")
+    p.write_text("OPENQASM 2.0;\nqreg q[2];\n" + line + "\n", encoding="utf-8")
     with pytest.raises(ValueError):
         read_qasm(str(p))

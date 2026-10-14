@@ -49,11 +49,11 @@ def _layout(tmp_path, readme="dataset README (stand-in)\n", circuits=None, name=
     shutil.copytree(FIX, d)
     os.remove(d / "README.md")
     if readme is not None:
-        (d / "README.md").write_text(readme)
+        (d / "README.md").write_text(readme, encoding="utf-8")
     if circuits:
         (d / "circuits").mkdir()
         for q, text in circuits.items():
-            (d / "circuits" / f"quench{q}_step1.qasm").write_text(text)
+            (d / "circuits" / f"quench{q}_step1.qasm").write_text(text, encoding="utf-8")
     return d
 
 
@@ -70,7 +70,7 @@ class _Log(list):
 def test_is_synthetic(tmp_path):
     assert rc.is_synthetic(FIX)
     assert not rc.is_synthetic(str(tmp_path))                       # no README at all
-    (tmp_path / "README.md").write_text("Zenodo record 18487089\n")
+    (tmp_path / "README.md").write_text("Zenodo record 18487089\n", encoding="utf-8")
     assert not rc.is_synthetic(str(tmp_path))
 
 
@@ -125,7 +125,7 @@ def test_trusted_gate_needs_readme_and_every_circuit(small_run, tmp_path, readme
 def test_trusted_gate_opens_only_for_verified_source(small_run, tmp_path):
     d = _layout(tmp_path, circuits=_good_circuits())
     assert rc.main(["--data", str(d)]) is True
-    text = small_run.read_text()
+    text = small_run.read_text(encoding="utf-8")
     assert not any(l.startswith("[") for l in text.splitlines())    # no SYNTHETIC/UNVERIFIED tag
     assert text.count("signs: literal circuit is (-J,-h,theta)") == len(C.quenches)
     assert "estimator/shots — zne+znr: estimator=zne+znr, shots=not stated" in text
