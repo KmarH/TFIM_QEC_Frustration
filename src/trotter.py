@@ -81,11 +81,45 @@ def trotter2_step(
     ising_diag is the precomputed diagonal of A (from ising_diagonal). The field
     half-angle uses B = -h sum X, so exp(-iB dt) = exp(i h dt sum X), i.e.
     theta = -h * dt in exp(-i theta sum X).
+
+    This is the ZZ-outside (ABA) splitting: exp(-iA dt/2) exp(-iB dt) exp(-iA dt/2).
+    It is unitarily conjugate to the X-outside splitting the published H2 circuits
+    use (same quasienergies, hence the same threshold location), but observables
+    read in the two frames differ (review/ordering finding, docs/q3_thermalization.md
+    §8). For any claim about those circuits, use `circuit_trotter2_step` instead.
     """
     half_phase = np.exp(-0.5j * dt * ising_diag)
     state = half_phase * state
     state = apply_x_rotations(state, n_sites, theta=-h * dt)
     state = half_phase * state
+    return state
+
+
+def circuit_trotter2_step(
+    state: np.ndarray,
+    n_sites: int,
+    ising_diag: np.ndarray,
+    h: float,
+    dt: float,
+) -> np.ndarray:
+    """One second-order Trotter step in the CIRCUIT (X-outside) frame:
+    exp(-iB dt/2) exp(-iA dt) exp(-iB dt/2), B = -h sum X, A = -J sum ZZ.
+
+    This is the splitting the published H2 circuits (arXiv:2503.20870) actually
+    implement (X half-layer, ZZ layer, X half-layer per step) and is the same
+    formula `src/compare.py:circuit_trotter_states` evaluates gate-by-gate; use
+    THIS function (not `trotter2_step`) for any claim about those circuits or
+    about quantities read out in their frame (e.g. defect density, P_out).
+    `trotter2_step`'s ZZ-outside splitting gives a different reading of the same
+    physical state at the published h*dt = 0.5 — see docs/q3_thermalization.md §8.
+
+    Signature matches `trotter2_step` so one can be swapped for the other.
+    """
+    half_x = -h * dt / 2
+    state = apply_x_rotations(state, n_sites, theta=half_x)
+    full_phase = np.exp(-1j * dt * ising_diag)
+    state = full_phase * state
+    state = apply_x_rotations(state, n_sites, theta=half_x)
     return state
 
 
