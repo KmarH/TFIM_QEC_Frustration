@@ -127,7 +127,18 @@ The winding leakage P(W ≠ W₀) also scales as h^2.08–h^2.09 for the stripe 
 
 A quantitative check uses the stripe state, where no spin is flippable and each flip costs 4|J| and makes 2 defects. First-order
 perturbation theory predicts a time-averaged defect density per triangle of **(h/|J|)²/8**. The ratio of measured to predicted is
-**1.011** at dt = 0.025. At the reference's dt = 0.25 it is about 10% higher, because Trotter error also flips spins. (That ≈10% is specific to the stripe start. The dt = 0.25 defect-density Trotter inflation depends on the start: ≈40% for the 3-sublattice start on 3×6, ≈18% for the 3×4 flippable start, ≈9% for the stripe. It is a blend of Floquet factors; see `docs/q3_thermalization.md` §8.)
+**1.011** at dt = 0.025. At dt = 0.25 **in this repo's own ZZ-outside Trotter splitting** (`src/trotter.trotter2_step`) it is about
+10% higher, because Trotter error also flips spins. (That ≈10% is specific to the stripe start and to this splitting. The dt = 0.25
+defect-density inflation in the ZZ-outside splitting depends on the start: ≈40% for the 3-sublattice start on 3×6, ≈18% for the
+3×4 flippable start, ≈9% for the stripe. It is a blend of Floquet factors; see `docs/q3_thermalization.md` §8.)
+**CORRECTION (peer review, MAJOR):** this subsection previously called dt = 0.25 "the reference's dt" and implied these inflation
+figures describe the published H2 circuit. They do not: they are specific to `trotter2_step`'s ZZ-outside splitting, which is
+**not** the ordering the published circuit implements. The circuit's own (X-outside) splitting, `src/trotter.circuit_trotter2_step`,
+**deflates** these quantities at the same dt = 0.25 instead of inflating them — e.g. defect density comes out ≈40% *below* the
+continuous-time value on 3×6 (3-sublattice, h = 0.3), ≈25% below on 3×4 flippable, and ≈46–50% below on 3×3 3-sublattice
+**[measured, `scripts/run_trotter_order_compare.py` → `data/trotter_order_compare.txt`]**. The stripe start's circuit-order figure
+was not computed in this fix; by the same mechanism a sign reversal is expected there too, but no number is asserted for it
+**[inferred, not measured]**.
 The test is `test_stripe_quench_matches_first_order_prediction`.
 
 **What a violation means.** In noiseless dynamics a defect is real physics: a virtual excitation out of the dimer manifold
