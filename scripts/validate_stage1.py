@@ -149,7 +149,7 @@ def main() -> None:
     report = "\n".join(lines) + "\n"
     os.makedirs(os.path.join(ROOT, "data"), exist_ok=True)
     out_path = os.path.join(ROOT, "data", "stage1_validation.txt")
-    with open(out_path, "w") as f:
+    with open(out_path, "w", encoding="utf-8") as f:
         f.write(report)
     print(report)
     print(f"written to {out_path}")

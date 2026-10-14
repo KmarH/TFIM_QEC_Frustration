@@ -83,7 +83,7 @@ def main():
         a = float(np.mean([x for x, _ in res]))
         log(f"p2={p2v:g} step {n}: Stim pytket-level {stim_acc(base, n):.3f} | Stim native-matched "
             f"{stim_acc(adj, n):.3f} | Selene {a:.3f}±{np.sqrt(a * (1 - a) / len(res)):.3f}")
-    with open(os.path.join(REPO, CONFIG.data_dir, "selene_gap.txt"), "w") as fh:
+    with open(os.path.join(REPO, CONFIG.data_dir, "selene_gap.txt"), "w", encoding="utf-8") as fh:
         fh.write("\n".join(out) + "\n")
 
 

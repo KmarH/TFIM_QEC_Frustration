@@ -94,13 +94,24 @@ class CeilingConfig:
 
     Enforced as guard rails by the backends. The statevector state alone costs
     2^N * 16 bytes (complex128): N=24 -> 268 MB. Caveat (qc-reviewer M1,
-    confirmed by probe): real peak RSS runs ~5.5x above that bare-state figure
-    because apply_x_rotations holds transient half-state copies — size the host
-    against ~5.5 * 2^N * 16 bytes, not the state alone.
+    confirmed by probe): real peak RSS runs ~5.7x above that bare-state figure
+    at N=24 (and higher at smaller N, where the interpreter baseline dominates:
+    6.9x at N=22, 9.5x at N=20) because apply_x_rotations holds transient
+    half-state copies — size the host against ~5.7 * 2^N * 16 bytes, not the
+    state alone.
 
-    Measured peaks on this host (~7.6 GB free, serial, ru_maxrss):
-      statevector Trotter: N=22 -> 413 MB, N=24 -> 1469 MB (SAFE at 24).
-      ED build+Lanczos:    N=20 -> 1871 MB (SAFE), N=22 -> 7971 MB (near-OOM edge).
+    Measured peaks on this host (~7.6 GB free, serial, ru_maxrss), as recorded
+    in data/stage1_validation.txt [4] and [5]:
+      statevector Trotter: N=22 -> 463 MB, N=24 -> 1543 MB (SAFE at 24).
+      ED build+Lanczos:    N=20 -> 1881 MB (SAFE), N=22 -> 7971 MB (near-OOM edge).
+    The N=22 ED figure (7971 MB) has no source in data/stage1_validation.txt, whose
+    [5] table stops at N=20; it is an unverified earlier measurement. It sits above
+    the enforced ed_max_spins=20 ceiling either way, so nothing depends on it.
+    Honest caveat on the ED figures: ru_maxrss is a process-lifetime maximum, so
+    the ED peaks reported at N=16 and N=18 (both 1543 MB) are the peak carried
+    over from the statevector run earlier in the same process, NOT ED-specific
+    measurements. Only the N=20 ED figure (1881 MB) exceeds that carried-over
+    high-water mark and is therefore ED-specific.
     """
 
     # ED set to 20: build+Lanczos at N=20 peaks ~1.9 GB (safe). N=22 was measured

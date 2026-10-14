@@ -36,7 +36,7 @@ Q = CONFIG.q3
 C = CONFIG.ceilings
 CAVEAT = ("# CLASSICAL statistical reference (uniform ensemble over a winding sector) and classical "
           "noiseless state-vector simulation only; NOT quantum hardware, NOT an H2 result.")
-with open(os.path.join(REPO, Q.leak_table)) as _fh:   # h range of the measured leak table
+with open(os.path.join(REPO, Q.leak_table), encoding="utf-8") as _fh:   # h range of the measured leak table
     TABLE_HMAX = max(float(v) for v in next(l for l in _fh if l.startswith("h_scan")).split("=")[1].split())
 DISCRIMINATING = ("flippable_density", "memory")   # rho_* are fixed by W0 and defect density is 0 in-sector
 
@@ -69,7 +69,7 @@ def provenance(path, new_lines):
     MCMC is seeded (CONFIG.seed), so a rerun must reproduce them exactly."""
     if not os.path.exists(path):
         return "# provenance: first generation of this file"
-    with open(path) as fh:
+    with open(path, encoding="utf-8") as fh:
         old = fh.read().splitlines()
     stamp = next((l for l in old if l.startswith("# generated")), "# generated ?")[2:]
     same = _numeric(old) == _numeric("\n".join(new_lines).splitlines())   # entries may hold "\n"
@@ -144,7 +144,7 @@ def baseline_file(path, seed):
     lines = "\n".join(out).splitlines()   # entries may hold "\n"
     out.insert(3, "# content-sha256 (numeric lines, i.e. minus generated/provenance/this line and "
                "trailing wall times): " + content_hash(lines))
-    with open(path, "w") as fh:
+    with open(path, "w", encoding="utf-8") as fh:
         fh.write("\n".join(out) + "\n")
 
 
@@ -221,7 +221,7 @@ def relaxation_file(path, seed):
             log(f"{name:24s} {c.times[j]:7.2f} {c.raw['flippable_density'][j]:.5f} {c.cond['flippable_density'][j]:.5f} "
                 f"{c.raw['memory'][j]:.5f} {c.cond['memory'][j]:.5f} {c.raw_shells[j, 1]:+.5f} {c.cond_shells[j, 1]:+.5f} "
                 f"{c.p_out[j]:.3e} {c.p_wleak[j]:.3e}")
-    with open(path, "w") as fh:
+    with open(path, "w", encoding="utf-8") as fh:
         fh.write("\n".join(out) + "\n")
 
 

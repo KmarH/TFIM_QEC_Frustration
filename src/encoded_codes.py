@@ -946,7 +946,7 @@ def guppy_program(sch: Schedule, tag: str):
     L += ["    result('accepted', ok)", "    discard_array(q)", ""]
     d = tempfile.mkdtemp(prefix="guppy_gen_")
     path = os.path.join(d, f"prog_{tag}.py")
-    with open(path, "w") as fh:
+    with open(path, "w", encoding="utf-8") as fh:
         fh.write("\n".join(L))
     spec = importlib.util.spec_from_file_location(f"prog_{tag}", path)
     mod = importlib.util.module_from_spec(spec)

@@ -23,7 +23,7 @@ TFIM simulation with logical (encoded) vs physical qubits, aimed at Quantinuum H
 ## Environment
 - `.venv`, **Python 3.12.14** (SCOPE pins 3.11, unavailable; FLAG A open). Host: aarch64, **2 cores**, ~6–7 GB free.
 - Pinned: numpy 2.5.3, scipy 1.18.1, pytest 9.1.1, stim 1.16.0, pytket 2.18.4, guppylang 1.1.2, selene-sim 0.3.4, hugr 0.18.8.
-- Tests: `. .venv/bin/activate && python -m pytest tests/ -q` (currently 169/169, about 100 s). Run the full suite before reporting.
+- Tests: `. .venv/bin/activate && python -m pytest tests/ -q` (currently 231/231; about 125 s on this host, 125–240 s across the three platforms measured). Run the full suite before reporting.
 - Run scripts as `.venv/bin/python -I scripts/<name>.py`. Scripts insert the repo root into `sys.path`.
 - Zenodo dataset for 2503.20870: `/home/opc/zenodo_18487089/zenodo_data` (outside the repo, MD5-verified; never copy it in).
 

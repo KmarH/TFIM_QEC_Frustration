@@ -153,7 +153,7 @@ def main() -> None:
         log(f"4x6 logical lattice (n_phys={big.n_phys}) refused before allocation: {e}")
 
     if not args.quick:
-        with open(os.path.join(REPO, CONFIG.data_dir, "encoded_iceberg.txt"), "w") as fh:
+        with open(os.path.join(REPO, CONFIG.data_dir, "encoded_iceberg.txt"), "w", encoding="utf-8") as fh:
             fh.write("\n".join(out) + "\n")
 
 

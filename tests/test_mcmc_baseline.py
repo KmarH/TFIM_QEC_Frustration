@@ -19,6 +19,7 @@ from scipy import stats
 
 from config import RunConfig
 from src.backends import MemoryCeilingError
+from src import mcmc_baseline
 from src.dimers import TriangularDimers
 from src.mcmc_baseline import (
     SCALARS, ConfigEvaluator, Shells, classify, dimer_pattern, ensemble_values, exact_references,
@@ -128,12 +129,57 @@ def test_sampler_never_leaves_the_sector_checked_against_dimers_arrays():
     assert len(v) == ex.sector.dim          # and it reaches all 60 states
 
 
-def test_sampler_raises_if_not_in_a_sector():
-    """The per-sweep guard is real: a configuration with defects has cut-dependent winding."""
+def test_sampler_raises_on_a_bad_INITIAL_state_only():
+    """The guard's initial-state branch: s0 = all up on 3x3 has all 18 triangles defective and
+    ZERO flippable sites, so the sampler performs no flips at all and the RuntimeError comes
+    from the state it was handed, not from the mover. (Review: this test alone passes even if
+    the flip-application code is a complete no-op — see the mover test below for the real
+    regression.) A configuration with defects also has cut-dependent winding."""
     d = TriangularDimers(3, 3)
+    ev = ConfigEvaluator(d)
+    z = np.ones((1, d.N), dtype=np.int8)
+    assert ev.defects(z)[0] == 2 * d.N            # every triangle defective
+    assert ev.flippable(z).sum() == 0             # nothing can move
     with pytest.raises(RuntimeError, match="left the defect-free"):
         sample_sector(d, np.ones((3, 3), dtype=int), Shells.build(d, 1), J=J, dt=DT, n_chains=2,
                       n_sweeps=2, burn_in=0, rng=np.random.default_rng(0))
+
+
+def test_sampler_guard_catches_a_mover_caused_escape(monkeypatch):
+    """The real regression (review): start IN the sector (3x4 'flippable', 0 defects) and make
+    the mover itself propose an invalid move, so the guard has to catch an escape caused by the
+    flip-application code — the path the bad-initial-state test above never reaches.
+
+    Injection: the flip condition reads the hexagon-neighbour table `ev.hex[s]`. Site BAD is
+    genuinely NOT flippable in this configuration (n_s = 2, flipping it creates 2 defects),
+    while site DONOR is. Giving BAD the DONOR's hexagon row makes BAD *look* flippable, so the
+    mover flips it and leaves the defect-free W0 sector. Everything the guard itself uses
+    (triangles for the defect count, row/column cuts for the windings) is untouched.
+    """
+    d = TriangularDimers(3, 4)
+    s0 = initial_spins(d, "flippable")
+    ev = ConfigEvaluator(d)
+    z0 = np.asarray(s0, dtype=np.int8).reshape(1, -1)
+    ns = ev.equal_hex_pairs(z0)[0]
+    BAD, DONOR = 0, 1
+    assert ev.defects(z0)[0] == 0                 # the start really is in the sector
+    assert ns[BAD] == 2 and ns[DONOR] == 0        # BAD is not flippable, DONOR is
+
+    class HexCorrupted(ConfigEvaluator):
+        def __init__(self, dd):
+            super().__init__(dd)
+            self.hex = self.hex.copy()
+            self.hex[BAD] = self.hex[DONOR]
+
+    monkeypatch.setattr(mcmc_baseline, "ConfigEvaluator", HexCorrupted)
+    with pytest.raises(RuntimeError, match="left the defect-free W0 sector"):
+        sample_sector(d, s0, Shells.build(d, 1), J=J, dt=DT, n_chains=2, n_sweeps=3,
+                      burn_in=0, rng=np.random.default_rng(0))
+    # ... and without the injection the very same run is clean (the guard is not trigger-happy).
+    monkeypatch.undo()
+    res = sample_sector(d, s0, Shells.build(d, 1), J=J, dt=DT, n_chains=2, n_sweeps=3,
+                        burn_in=0, rng=np.random.default_rng(0))
+    assert res.accept_rate > 0
 
 
 def test_sampler_is_uniform_on_the_component_chi2():

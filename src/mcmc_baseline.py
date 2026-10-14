@@ -574,7 +574,7 @@ def leak_scaling(path: str, label: str, dt: float) -> Optional[Tuple[float, floa
     """(A, s) of the measured time-averaged P(W != W0) = A h^s for the row starting with `label`
     (e.g. '3x6 3-sublattice') at this dt, fitted (log-log least squares, as the file's printed
     slope) to the file's own points; None if the file has no such row."""
-    with open(path) as fh:
+    with open(path, encoding="utf-8") as fh:
         text = fh.read()
     m = re.search(r"^h_scan = (.+)$", text, re.M)
     if not m:

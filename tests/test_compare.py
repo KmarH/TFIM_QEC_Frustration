@@ -12,8 +12,9 @@ import scipy.linalg as la
 
 from src.backends import MemoryCeilingError
 from src.compare import (
-    CAVEAT, ZenodoData, check_ceiling, circuit_trotter_states, compare_z2,
-    pair_average_from_z2, qasm_step_bonds, read_qasm, ry_product_state, simulate_z2,
+    CAVEAT, Series, ZenodoData, check_ceiling, circuit_trotter_states, compare_z2,
+    gauge_check_angles, light_cone_z2_step1, pair_average_from_z2, qasm_step_bonds, read_qasm,
+    ry_product_state, simulate_z2,
 )
 from src.lattice import square_bonds
 from src.observables import (
@@ -168,8 +169,60 @@ def test_harness_reproduces_literal_qasm_gates(theta):
     # README gauge identities: (J,h,th) -> (-J,-h,th) and (J,h,th) -> (J,-h,-th)
     assert np.allclose(simulate_z2(3, 3, "periodic", -1.0, -2.0, 0.25, theta, steps, 24), ref, atol=1e-12)
     assert np.allclose(simulate_z2(3, 3, "periodic", 1.0, -2.0, 0.25, -theta, steps, 24), ref, atol=1e-12)
+    # ... and their composition (J,h,th) -> (-J,h,-th), the fourth element of the orbit
+    assert np.allclose(simulate_z2(3, 3, "periodic", -1.0, 2.0, 0.25, -theta, steps, 24), ref, atol=1e-12)
     # the sign mapping matters: the non-gauge pairing is measurably different
     assert np.abs(simulate_z2(3, 3, "periodic", 1.0, -2.0, 0.25, theta, steps, 24) - ref).max() > 0.05
+
+
+@pytest.mark.parametrize("theta", [np.pi / 6, -np.radians(10)])
+def test_gauge_check_agrees_with_literal_replay(theta):
+    """gauge_check_angles accepts a signed (rzz, rx, ry) circuit iff its literal gate replay
+    reproduces the config run (J, h) = (1, 2) — an independent check of the accepted set."""
+    steps = [1, 2, 3]
+    ref = simulate_z2(2, 3, "periodic", 1.0, 2.0, 0.25, theta, steps, 24)   # 2x3 torus: fast
+    for sa in (1, -1):
+        for sb in (1, -1):
+            for sc in (1, -1):
+                replay = _gate_replay(2, 3, sc * theta, steps, rzz=sa * 0.5, rx=sb * 0.5)
+                same = np.allclose(replay, ref, atol=1e-10)
+                label, probs = gauge_check_angles([sa * 0.5] * 6, [sb * 0.5] * 6, [sc * theta] * 6,
+                                                  1.0, 2.0, 0.25, theta)
+                assert (label is not None) == same, (sa, sb, sc)
+                assert (probs == []) == same
+                if not same:
+                    assert np.abs(replay - ref).max() > 0.05     # discriminating, not marginal
+
+
+def test_gauge_check_rejects_mixed_signs_and_magnitudes():
+    ok = dict(J=1.0, h=2.0, dt=0.25, theta=0.5)
+    assert gauge_check_angles([0.5, 0.5], [0.5, 1.0], [0.5], **ok) == ("(-J,-h,theta)", [])
+    _, p = gauge_check_angles([0.5, -0.5], [0.5], [0.5], **ok)
+    assert any("rzz: mixed signs" in x for x in p)
+    _, p = gauge_check_angles([0.5], [0.5, -0.5], [0.5], **ok)
+    assert any("rx: mixed signs" in x for x in p)
+    _, p = gauge_check_angles([0.4], [0.5], [0.5], **ok)
+    assert any("rzz: |angle| off target" in x for x in p)
+    _, p = gauge_check_angles([], [0.5], [0.5], **ok)
+    assert p == ["rzz: no gates"]
+
+
+# -------------------------------------------- exact N = 56 step 1 via the light cone
+@pytest.mark.parametrize("Lx,Ly,bc", [(4, 4, "periodic"), (4, 5, "periodic"), (3, 4, "open")])
+def test_light_cone_step1_matches_full_statevector(Lx, Ly, bc):
+    th = np.pi / 6
+    full = simulate_z2(Lx, Ly, bc, 1.0, 2.0, 0.25, th, [1], 24)[0]
+    assert light_cone_z2_step1(Lx, Ly, bc, 1.0, 2.0, 0.25, th, 24) == pytest.approx(full, abs=1e-12)
+
+
+def test_light_cone_step1_n56_value():
+    """[measured] Exact step-1 value on the 7x8 torus quoted in docs/q1_compare.md."""
+    z2 = light_cone_z2_step1(7, 8, "periodic", 1.0, 2.0, 0.25, np.pi / 6, 24)
+    assert z2 == pytest.approx(0.754759, abs=1e-6)
+    assert pair_average_from_z2(z2, 56) == pytest.approx(0.750300, abs=1e-6)
+    # the reduced-lattice pair averages the old "about 3 sigma" used, for contrast
+    assert pair_average_from_z2(simulate_z2(4, 5, "periodic", 1.0, 2.0, 0.25, np.pi / 6, [1], 24)[0], 20) \
+        == pytest.approx(0.7610, abs=5e-5)
 
 
 def test_ry_product_state():
@@ -210,6 +263,47 @@ def test_compare_z2_table_on_fixture(data):
     assert set(cmp.sim) == {(2, 2), (2, 3)}
     assert all(v.shape == (12,) for v in cmp.sim.values())
     assert "NOT a same-system fidelity" in CAVEAT
+
+
+def test_series_defaults_keep_old_constructions(data):
+    s = Series(1, "Z2", "zne+znr", np.arange(3), np.zeros(3), None)       # pre-existing 6-arg form
+    assert s.estimator == "zne+znr" and s.shots is None and s.effective_shots is None
+    assert s.acceptance is None
+    assert data.load(1, "Z2", "raw_unamplified").estimator == "raw"
+    assert data.load(1, "Z2", "raw_unamplified").shots is None          # dataset states no shots
+    assert Series(1, "Z2", "custom", np.arange(3), np.zeros(3), None).estimator is None
+    with pytest.raises(ValueError, match="shot count not stated"):
+        s.stderr_from_shot_std(0.3)
+
+
+def test_series_holds_a_postselected_arm():
+    """Structure only: a placeholder Series with made-up counts, not logical data."""
+    steps = np.array([1, 2])
+    s = Series(1, "Z2", "logical", steps, np.zeros(2), None,
+               shots=1000, accepted_shots=np.array([800, 400]), estimator="postselected")
+    assert np.array_equal(s.effective_shots, [800, 400])            # accepted, not executed
+    assert np.allclose(s.acceptance, [0.8, 0.4])
+    assert np.allclose(s.stderr_from_shot_std(0.4), 0.4 / np.sqrt([800, 400]))
+    assert "estimator=postselected" in s.provenance() and "accepted=400..800 (per step)" in s.provenance()
+    raw = Series(1, "Z2", "physical", steps, np.zeros(2), None, shots=1000, estimator="raw")
+    assert raw.effective_shots == 1000 and raw.stderr_from_shot_std(0.4) == pytest.approx(0.4 / np.sqrt(1000))
+    with pytest.raises(ValueError, match="exceeds"):
+        Series(1, "Z2", "x", steps, np.zeros(2), None, shots=10, accepted_shots=11)
+    with pytest.raises(ValueError, match="without shots"):
+        Series(1, "Z2", "x", steps, np.zeros(2), None, accepted_shots=5)
+    with pytest.raises(ValueError, match="needs accepted_shots"):
+        Series(1, "Z2", "x", steps, np.zeros(2), None, shots=10, estimator="postselected")
+    with pytest.raises(ValueError, match="unknown estimator"):
+        Series(1, "Z2", "x", steps, np.zeros(2), None, estimator="mitigated")
+    with pytest.raises(ValueError, match="nothing accepted"):
+        Series(1, "Z2", "x", steps, np.zeros(2), None, shots=10, accepted_shots=0,
+               estimator="postselected").stderr_from_shot_std(0.1)
+
+
+def test_comparison_provenance_lists_estimators(data):
+    cmp = compare_z2(data, 1, np.pi / 6, [(2, 2)], "periodic", 1.0, 2.0, 0.25, max_spins=24)
+    assert [p.split(":")[0] for p in cmp.provenance()] == ["zne+znr", "raw_unamplified"]
+    assert "estimator=raw," in cmp.provenance()[1]
 
 
 def test_pair_average_removes_self_term():
@@ -259,6 +353,6 @@ def test_yielded_states_are_not_aliased():
 @pytest.mark.parametrize("line", ["ry(-(pi/18)) q[1];", "rx(0.5) q;", "rzz(0.5) q[0];"])
 def test_qasm_parser_fails_loudly(tmp_path, line):
     p = tmp_path / "bad.qasm"
-    p.write_text("OPENQASM 2.0;\nqreg q[2];\n" + line + "\n")
+    p.write_text("OPENQASM 2.0;\nqreg q[2];\n" + line + "\n", encoding="utf-8")
     with pytest.raises(ValueError):
         read_qasm(str(p))

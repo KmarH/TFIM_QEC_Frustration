@@ -64,7 +64,7 @@ def main() -> None:
                 f"{r.logical_errors}/{r.kept} [{llo:.1e},{lhi:.1e}]   "
                 f"{lab.get('flag',0)}/{lab.get('inner',0)}/{lab.get('outer',0)}")
     os.makedirs(CONFIG.data_dir, exist_ok=True)
-    with open(os.path.join(CONFIG.data_dir, "concat_d4.txt"), "w") as fh:
+    with open(os.path.join(CONFIG.data_dir, "concat_d4.txt"), "w", encoding="utf-8") as fh:
         fh.write("\n".join(out) + "\n")
 
 

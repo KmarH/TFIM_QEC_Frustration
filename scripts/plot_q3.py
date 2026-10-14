@@ -49,7 +49,7 @@ plt.rcParams.update({
 
 
 def _read(name):
-    with open(os.path.join(DATA, name)) as fh:
+    with open(os.path.join(DATA, name), encoding="utf-8") as fh:
         return fh.read().splitlines()
 
 

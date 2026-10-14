@@ -181,7 +181,7 @@ def main():
             vi = ideal.cond[o][0][late]
             log(f"  {Lx}x{Ly} {kind:12s} {o:18s} noisy cond late mean {np.mean(v):+.4f} (std {np.std(v):.4f}); "
                 f"ideal cond {np.mean(vi):+.4f}; B_W0 {b:+.4f}; DE {dv:+.4f}; Gauss acceptance late {np.mean(bare.p_in[late]):.3f}")
-    with open(os.path.join(REPO, CONFIG.data_dir, "q3_noisy.txt"), "w") as fh:
+    with open(os.path.join(REPO, CONFIG.data_dir, "q3_noisy.txt"), "w", encoding="utf-8") as fh:
         fh.write("\n".join(out) + "\n")
     print("wrote data/q3_noisy.txt")
 

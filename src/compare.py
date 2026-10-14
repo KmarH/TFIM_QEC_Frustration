@@ -21,7 +21,10 @@ Spec: research/05-zenodo-dataset-map.md (frozen) and handoff/03. Three parts:
    (J, h) = (+1, +2) with the SAME theta, which is what config uses.
 
 3. `compare_z2` — table of simulated Z2 at the dataset's step indices against the H2
-   `zne+znr` and `raw_unamplified` curves, with the H2 bootstrap error bars.
+   `zne+znr` and `raw_unamplified` curves, with the H2 bootstrap error bars. Each `Series`
+   carries an estimator class and optional shot / accepted-shot counts, so a post-selected
+   logical arm can be held and labelled next to mitigated physical data (no such arm exists
+   yet; nothing here produces logical data).
 
 HONESTY CONSTRAINT (handoff/03, SCOPE §12): the H2 square data is N = 56; exact
 simulation here is capped at CeilingConfig.statevector_max_spins (24). The comparison
@@ -46,13 +49,30 @@ from src.trotter import apply_x_rotations, ising_diagonal
 
 MODES = ("raw_unamplified", "raw_amplified", "znr_unamplified", "znr_amplified", "zne", "zne+znr")
 
+# Estimator classes a Series can carry. Values from different classes are not like-for-like:
+# a post-selected logical arm (accepted shots only) vs ZNE+ZNR-mitigated physical data must be
+# labelled as such in any comparison (review R-Main-5).
+ESTIMATORS = ("raw", "znr", "zne", "zne+znr", "postselected")
+ESTIMATOR_OF_MODE = {
+    "raw_unamplified": "raw", "raw_amplified": "raw",     # amplified = raw at boosted noise
+    "znr_unamplified": "znr", "znr_amplified": "znr",
+    "zne": "zne", "zne+znr": "zne+znr",
+}
+
 
 # --------------------------------------------------------------------------- #
 # 1. Loader
 # --------------------------------------------------------------------------- #
 @dataclass
 class Series:
-    """One observable/mode: values with the step index (and r for dimercorrs)."""
+    """One observable/mode: values with the step index (and r for dimercorrs).
+
+    Optional provenance (all default to "unknown", so existing constructions are unchanged):
+    `shots` executed and `accepted_shots` kept (scalar or per-step array; a post-selected
+    logical arm keeps fewer than it runs), and `estimator` in ESTIMATORS. If `estimator` is
+    None it is derived from a dataset `mode`; it stays None for an unrecognised mode.
+    The released H2 dataset does not state shot counts, so loaded Series have shots=None.
+    """
 
     quench: int
     observable: str
@@ -61,6 +81,66 @@ class Series:
     values: np.ndarray
     err: Optional[np.ndarray]    # bootstrap error bar, same shape, or None if absent
     rs: Optional[np.ndarray] = None   # dimercorrs only; values are [r, step]
+    shots: Optional[np.ndarray] = None            # shots executed (scalar or per step)
+    accepted_shots: Optional[np.ndarray] = None   # shots kept after post-selection
+    estimator: Optional[str] = None               # one of ESTIMATORS
+
+    def __post_init__(self):
+        if self.estimator is None:
+            self.estimator = ESTIMATOR_OF_MODE.get(self.mode)
+        elif self.estimator not in ESTIMATORS:
+            raise ValueError(f"unknown estimator {self.estimator!r}; expected one of {ESTIMATORS}")
+        for name in ("shots", "accepted_shots"):
+            v = getattr(self, name)
+            if v is not None and np.any(np.asarray(v) < 0):
+                raise ValueError(f"{name} must be >= 0")
+        if self.accepted_shots is not None:
+            if self.shots is None:
+                raise ValueError("accepted_shots given without shots: acceptance would be undefined")
+            if np.any(np.asarray(self.accepted_shots) > np.asarray(self.shots)):
+                raise ValueError("accepted_shots exceeds shots")
+        if self.estimator == "postselected" and self.shots is not None and self.accepted_shots is None:
+            raise ValueError("a post-selected Series needs accepted_shots (its error bars use them)")
+
+    @property
+    def effective_shots(self) -> Optional[np.ndarray]:
+        """Shots that actually enter the estimator: accepted shots if post-selected, else
+        all shots; None if the source does not state them. Use this, never `shots`, for
+        shot-noise error bars."""
+        if self.accepted_shots is not None:
+            return np.asarray(self.accepted_shots)
+        return None if self.shots is None else np.asarray(self.shots)
+
+    @property
+    def acceptance(self) -> Optional[np.ndarray]:
+        """accepted_shots / shots, or None if either is not stated."""
+        if self.accepted_shots is None or self.shots is None:
+            return None
+        return np.asarray(self.accepted_shots) / np.asarray(self.shots)
+
+    def stderr_from_shot_std(self, shot_std) -> np.ndarray:
+        """Standard error of a per-shot sample mean, std / sqrt(effective_shots).
+        Raises if the effective shot count is unknown or zero (no error bar is invented)."""
+        n = self.effective_shots
+        if n is None:
+            raise ValueError(f"{self.mode}: shot count not stated; cannot form a shot-noise error bar")
+        if np.any(n <= 0):
+            raise ValueError(f"{self.mode}: zero effective shots (nothing accepted)")
+        return np.asarray(shot_std) / np.sqrt(n)
+
+    def provenance(self) -> str:
+        """One-line estimator/shot summary for logs and tables."""
+        def fmt(v):
+            if v is None:
+                return "not stated"
+            a = np.asarray(v)
+            return f"{int(a)}" if a.ndim == 0 else f"{int(a.min())}..{int(a.max())} (per step)"
+        acc = self.acceptance
+        acc_s = "n/a" if acc is None else (f"{float(acc):.4f}" if np.ndim(acc) == 0
+                                           else f"{acc.min():.4f}..{acc.max():.4f}")
+        return (f"{self.mode}: estimator={self.estimator or 'unknown'}, shots={fmt(self.shots)}, "
+                f"accepted={fmt(self.accepted_shots)}, acceptance={acc_s}, "
+                f"effective shots={fmt(self.effective_shots)}")
 
 
 class ZenodoData:
@@ -178,7 +258,7 @@ def read_qasm(path: str) -> Dict[str, list]:
     """Return {'rzz': [(a, b, angle)], 'rx': [(q, angle)], 'ry': [(q, angle)]} from a QASM file."""
     out: Dict[str, list] = {"rzz": [], "rx": [], "ry": []}
     arity = {"rzz": 2, "rx": 1, "ry": 1}
-    with open(path) as fh:
+    with open(path, encoding="utf-8") as fh:
         for lineno, line in enumerate(fh, 1):
             m = _GATE.match(line)
             if not m:
@@ -196,6 +276,59 @@ def read_qasm(path: str) -> Dict[str, list]:
 def qasm_step_bonds(path: str) -> List[Tuple[int, int]]:
     """Distinct rzz qubit pairs of one circuit file (the bond list actually executed)."""
     return sorted({(min(a, b), max(a, b)) for a, b, _ in read_qasm(path)["rzz"]})
+
+
+def _uniform_sign(vals, mag_ok, tol) -> Tuple[Optional[int], List[str]]:
+    """Common sign of `vals` (+1/-1, or 0 if every |v| is ~0) plus any problems found."""
+    probs = []
+    if len(vals) == 0:
+        return None, ["no gates"]
+    bad = [v for v in vals if not mag_ok(abs(v))]
+    if bad:
+        probs.append(f"|angle| off target: {sorted({round(v, 6) for v in bad})}")
+    signs = {int(np.sign(v)) if abs(v) > tol else 0 for v in vals}
+    if len(signs) > 1:
+        probs.append(f"mixed signs {sorted({round(v, 6) for v in vals})}")
+        return None, probs
+    return signs.pop(), probs
+
+
+def gauge_check_angles(rzz, rx, ry, J: float, h: float, dt: float, theta: float,
+                       tol: float = 1e-6, theta_tol: float = 1e-4) -> Tuple[Optional[str], List[str]]:
+    """Check signed circuit angles against (J, h, theta), allowing ONLY gauge-equivalent signs.
+
+    A circuit with rzz(a) = exp(-i a/2 ZZ) on every bond, rx(b) half-layers = exp(-i b/2 X)
+    (or merged interior rx(2b)) and ry(c) prep is, in our H = -J sum ZZ - h sum X, the literal
+    point (J', h', theta') = (-a/(2dt), -b/dt, c) [derived; see module docstring and the
+    gate-replay test]. It reproduces our run iff (J', h', theta') is in the gauge orbit
+        {(J,h,th), (-J,-h,th), (J,-h,-th), (-J,h,-th)}
+    (README identities (J,h,th)->(-J,-h,th), (J,h,th)->(J,-h,-th) and their composition).
+    Every gate of a type must share one sign (a mixed-sign rzz layer is a different model,
+    not a gauge). Magnitudes: |a| = 2|J|dt, |b| in {|h|dt, 2|h|dt}, |c| = |theta|.
+
+    Returns (label, problems): label names the matched orbit element, e.g. "(-J,-h,theta)";
+    problems is empty iff the circuit matches.
+    """
+    problems = []
+    sa, p = _uniform_sign(rzz, lambda m: abs(m - 2 * abs(J) * dt) < tol, tol)
+    problems += [f"rzz: {x}" for x in p]
+    sb, p = _uniform_sign(rx, lambda m: min(abs(m - abs(h) * dt), abs(m - 2 * abs(h) * dt)) < tol, tol)
+    problems += [f"rx: {x}" for x in p]
+    sc, p = _uniform_sign(ry, lambda m: abs(m - abs(theta)) < theta_tol, theta_tol)
+    problems += [f"ry: {x}" for x in p]
+    if problems or None in (sa, sb, sc):
+        return None, problems or ["sign undetermined"]
+    # literal-point signs relative to (J, h, theta); a zero target leaves its sign free
+    rel = []
+    for s_lit, ref in ((-sa, J), (-sb, h), (sc, theta)):
+        rel.append(0 if (s_lit == 0 or ref == 0) else int(s_lit * np.sign(ref)))
+    orbit = {(1, 1, 1): "(J,h,theta)", (-1, -1, 1): "(-J,-h,theta)",
+             (1, -1, -1): "(J,-h,-theta)", (-1, 1, -1): "(-J,h,-theta)"}
+    for key, label in orbit.items():
+        if all(r == 0 or r == k for r, k in zip(rel, key)):
+            return label, []
+    return None, [f"sign pattern (J',h',theta') = {tuple(('+' if r > 0 else '-') + n for r, n in zip(rel, ('J', 'h', 'theta')))} "
+                  "is NOT gauge-equivalent to (J,h,theta)"]
 
 
 # --------------------------------------------------------------------------- #
@@ -261,6 +394,31 @@ def pair_average_from_z2(z2: np.ndarray, n: int) -> np.ndarray:
     return (n * np.asarray(z2) - 1.0) / (n - 1.0)
 
 
+def light_cone_z2_step1(Lx: int, Ly: int, boundary: str, J: float, h: float, dt: float,
+                        theta: float, max_spins: int) -> float:
+    """EXACT Z2 after ONE circuit-order Strang step at any lattice size, via the light cone.
+
+    [derived] For a product initial state, <Z_i Z_j> after rx-half . rzz . rx-half depends only
+    on sites S = {i, j} and their bond neighbours, and only on bonds touching i or j (all other
+    gates cancel in U^dag Z_i Z_j U). So each pair is a <= 10-site simulation. Checked in tests
+    against simulate_z2 on reduced tori; this is how the N = 56 step-1 value is obtained.
+    Each cluster is guarded by check_ceiling (the full lattice is never allocated).
+    """
+    n = Lx * Ly
+    bonds = square_bonds(Lx, Ly, boundary)
+    total = float(n)                                    # diagonal Z_i^2 = 1
+    for i in range(n):
+        for j in range(i + 1, n):
+            bb = [b for b in bonds if i in b or j in b]
+            sites = sorted({i, j} | {q for b in bb for q in b})
+            idx = {q: k for k, q in enumerate(sites)}
+            local = [(idx[a], idx[b]) for a, b in bb]
+            _, psi = next(circuit_trotter_states(len(sites), local, J, h, dt, theta, [1], max_spins))
+            zz = ising_diagonal(len(sites), [(idx[i], idx[j])], -1.0)   # diag of Z_i Z_j
+            total += 2.0 * float(np.real(np.vdot(psi, zz * psi)))
+    return total / n ** 2
+
+
 # --------------------------------------------------------------------------- #
 # 3. Comparison
 # --------------------------------------------------------------------------- #
@@ -295,6 +453,12 @@ class Z2Comparison:
                 row += f"  {pair_average_from_z2(ser.values[k], self.n_data):>14.4f} ± {e:<9.4f}"
             lines.append(row)
         return lines
+
+    def provenance(self) -> List[str]:
+        """Estimator class and shot counts of every reference column. The ± in table() are
+        the series' own `err`; a column built from shots (e.g. a post-selected logical arm)
+        must have taken its err from Series.stderr_from_shot_std, i.e. from ACCEPTED shots."""
+        return [ser.provenance() for ser in self.h2.values()]
 
 
 def compare_z2(data: ZenodoData, quench: int, theta: float, sizes: Sequence[Tuple[int, int]],

@@ -137,6 +137,14 @@ Nature 653, 56–62, 2026; DOI 10.48550/arXiv.2503.20870):
   the quantum-dimer description ("emergent gauge-theoretic description in terms of a quantum dimer
   model") are confirmed in the abstract/intro/§V.
 
+  > **CONTRADICTED by the reference's own dataset — see [`DECISIONS.md`](../DECISIONS.md) OPEN-1.**
+  > A separate research thread (`research/05-zenodo-dataset-map.md`) read the released quench4
+  > ("triangular quench") circuits and found `rzz(0.5)`, `rx(0.5)`/`rx(1.0)` in all of them, i.e.
+  > **h/|J| = 2**, identical to the square quenches. The two threads never cross-checked each
+  > other and the conflict was never resolved. Note also that this item's own paragraph below
+  > records that the §V *body* was never reached, so the reading above rests on the abstract and
+  > intro. Treat h/|J| = 0.3 as **unconfirmed against the dataset the project actually has**.
+
 Not settleable from source with the available tools (PDF fetch blocked by content-type; the
 arxiv.org HTML of v3 truncates before the §V body and the Methods; the ar5iv mirror only hosts the
 older v1 preprint "Digital quantum magnetism at the frontier of classical simulations," which the

@@ -219,6 +219,62 @@ def test_z_errors_are_invisible_to_the_gauss_law_instantaneously():
     assert det["Z"] == 0.0 and det["X"] > 0.3
 
 
+def test_postselect_on_a_hand_built_distribution():
+    """Direct unit test of Targets.postselect (review: it had none, yet the Gauss-law
+    'qualified yes' verdict rests on it; its only callers were in scripts/run_gauss_law.py).
+
+    Hand-built distribution on 3x3: weight 0.5 on the 3-sublattice state c0 (defect-free),
+    0.3 on c1 = c0 with ONE spin flipped (still defect-free), 0.2 on a defective state. The
+    acceptance must then be exactly 0.8 and the pattern-memory estimator
+    m = (1/N) sum_i s_i(0) Z_i must equal the hand-computed
+        (0.5 * 1 + 0.3 * (N - 2)/N) / 0.8,
+    since m(c0) = 1 by definition and flipping one of the N = 9 spins costs 2/N. Spins are
+    read back from the basis index with independent bit arithmetic (site 0 = MSB,
+    bit = (1 - s)/2), so the expected value does not reuse the estimator's own value arrays.
+    """
+    d = TriangularDimers(3, 3)
+    s0 = d.three_sublattice_spins()
+    T = Targets.build(d, s0)
+    N = d.N
+    defects = d.total_defects()
+
+    i0 = d.product_state_index(s0)
+    s1 = np.array(s0, copy=True)
+    s1[0, 0] *= -1                                     # flippable in the 3-sublattice state
+    i1 = d.product_state_index(s1)
+    i2 = int(np.nonzero(defects > 0)[0][0])
+    assert defects[i0] == 0 and defects[i1] == 0 and defects[i2] > 0
+
+    p = np.zeros(1 << N)
+    p[i0], p[i1], p[i2] = 0.5, 0.3, 0.2
+
+    vals, acc = T.postselect(p)
+    assert acc == pytest.approx(0.8)
+
+    def memory(index):                                 # independent of gauss_mitigation
+        z = np.array([1 - 2 * ((index >> (N - 1 - i)) & 1) for i in range(N)])
+        return float(np.sum(np.asarray(s0).reshape(-1) * z) / N)
+
+    assert memory(i0) == pytest.approx(1.0)
+    assert memory(i1) == pytest.approx((N - 2) / N)
+    assert vals[0] == pytest.approx((0.5 * 1.0 + 0.3 * (N - 2) / N) / 0.8)
+
+    # The rejected (defective) branch must not influence the estimate at all...
+    q = p.copy()
+    q[i2] = 5.0
+    q /= q.sum()
+    vals_q, acc_q = T.postselect(q)
+    assert np.allclose(vals_q, vals)
+    assert acc_q == pytest.approx(0.8 / 5.8)
+    # ... on a distribution supported only on defect-free states it equals the raw mean ...
+    r = np.zeros(1 << N)
+    r[i0], r[i1] = 0.25, 0.75
+    assert np.allclose(T.postselect(r)[0], T.raw(r))
+    assert T.postselect(r)[1] == pytest.approx(1.0)
+    # ... and it is discriminating: the raw mean of p is not the post-selected one.
+    assert abs(T.raw(p)[0] - vals[0]) > 0.05
+
+
 def test_estimators_are_exact_on_ideal_global_depolarizing():
     # If the noise really were GLOBAL depolarizing with known floor, self-mitigation is exact.
     d, sp0, psi0 = _small()

@@ -99,7 +99,7 @@ def main():
     log("  Bare and Iceberg-undetected rates are exactly linear in N; the Iceberg detection rate per site drifts down "
         "slightly with N: each syndrome round has an N-independent part (the +4 of its 2(N+2) CNOTs, the flag "
         "CNOTs, ancilla readout/reset), so its rate is a*N + c and the constant amortises. 'Linear in N' is approximate for it. Time to a fixed survival shrinks ~1/N.")
-    with open(os.path.join(REPO, CONFIG.data_dir, "q3_size.txt"), "w") as fh:
+    with open(os.path.join(REPO, CONFIG.data_dir, "q3_size.txt"), "w", encoding="utf-8") as fh:
         fh.write("\n".join(out) + "\n")
     print("wrote data/q3_size.txt")
 

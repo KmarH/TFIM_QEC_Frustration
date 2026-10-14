@@ -121,9 +121,14 @@ A findings-vs-questions table (\S\ref{sec:table}) maps each conclusion to its ev
 simulated TFIM dynamics on up to 56 physical trapped-ion qubits of Quantinuum H2 and released the raw
 observable-level data on Zenodo. Separate work runs logical-qubit simulations but does not compute
 these physical observables from logical data. The project's thesis is to close that gap with a
-\emph{controlled} comparison: the same Hamiltonian, the same observables and conventions, the same
-experiment's physical-qubit data as baseline, with encoding as the single varied axis. A cross-platform
-comparison was considered and rejected because it changes Hamiltonian, code, observable and platform at once.
+\emph{controlled} comparison: the same Hamiltonian, the same observables and conventions, and encoding as
+the single varied axis --- between this project's own encoded and bare arms, run on one lattice at matched
+shots. The released experiment's physical-qubit data serves as an \emph{external reference} rather than as
+the bare arm: Iceberg needs $k+4$ physical qubits, so the reference's $7\times8$ lattice would need 60 and H2
+has 56, and lattice size, calibration and mitigation would all differ as well (see \S\ref{sec:q1} and
+\S\ref{sec:hw}).
+A cross-platform comparison was considered and rejected because it changes Hamiltonian, code, observable
+and platform at once.
 
 \paragraph{Related work, to be distinguished (not baselines).}
 Froland \emph{et al.}~\cite{froland} report an encoded $[[4,2,2]]$ Iceberg vs unencoded comparison of Ising
@@ -172,7 +177,13 @@ on periodic tori with row-major site index $n=y L_x+x$ (qubit 0 the most signifi
   (Trotter-vs-exact gap up to 0.066 for quench 1 and 0.298 for quench 2 on $4\times4$ \mea).
 \item \textbf{Frustrated model.} 2503.20870 writes $H=J\sum ZZ+h\sum X$ with antiferromagnetic $J>0$; in our
   sign the frustrated model is $J=-1$ \est. The triangular torus uses bonds along $(1,0),(0,1),(1,1)$
-  (``square + one diagonal''), $h/|J|=0.3$, $dt\,|J|=0.25$, as in the reference \S V.
+  (``square + one diagonal''), $h/|J|=0.3$, $dt\,|J|=0.25$. \textbf{Open:} the reference's own released
+  quench-4 (triangular) circuits are at $h/|J|=2$, not $0.3$ --- $r_{zz}(0.5)$, $r_x(0.5)/r_x(1.0)$ in every
+  file, identical to the square quenches. The $0.3$ comes from the paper's abstract and intro (its \S V body
+  was never read), and the two readings were never reconciled. The triangular work in this report should
+  therefore be read as a study of the weak-field regime $h\le0.5$, \emph{not} as reproducing the reference's
+  triangular quench; at $h/|J|=2$ the dimer and emergent-Gauss-law description does not apply at all. See
+  \texttt{DECISIONS.md} OPEN-1.
 \item \textbf{Observables.} $Z_2=\langle(\sum_iZ_i)^2\rangle/N^2$ (second moment, not the connected variance);
   connected $\langle Z_iZ_j\rangle_c$ binned by distance; dimer occupations $n_b=(1+Z_iZ_j)/2$, triangle
   defects $D_t$, winding numbers $(W_x,W_y)$ and flippable spins $\Pi_s$ (\S\ref{sec:gauss}).
@@ -229,9 +240,14 @@ SPAM asymmetry, and (except as a twirled stand-in) coherent errors.
 
 \subsection{The reference data and the comparison harness}
 The released dataset (Zenodo record 18487089, MD5-verified) was loaded with shape checks against the published
-step lists, and the geometry, angles and gauge signs were re-checked against the published QASM before any
+step lists, and the geometry and gate angles were re-checked against the published QASM before any
 comparison (run aborts on mismatch). Table~\ref{tab:q1} shows the first quench-1 steps against a reduced-lattice
-simulation at matched dimensionless parameters.
+simulation at matched dimensionless parameters. The check now compares the \emph{signed}
+$(r_{zz}, r_x, r_y)$ triple against the four gauge-equivalent sign patterns and requires sign
+uniformity across bonds; earlier drafts of this sentence claimed signs were checked while the code
+compared magnitudes only, which would have accepted a non-gauge pattern that shifts $Z_2$ by more than
+$0.05$. The released circuits are in fact sign-uniform throughout ($r_{zz}(0.5)$, $r_x(0.5)/r_x(1.0)$ in
+all 80 files), so no published comparison was affected.
 
 \begin{table}[h]\centering\small
 \caption{Quench 1 ($\theta=30^\circ$), $Z_2$ pair average $(NZ_2-1)/(N-1)=\overline{\langle Z_iZ_j\rangle}_{i\neq j}$.
@@ -267,14 +283,19 @@ round follows every step, with post-selection on all detectors.
 \item \textbf{Generic-noise execution} \cp: on $2\times3$ ($[[8,6,2]]$, 10 physical qubits), by step 6 bare $Z_2$
   drifts $\approx4.5\sigma$ ($p_2=10^{-3}$) and $\approx8\sigma$ ($3\times10^{-3}$) from ideal while post-selected encoded stays
   within $\approx2\sigma$, at 1.3--3$\times$ the shots; at $p_2=10^{-2}$ only $\approx5\%$ of shots survive and no
-  advantage is resolved \mea. One early point has encoded worse than bare; the advantage is not uniform.
+  advantage is resolved \mea. The advantage is not uniform: in 7 of the 24 $(p_2,\text{step})$ cells at
+  $p_2\le3\times10^{-3}$ encoded sits further from ideal than bare, including steps 4 and 5, though
+  encoded minus bare is within $1.0\sigma$ in every one of them; encoded beats bare at $\ge2.5\sigma$ only
+  at step 6. (The $\approx2\sigma$ above is encoded against \emph{ideal}; one cell reaches $2.8\sigma$.)
 \end{itemize}
 
 \subsection{Does encoding help at all? The \texorpdfstring{$\eta$}{eta} crossover (FLAG-0)}\label{sec:flag0}
 A two-qubit fault after a logical $e^{-i\phi P_aP_b}$ on the support $(a,b)$ that is $X_aX_b$, $Y_aY_b$ or $Z_aZ_b$
 commutes with both Iceberg stabilizers and is a nontrivial logical: 3 of the 15 two-qubit Paulis, i.e.\ 1/5 of a
 uniform gate fault, is undetectable \der{}+\mea{} (on the $2\times3$ step Stim finds 63 distinct undetected
-Paulis, all $XX$/$YY$/$ZZ$ on the supports of the 21 logical gates; \code{docs/encoded_tfim.md} \S2 and its test). If a fraction $\eta$ of the error is extra $Z\otimes Z$, the undetectable rate per
+Paulis, all $XX$/$YY$/$ZZ$ on the supports of the 21 logical gates; \code{docs/encoded_tfim.md} \S2 and its test.
+This is a count of distinct Pauli \emph{operators} and is not the same quantity as the ``undetected-logical''
+column of \code{data/encoded_iceberg.txt}, which counts detector-error-model fault \emph{mechanisms}). If a fraction $\eta$ of the error is extra $Z\otimes Z$, the undetectable rate per
 logical gate is $p_2[(1-\eta)\tfrac{3}{15}+\eta]=p_2(0.2+0.8\eta)$. On the $2\times2$ test lattice the Iceberg
 step has 12 logical rotations and the bare step 4 two-qubit and 8 one-qubit gates, so the crossover
 $12\,p_2(0.2+0.8\eta)=4p_2+8p_1$ with $p_1=p_2/10$ gives $\eta=0.25$ exactly for Iceberg \der{}
@@ -362,9 +383,13 @@ acceptance after 3 steps ($2\times3$) & 0.83 & 0.21 & 0.28 & 0.23 & ---\\
 \end{table}
 
 \paragraph{Decision.} \textbf{Iceberg is the recommended encoded baseline.} Under the assumed noise \cp, the $d=3$
-and $d=4$ codes buy about $1.2\times$ on the residual and pay in acceptance (3--4$\times$ lower after 3 steps on
-$2\times3$ at $p_2=10^{-3}$, more at higher $p_2$, 1.4--1.6$\times$ at the H2 prior) and in two-qubit gates (3--7$\times$
-per step in Table~\ref{tab:budget}, whose lattices differ; 6--8$\times$ per logical qubit). None was discarded: all four
+and $d=4$ codes buy about $1.2\times$ on the residual and pay in acceptance (2.9--3.9$\times$ lower after 3 steps on
+$2\times3$ at $p_2=10^{-3}$, more at higher $p_2$, but only $\approx1.9$--$2.3\times$ at $2\times2$, so the lattice
+belongs with the ratio; 1.4--1.6$\times$ at the H2 prior) and in two-qubit gates
+(\textbf{6.6--8.6$\times$} per step at a matched $2\times2$ lattice: Iceberg 28, concatenated 184, 5-qubit 192,
+Steane 240). Table~\ref{tab:budget}'s own rows use different lattices per code, and the "3--7$\times$" of
+earlier drafts came from reading across them; it \emph{understated} the cost of the higher-distance codes and
+so ran against this section's own conclusion. None was discarded: all four
 were built, verified (transparency, Stim-vs-local-sim agreement) and executed on Selene with mid-circuit measurement
 and feed-forward, and in each run the executed acceptance follows the first-order prediction from below (Iceberg
 highest, concat lowest) \mea. The expectation in the brief that the 5-qubit code would be
@@ -498,12 +523,22 @@ Local observables stay faithful below a sharp Trotter-step threshold~\cite{heyl}
 Floquet resonance $dt=\pi/(|J|n_s)$, where flipping a non-flippable spin costs $2|J|n_s$ ($n_s\in\{2,4,6\}$);
 $\pi/6=0.524$ for the $n_s=6$ spins of the starts \der, broadened downward by $h$. Measured thresholds (absolute criterion: time-max flippable
 error $0.05$) are 0.38--0.52 at $h\le0.3$ and 0.32--0.42 at $h=0.5$ \mea. Second order is confirmed (local slopes
-2.00--2.04, infidelity $\propto dt^4$). \textbf{For $h\le0.3$, $dt=0.25$ sits 1.3--2.0$\times$ below the threshold}
-(relative and absolute criteria); at $h=0.5$ it is past the relative threshold. The sector-conditioned verdict
-quantities have Trotter bias $\le0.12$ of their tolerance; the bias sits in the leakage ($P_{\rm out}$ inflated
-$\approx10$--25\%) and in the defect density ($\approx40\%$ on $3\times6$, explained by a blend of Floquet factors,
-predicted 1.39--1.44$\times$ vs measured 1.39--1.43$\times$) \der{}+\mea. Absolute defect densities quoted at
-$dt=0.25$ describe the circuit, not continuous time.
+1.97--2.04, infidelity $\propto dt^4$). \textbf{For $h\le0.3$, $dt=0.25$ sits 1.3--2.0$\times$ below the threshold}
+(relative and absolute criteria); at $h=0.5$ it is past the relative threshold. The threshold location is
+invariant under the choice of Strang ordering, since the two step operators are unitarily conjugate and so share
+their Floquet quasienergies; re-measured in the published circuits' ordering, every bracket is equal or higher,
+so this margin is conservative. The sector-conditioned verdict quantities have Trotter bias $\le0.12$ of their
+tolerance in either ordering.
+
+The leakage and raw defect density, however, carry a Trotter bias \textbf{whose sign depends on the ordering}.
+In this project's splitting (\code{src/trotter.py}, $ZZ$ outside) $P_{\rm out}$ is inflated $\approx10$--25\% and
+the $3\times6$ defect density $\approx40\%$ (a blend of Floquet factors, predicted 1.39--1.44$\times$ vs measured
+1.39--1.43$\times$) \der{}+\mea. In the \emph{published circuits'} ordering ($X$ half, $ZZ$, $X$ half, as in
+\code{src/compare.py}) the same quantities are \emph{deflated}: $P_{\rm out}$ by 19--35\% and the defect density
+by 25--51\% ($3\times6$ full-window ratio 0.605 against 1.389) \mea. Earlier drafts stated that the absolute
+defect densities at $dt=0.25$ ``describe the circuit, not continuous time'': that had the sign backwards. They
+describe this project's own splitting. Any statement about the reference circuit must use the circuit ordering;
+see \code{data/trotter_order_compare.txt}.
 
 \begin{figure}[h]\centering
 \maybefig{trotter_threshold.png}{0.85\linewidth}
@@ -598,7 +633,7 @@ use & verdict & basis\\
 error correction & \textbf{no} (passive constraint) & distance 1; no recovery map; ideal dynamics violates the constraint. Engineered monitored $\mathbb Z_2$ schemes with feedback exist~\cite{wauters} but were not modelled. \\
 post-selection on defects & \textbf{modest yes}, $X$/$Y$-type noise only & 2--8$\times$ bias reduction on spin correlators at $p\le3\times10^{-3}$ for 1.1--1.8$\times$ shots; floored by an $O((h/J)^2)$ physics bias ($\approx0.013$ at $h/|J|=0.3$); acceptance falls with size even noiseless \mea\\
 \quad under dephasing & \textbf{no} & post-selection only flips the residual's sign \mea\\
-self-mitigation by depolarizing rescaling & \textbf{no} as a general method & under local noise the defect-derived fidelity is not the per-observable decay; up to $13\times$ worse on some observables \mea\\
+self-mitigation by depolarizing rescaling & \textbf{no} as a general method & under local noise the defect-derived fidelity is not the per-observable decay; up to $32\times$ worse on some observables (the maximum in \code{data/gauss_law_mitigation.txt}: bit-flip $p=10^{-2}$ at $t=3.25$; $25\times$ for depolarizing $p=3\times10^{-3}$) \mea\\
 exact-symmetry methods (symmetry expansion, GUESS, symmetry-adjusted shadows) & \textbf{not applicable} & a $Z$-product quench has $\langle\prod X\rangle=0$, and Pauli channels keep it 0; TFIM lacks the needed U(1) \der\\
 platforms & \textbf{undetermined} & depends on each platform's residual $X$/$Y$ fraction; Gauss-law post-selection has been realized on H2 for an \emph{engineered} one-form syndrome~\cite{sukeno} \tg{established, abstract}\\
 \bottomrule
@@ -663,8 +698,12 @@ and a recorded cost estimate. Every result will be labelled classical prediction
 \item \textbf{G2 --- the inputs of FLAG-0.} Obtain $\eta$ and $\epsilon$ for H2's native gate from the best
   labelled source and rerun the sensitivity table.
 \item \textbf{G3 --- the decisive test.} Encoded (Iceberg, randomized-compiled) vs bare on H2 at matched shots,
-  lattice, steps and observable; a yes / no / inconclusive verdict on ``encoding helps''. This is also the
-  article's Q1 spine against the released physical data.
+  lattice, steps and observable; a yes / no / inconclusive verdict on ``encoding helps''. The lattice must be
+  one where \emph{both} arms fit in H2's 56 qubits: $6\times8$ (52 physical) is the closest in shape to the
+  reference's $7\times8$, which cannot be encoded at all ($k+4=60>56$). The released physical data enters as an
+  external reference --- quantitatively at step 1 through an exact light-cone finite-size correction, and as a
+  trend thereafter --- not as the bare arm. The same reduction was already made for Q3 and is now explicit
+  for Q1 (\texttt{DECISIONS.md} OPEN-2).
 \item \textbf{G4 --- active correction} for $d\ge3$, designed and verified in Stim and Selene first.
 \end{enumerate}
 Two decisions from this work apply to the hardware runs. An encoded Q3 run cannot use the $9\times6$ reference torus on

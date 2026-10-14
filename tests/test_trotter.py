@@ -12,8 +12,8 @@ import scipy.sparse.linalg as sla
 
 from src.lattice import square_bonds
 from src.operators import tfim_hamiltonian
-from src.trotter import apply_x_rotations, evolve, ising_diagonal
-from src.observables import expval_z
+from src.trotter import apply_x_rotations, circuit_trotter2_step, evolve, ising_diagonal, trotter2_step
+from src.observables import expval_z, total_z_sq_normalized
 
 
 def test_norm_preserved():
@@ -71,6 +71,54 @@ def test_trotter_converges_to_exact():
     ratio2 = errs[1] / errs[2]
     assert ratio1 > 3.0 and ratio2 > 3.0
     assert errs[-1] < 1e-2
+
+
+def test_circuit_trotter2_step_matches_compare_circuit_order():
+    # Pin circuit_trotter2_step against src/compare.py's independent, gate-level
+    # circuit-order evolution (X half, ZZ, X half) built from the same primitives.
+    from src.compare import circuit_trotter_states
+
+    n = 4
+    bonds = square_bonds(2, 2, "open")
+    J, h, dt = 1.3, 0.9, 0.25
+    diag = ising_diagonal(n, bonds, J)
+
+    psi = np.zeros(1 << n, dtype=np.complex128)
+    psi[0] = 1.0   # |0...0>, matching compare.ry_product_state(theta=0)
+    n_steps = 5
+    for _ in range(n_steps):
+        psi = circuit_trotter2_step(psi, n, diag, h, dt)
+
+    step, want = next(circuit_trotter_states(
+        n, bonds, J, h, dt, theta=0.0, record_steps=[n_steps], max_spins=n))
+    assert step == n_steps
+    assert np.allclose(psi, want, atol=1e-12)
+
+
+def test_trotter_orderings_differ_at_reference_dt():
+    # The two 2nd-order splittings are unitarily conjugate (same quasienergies),
+    # but they read out different observables along the way. At the published
+    # dt = 0.25, h*dt = 0.5 this must NOT be negligible, or the two orderings
+    # could be silently swapped without anyone noticing (the bug this pins).
+    n = 9
+    bonds = square_bonds(3, 3, "periodic")
+    J, h, dt = 1.0, 2.0, 0.25   # project convention (J, h) = (+1, +2) at dt = 0.25
+    diag = ising_diagonal(n, bonds, J)
+
+    theta = np.pi / 6
+    single = np.array([np.cos(theta / 2), np.sin(theta / 2)], dtype=np.complex128)
+    psi0 = np.ones(1, dtype=np.complex128)
+    for _ in range(n):
+        psi0 = np.kron(psi0, single)
+
+    psi_zz, psi_circ = psi0.copy(), psi0.copy()
+    for _ in range(8):
+        psi_zz = trotter2_step(psi_zz, n, diag, h, dt)
+        psi_circ = circuit_trotter2_step(psi_circ, n, diag, h, dt)
+
+    z2_zz = total_z_sq_normalized(psi_zz, n)
+    z2_circ = total_z_sq_normalized(psi_circ, n)
+    assert abs(z2_zz - z2_circ) > 1e-2
 
 
 def test_ising_diagonal_matches_operator():

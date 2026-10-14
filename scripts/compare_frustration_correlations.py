@@ -96,7 +96,7 @@ def main():
             log(f"  {Lx}x{Ly:<5d} {h:4.1f} | {sq[0].mean:+11.4f} {sq[-1].mean:+9.4f} {sq[-1].r:6.3f} | {tr[0].mean:+11.4f} "
                 f"{tr[-1].mean:+9.4f} {tr[-1].r:6.3f} | "
                 f"{'yes' if sq[0].mean < tr[0].mean else 'NO'}")
-    with open(os.path.join(ROOT, CONFIG.data_dir, "frustration_correlations.txt"), "w") as fh:
+    with open(os.path.join(ROOT, CONFIG.data_dir, "frustration_correlations.txt"), "w", encoding="utf-8") as fh:
         fh.write("\n".join(out) + "\n")
     print("wrote data/frustration_correlations.txt")
 

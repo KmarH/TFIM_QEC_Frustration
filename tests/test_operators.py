@@ -1,6 +1,7 @@
 """Operator and Hamiltonian correctness tests with analytic references."""
 
 import numpy as np
+import pytest
 
 from src.lattice import square_bonds
 from src.operators import single_site, tfim_hamiltonian, two_site
@@ -29,9 +30,22 @@ def test_single_spin_spectrum():
 
 
 def test_two_spin_closed_form():
-    # Two spins, one bond: H = -J Z0 Z1 - h (X0 + X1).
-    # Known: ground-state energy E0 = -sqrt((2h)^2 + J^2)? Verify numerically
-    # against direct diagonalization of the explicit 4x4 matrix built here.
+    """Two spins, one bond: H = -J Z0 Z1 - h (X0 + X1) (this project's convention).
+
+    Analytic ground-state energy [derived]: in the symmetric sector with basis
+    |00>, (|01>+|10>)/sqrt2, |11> the Hamiltonian is
+        [[-J, -sqrt2 h, 0], [-sqrt2 h, +J, -sqrt2 h], [0, -sqrt2 h, -J]],
+    and (|00> - |11>)/sqrt2 is an exact eigenvector with eigenvalue -J. In the
+    remaining 2x2 block spanned by (|00>+|11>)/sqrt2 and (|01>+|10>)/sqrt2 the
+    matrix is [[-J, -2h], [-2h, +J]], whose eigenvalues are +-sqrt(J^2 + 4h^2).
+    The antisymmetric state (|01>-|10>)/sqrt2 is decoupled at energy +J. Hence
+        E0 = -sqrt(J^2 + 4h^2),
+    the lowest of {-sqrt(J^2+4h^2), -J, +J, +sqrt(J^2+4h^2)}.
+
+    Review fix: this test previously built its reference from the same primitives
+    it tests and never asserted the closed form, so it could not catch a wrong
+    overall convention. The full spectrum is now checked against the analytic one.
+    """
     J, h = 1.0, 0.5
     H = tfim_hamiltonian(2, bonds=[(0, 1)], J=J, h=h).toarray()
 
@@ -40,6 +54,36 @@ def test_two_spin_closed_form():
     X1 = single_site("X", 1, 2).toarray()
     H_ref = -J * ZZ - h * (X0 + X1)
     assert np.allclose(H, H_ref)
+
+    # The analytic closed form, asserted (not just "verified numerically").
+    for J, h in [(1.0, 0.5), (1.0, 0.0), (0.0, 0.73), (1.0, 2.0), (-1.0, 0.4)]:
+        w = np.linalg.eigvalsh(tfim_hamiltonian(2, bonds=[(0, 1)], J=J, h=h).toarray())
+        root = np.sqrt(J * J + 4 * h * h)
+        assert w[0] == pytest.approx(-root)
+        assert np.allclose(np.sort(w), np.sort([-root, -J, J, root]))
+
+
+def test_neel_product_state_is_a_checkerboard():
+    """Regression (review): `product_state(..., "neel")` selected spins by `site % 2`,
+    which for row-major n = y*Lx + x with EVEN Lx is `x % 2` — column stripes, giving
+    sum_<ij> <Z_iZ_j> = 0 on the 4x4 periodic lattice instead of -32. A true
+    checkerboard flips the (x + y) % 2 sublattice, so every one of the 32 bonds is
+    anti-aligned. Measured here as the J=1, h=0 energy (= -sum ZZ) of the state."""
+    from src.backends import product_state
+
+    Lx = Ly = 4
+    n = Lx * Ly
+    bonds = square_bonds(Lx, Ly, "periodic")
+    assert len(bonds) == 32
+    H = tfim_hamiltonian(n, bonds, J=1.0, h=0.0)
+    psi = product_state(n, "neel", Lx=Lx)
+    sum_zz = -float(np.real(psi.conj() @ (H @ psi)))
+    assert sum_zz == pytest.approx(-len(bonds))
+    # all_up is the opposite extreme, and the 1D default still alternates.
+    up = product_state(n, "all_up")
+    assert -float(np.real(up.conj() @ (H @ up))) == pytest.approx(len(bonds))
+    chain = product_state(4, "neel")
+    assert np.argmax(np.abs(chain)) == 0b0101
 
 
 def test_sparse_builder_matches_kron_reference():
