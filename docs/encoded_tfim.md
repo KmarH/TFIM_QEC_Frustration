@@ -12,7 +12,10 @@ Status tags: **[established]** from a cited source or the repo's verified code; 
 
 ## 1. What was built
 
-**Encoding.** The logical 2×3 periodic square lattice (k = 6) sits in **one** Iceberg block, [[8, 6, 2]] (arXiv:2211.06703; repo `src/qec/iceberg.py` layout). One syndrome ancilla and one flag are added, so **n_phys = 10**.
+**Encoding.** The logical 2×3 periodic lattice (k = 6) sits in **one** Iceberg block, [[8, 6, 2]] (arXiv:2211.06703; repo `src/qec/iceberg.py` layout). One syndrome ancilla and one flag are added, so **n_phys = 10**.
+
+> **What "2×3 periodic" actually is [established from `src/lattice.py`; tested].** Along a periodic dimension of length 2 the two wrap neighbours of a site coincide, so `src/lattice.py` deliberately de-duplicates that bond rather than counting it twice. This is correct physics and is covered by tests — not a bug. The consequence for the small lattices used throughout this document is that **2×3 is a ladder (B = 9 bonds), and 2×2 is a 4-site ring (B = 4), neither of them a genuine torus.** They are degenerate test lattices, called "periodic square" loosely elsewhere in the project.
+> The headline crossover nevertheless generalises correctly to non-degenerate lattices, verified with the repo's own code: **η\* = 0.2500 at 2×2 (B = 4), 0.3600 at 2×3 (B = 9), 0.4404 at a genuine non-degenerate 4×4 torus (B = 32)**, with ratios at η = 0.05 of 0.60, 0.4941 and 0.4364 respectively — matching the generalisation derived later in this document ("Lattice dependence of the crossover") **[measured]**. So the 2×2 toy lattice is the **most pessimistic** case for Iceberg, not a favourably chosen one.
 - Why one block: Iceberg encodes k logicals at a cost of only 2 extra qubits, and the logical bonds and fields are then weight-2 physical rotations.
 - Iceberg requires even k, so odd lattices (3×3) are refused.
 
@@ -58,6 +61,7 @@ Pauli faults pass through a Pauli rotation exp(−iφP) unchanged; only φ's sig
 **The brief's done-check "no single-fault undetected logical error" FAILS for this construction, and cannot pass for any construction of this kind [derived; measured].**
 - A logical gate exp(−iφ P_aP_b) acts on exactly two physical qubits. A fault after it can leave **X_aX_b, Y_aY_b or Z_aZ_b**. Each of these commutes with S_X = Xⁿ and S_Z = Zⁿ, and each is a nontrivial logical operator. This is distance 2 with weight-2 logical gates.
 - Stim lists 63 distinct undetected Paulis. **All are XX, YY or ZZ, and each sits on the support of one of the 21 logical gates**: 21 × 3, with nothing else (`test_single_fault_accounting_isolates_the_logical_gates`).
+  - **Naming caution — 63 is not the same count as the "undetected-logical" column of `data/encoded_iceberg.txt` (42).** `single_fault_report` in `src/encoded_tfim.py` returns two different, both-correct quantities with confusingly similar English names: `paulis` is the **de-duplicated set of distinct undetected Pauli strings**, pooled over the Z and X readout bases (len = 63 — the 21 × 3 above), while `undetected_logical` counts **detector-error-model fault mechanisms** that cause an undetected logical error, summed over both bases (42 — the row in the table above). One counts distinct Pauli *operators*, the other counts noise *mechanisms*, so they are not expected to match and a mismatch between 63 and 42 is not an inconsistency.
 - Under uniform two-qubit depolarizing noise that is **3 of 15 Pauli components, i.e. 1/5 of every logical-gate fault**, which the code cannot see.
 - So the honest statement is: **the syndrome-extraction gadget is single-fault tolerant; the encoded Trotter step is not.** The undetectable residue is first order in the logical-gate error rate.
 
@@ -153,16 +157,24 @@ Physical qubits = data + 1 ancilla + 1 flag. L = runs locally and fits H2; H = f
 
 **Logical-gate cost [measured from the schedules]:**
 
-| code (lattice) | field X̄ weight | bond Z̄Z̄ weight | 2q ops / step | 1q ops / step | measurements / step |
-|---|---|---|---|---|---|
-| Iceberg 2×2 | 2 | 2 | 28 | 48 | 4 |
-| Steane 1×2 | 3 | 6 | 108 | 101 | 29 |
-| 5-qubit 1×2 | 3 | 6 | 84 | 109 | 21 |
-| concat 2×2 | 4 | 4 | 184 | 164 | 36 |
-| bare 2×2 | — | — | 4 | 8 | — |
+The per-step counts below are the *executed* (reduced-lattice) schedules, and **the lattice differs by row** — Steane and the 5-qubit code are counted at 1×2, Iceberg and concat at 2×2 — so these columns must **not** be compared across rows. The last column gives the gate count re-measured for every code at the **same** 2×2 lattice, which is the only apples-to-apples comparison.
+
+| code (executed lattice) | field X̄ weight | bond Z̄Z̄ weight | 2q ops / step (that lattice) | 1q ops / step (that lattice) | measurements / step (that lattice) | **2q ops / step, matched 2×2** |
+|---|---|---|---|---|---|---|
+| Iceberg 2×2 | 2 | 2 | 28 | 48 | 4 | **28** |
+| Steane 1×2 | 3 | 6 | 108 | 101 | 29 | **240** |
+| 5-qubit 1×2 | 3 | 6 | 84 | 109 | 21 | **192** |
+| concat 2×2 | 4 | 4 | 184 | 164 | 36 | **184** |
+| bare 2×2 | — | — | 4 | 8 | — | **4** |
+
+At the matched 2×2 lattice (physical qubits: Iceberg 8, Steane 30, 5-qubit 22, concat 18) the d ≥ 3 / d = 4 codes cost **6.6–8.6× Iceberg's two-qubit gates per step**: Steane 240/28 = 8.6×, 5-qubit 192/28 = 6.9×, concat 184/28 = 6.6× **[measured, matched-lattice rerun of the repo's own builders]**. Earlier drafts quoted "3–7×" from the mixed-lattice columns above, which **understated** the cost of the higher-distance codes. Note the direction of that error: it ran *against* this document's own preferred conclusion by making the d ≥ 3 and d = 4 codes look cheaper than they are, so the corrected 6.6–8.6× range **strengthens** the Iceberg recommendation of B5 rather than weakening it.
 
 ## B3. Measured undetected-logical probability per Trotter step [Stim, first order]
 Noise **[assumed]**: p2 per 2-qubit gate; p1 = pm = p_init = p2/10.
+
+**What "[measured], first order" means for these numbers.** Every "first-order" value here and in the sensitivity tables below is an **exact closed-form accounting** over Stim's detector-error-model mechanisms — a deterministic enumeration with **no sampling error**, so it carries no error bar. It is not a Monte Carlo estimate, and a `[measured]` tag on one of these numbers must not be read as "sampled, error bar omitted". What is approximate is the physics, not the arithmetic: the accounting keeps only single-fault mechanisms and exponentiates the per-step detection probability, acceptance = exp(−D).
+- **That approximation is validated, not suspect [measured].** Exact Stim Monte Carlo sampling was run against the first-order exp(−D) acceptance and agrees to **≤ 1.1e-3** even where acceptance is as low as 0.0097 — e.g. Steane 2×3 at p2 = 3e-3: first order 0.0097 vs sampled 0.0096 ± 0.0002; Iceberg 2×2 at p2 = 1e-3: 0.8751 vs 0.8749 ± 0.0007.
+- The **undetected-logical** first-order rate is the looser of the two: it sits about **2–11% below** the sampled value, and by a similar margin for all four codes, so the rankings and ratios quoted in this document are unaffected.
 
 | lattice, p2 = 1e-3 | Iceberg | Steane | 5-qubit | concat | **bare** |
 |---|---|---|---|---|---|
@@ -178,7 +190,7 @@ At p2 = 3e-3 the residuals scale ×3. First-order acceptance after 3 steps at 2�
 2. **The entire undetectable residual sits at the logical rotations, and it is independent of code distance.**
    - Iceberg's native gate leaves XX, YY or ZZ on its own support: 3/15 · p2 per gate.
    - Every parity gadget leaves its own generator through the fault at the rotation point: 2/15 · p2 (from the adjacent CNOTs) plus 1/3 · p1 (from the ancilla `Rz`), regardless of whether the code has d = 2, 3 or 4.
-3. Per step, every code suppresses the unprotected error of the bare circuit by about **2–3×**: 2.4e-3 vs 4.8e-3 at 2×2, and 3.5–4.2e-3 vs 1.02e-2 at 2×3. **The d = 3 and d = 4 codes buy only a further ~1.2× over Iceberg**, from the cheaper gadget residual, at **3–4× lower acceptance** and 3–7× more two-qubit gates per step.
+3. Per step, every code suppresses the unprotected error of the bare circuit by about **2–3×**: 2.4e-3 vs 4.8e-3 at 2×2, and 3.5–4.2e-3 vs 1.02e-2 at 2×3. **The d = 3 and d = 4 codes buy only a further ~1.2× over Iceberg**, from the cheaper gadget residual, at **3–4× lower acceptance on the 2×3 lattice** (2.9–3.9× from the table above; the penalty is lattice-dependent and is only about **1.9–2.3× at 2×2**, where Iceberg's acceptance is 0.875 vs Steane 0.383, 5-qubit 0.469 and concat 0.472 at p2 = 1e-3) and **6.6–8.6× more two-qubit gates per step at a matched 2×2 lattice** (see B2).
 
 ## B4. Executed noisy runs at reduced size (Selene) [measured]
 - Source: `data/encoded_codes.txt` §5. Setup: θ = π/6; p1 = pm = p_init = p2/10 **[assumed]**; ± is 1 standard error.
@@ -199,7 +211,7 @@ At p2 = 3e-3 the residuals scale ×3. First-order acceptance after 3 steps at 2�
 
 What the execution shows:
 - All four pipelines run end to end on Selene, with real mid-circuit measurement and feedforward discard.
-- **Acceptance ranks exactly as the Stim accounting predicts:** Iceberg ≫ 5-qubit > Steane > concat. Executed acceptance is consistently **below** the first-order prediction (by 5–15 points at 1e-3). The likely reasons are Selene's own native-gate decomposition (as in Part A) and the first-order exp approximation **[inferred]**.
+- **Acceptance ranks exactly as the Stim accounting predicts:** Iceberg ≫ 5-qubit > Steane > concat. Executed acceptance is consistently **below** the first-order prediction (by 5–15 points at 1e-3). **The cause is Selene's own native-gate accounting, not the first-order approximation** — see "Why Selene keeps fewer shots than the Stim prediction" below and `data/selene_gap.txt` §1, where the first-order exp(−D) value, exact Stim sampling and local-sim all agree (0.670 / 0.673 / 0.655 ± 0.015 at p2 = 3e-3) and the gap is isolated to Selene charging its one-qubit error channel on ≈3.85× more native operations (`rxy` and `rz`) plus extra init/allocation events **[measured]**.
 - **Z2:** at 3 steps on these 2–4-site lattices, neither encoded nor bare Z2 deviates resolvably from ideal. Every point is within about 1.7σ. **The execution therefore cannot show an encoding advantage at this size and depth; it does not show a disadvantage either.**
   - The d ≥ 3 codes keep so few shots that their error bars are 2–14× the bare ones.
   - The quantitative comparison rests on the measured accounting (B3), not on these curves.
@@ -209,19 +221,23 @@ What the execution shows:
 | code | decision | quantitative basis |
 |---|---|---|
 | **Iceberg [[k+2,k,2]]** | **BUILT — the reference, and the recommended encoded baseline** | Fits H2 up to 4×4 (20 qubits). Residual is 0.42–0.50× bare per step. First-order acceptance after 3 steps is 0.83 (2×3, p2 = 1e-3). |
-| **Steane [[7,1,3]]** | **BUILT, not recommended** (dominated by Iceberg) | Fits ≤ 55 up to 2×3 (44 qubits); 2×4 needs 58. Pipeline verified (B1). Residual is **only 1.2× lower than Iceberg** (3.5e-3 vs 4.2e-3 per step at 2×3), because it comes from the rotation gadgets, not the distance. Acceptance is **4× lower** (0.21 vs 0.83 after 3 steps), with 108 two-qubit gates per step for just 2 logical qubits. |
-| **5-qubit [[5,1,3]]** | **BUILT, not recommended** (dominated by Iceberg) | Fits ≤ 55 up to 2×4 (42 qubits). The handoff expected a discard on logical-gate cost. **The measurement does not support that:** with the frame-corrected, minimum-weight representatives, its gates cost about the same as Steane's (field weight 3, bond weight 6; 84 two-qubit gates per step vs Steane's 108), and it keeps slightly more shots (0.28 vs 0.21). Same residual as Steane. |
+| **Steane [[7,1,3]]** | **BUILT, not recommended** (dominated by Iceberg) | Fits ≤ 55 up to 2×3 (44 qubits); 2×4 needs 58. Pipeline verified (B1). Residual is **only 1.2× lower than Iceberg** (3.5e-3 vs 4.2e-3 per step at 2×3), because it comes from the rotation gadgets, not the distance. Acceptance is **4× lower at 2×3** (0.21 vs 0.83 after 3 steps; about 2.3× lower at 2×2, 0.383 vs 0.875), with 108 two-qubit gates per step at its executed 1×2 lattice — 240 at a matched 2×2, i.e. 8.6× Iceberg's — for just 2 logical qubits. |
+| **5-qubit [[5,1,3]]** | **BUILT, not recommended** (dominated by Iceberg) | Fits ≤ 55 up to 2×4 (42 qubits). The handoff expected a discard on logical-gate cost. **The measurement does not support that:** with the frame-corrected, minimum-weight representatives, its gates cost about the same as Steane's (field weight 3, bond weight 6; 84 two-qubit gates per step vs Steane's 108, both at their executed 1×2 lattice; 192 vs 240 at a matched 2×2), and it keeps slightly more shots (0.28 vs 0.21). Same residual as Steane. |
 | **Concatenated Iceberg [[16,4,4]]** | **BUILT, not recommended** (dominated by Iceberg) | Fits ≤ 55 up to 3×4 (50 qubits), the largest d ≥ 3 lattice here. Highest cost: 184 two-qubit gates per step at 2×2. Lowest executed acceptance (0.33 after 3 steps at 1e-3; 0.03 at 3e-3). Same residual as the d = 3 codes. **Distance 4 buys nothing over d = 3 for this residual.** |
 
 **None of the three is discarded.** Under budget (ii), each fits the ~55-qubit scale for at least a 2×2 lattice, and its pipeline is built, verified and executed. A budget or "harder to implement" discard would therefore be weak, and the brief rules those out. The measured comparison is still unambiguous for this setting (QED post-selection, distillation-free rotations, assumed depolarizing noise):
 
-> **Higher code distance does not reduce the undetectable residual, because the residual is set by the arbitrary-angle rotation gadgets, not by the code. The d = 3 and d = 4 codes buy about 1.2× on that residual and pay 3–5× in acceptance (more at higher p2) and 3–7× in two-qubit gates. Iceberg is the right encoded baseline for Q1.**
+> **Higher code distance does not reduce the undetectable residual, because the residual is set by the arbitrary-angle rotation gadgets, not by the code. The d = 3 and d = 4 codes buy about 1.2× on that residual and pay **2.9–3.9× in acceptance on the 2×3 lattice** (about 1.9–2.3× at 2×2; more at higher p2 on either lattice) and **6.6–8.6× in two-qubit gates at a matched 2×2 lattice**. Iceberg is the right encoded baseline for Q1.**
 
 ## B6. Open, not done
 - **Active error correction for the d ≥ 3 codes.** They are run here as *detection* codes, which is the brief's post-selection pipeline. Correcting single errors instead of discarding would raise their acceptance substantially, and it is the main lever that could change B5. It would **not** remove the rotation-gadget residual, and decoding adds its own failure modes. This is not built.
 - **Lower-residual rotations.** Magic-state injection with distillation, or flagged/verified rotation gadgets, could cut the residual. Distillation is excluded at this scale by the brief.
 - **Scale.** Execution runs at 2–4 logical qubits; the 2×3 numbers come from Stim only. Selene takes about 1–4 s per shot at 16–18 qubits, so larger executed shot counts need much more time.
-- The Selene-vs-prediction acceptance gap is unexplained beyond the decomposition hypothesis.
+- The Selene-vs-prediction acceptance gap is now **mostly explained**: Selene charges its one-qubit
+  error channel on ≈3.85× more native operations, plus extra init/allocation events, which accounts
+  for 60–80% of it and leaves a 1–3σ residual. It is **not** caused by the first-order
+  approximation, which exact Stim sampling confirms to ≤1.1e-3 even at 1% acceptance. See
+  "Why Selene keeps fewer shots than the Stim prediction" and `data/selene_gap.txt` §1–4 [measured].
 
 ---
 
