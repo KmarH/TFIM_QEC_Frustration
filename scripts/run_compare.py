@@ -24,8 +24,8 @@ import scipy.sparse.linalg as sla  # noqa: E402
 
 from config import CONFIG  # noqa: E402
 from src.compare import (  # noqa: E402
-    CAVEAT, ZenodoData, check_ceiling, compare_z2, qasm_step_bonds, read_qasm,
-    ry_product_state,
+    CAVEAT, ZenodoData, check_ceiling, compare_z2, gauge_check_angles, qasm_step_bonds,
+    read_qasm, ry_product_state,
 )
 from src.lattice import square_bonds  # noqa: E402
 from src.observables import total_z_sq_normalized  # noqa: E402
@@ -34,16 +34,32 @@ from src.operators import tfim_hamiltonian  # noqa: E402
 
 def is_synthetic(root: str) -> bool:
     p = os.path.join(root, "README.md")
-    return os.path.isfile(p) and "SYNTHETIC" in open(p, encoding="utf-8").read()
+    if not os.path.isfile(p):
+        return False
+    with open(p, encoding="utf-8") as fh:
+        return "SYNTHETIC" in fh.read()
 
 
-def _same_up_to_sign(vals, target, tol=1e-6) -> bool:
-    """README gauge identities flip signs only, so compare |angle| with a tolerance."""
-    return len(vals) > 0 and all(abs(abs(v) - abs(target)) < tol for v in vals)
+def _inside(path: str, parent: str) -> bool:
+    path, parent = os.path.realpath(path), os.path.realpath(parent)
+    return os.path.commonpath([path, parent]) == parent
+
+
+def source_status(root: str):
+    """(synthetic, trusted_source) for a data directory. trusted_source is the positive check
+    BEFORE circuit verification: not synthetic (README marker or under tests/fixtures) and it
+    carries the dataset README. main() additionally requires verify_circuits for every quench."""
+    synthetic = is_synthetic(root) or _inside(root, os.path.join(REPO, "tests", "fixtures"))
+    trusted = not synthetic and os.path.isfile(os.path.join(root, "README.md"))
+    return synthetic, trusted
 
 
 def verify_circuits(root: str, quench: int, theta: float, log) -> bool:
-    """Check the published QASM against the harness parameters; abort on a real mismatch."""
+    """Check the published QASM against the harness parameters; abort on a real mismatch.
+
+    Angles are compared WITH their signs: only the gauge-equivalent patterns of (J, h, theta)
+    pass (src.compare.gauge_check_angles); a non-gauge pairing or a mixed-sign layer aborts.
+    Returns True only if angles match and the bond set equals one candidate index map."""
     c = CONFIG.compare
     path = os.path.join(root, "circuits", f"quench{quench}_step1.qasm")
     if not os.path.isfile(path):
@@ -54,18 +70,14 @@ def verify_circuits(root: str, quench: int, theta: float, log) -> bool:
     rzz = [a for *_, a in g["rzz"]]
     rx = [a for _, a in g["rx"]]
     ry = [a for _, a in g["ry"]]
-    log(f"  QASM quench{quench}_step1: {len(bonds)} distinct rzz pairs, |rzz| angles "
-        f"{sorted({round(abs(a), 6) for a in rzz})}, |rx| {sorted({round(abs(a), 6) for a in rx})}, "
+    log(f"  QASM quench{quench}_step1: {len(bonds)} distinct rzz pairs, signed angles: rzz "
+        f"{sorted({round(a, 6) for a in rzz})}, rx {sorted({round(a, 6) for a in rx})}, "
         f"ry {sorted({round(a, 6) for a in ry})}")
-    problems = []
-    if not _same_up_to_sign(rzz, 2 * c.J * c.dt):
-        problems.append("rzz angle != 2*J*dt")
-    if not all(min(abs(abs(a) - c.h * c.dt), abs(abs(a) - 2 * c.h * c.dt)) < 1e-6 for a in rx):
-        problems.append("rx angle not h*dt (half) or 2*h*dt (merged)")
-    if not _same_up_to_sign(ry, theta, tol=1e-4):     # theta sign is gauge-dependent
-        problems.append(f"ry angle != +-theta ({theta:+.6f})")
+    label, problems = gauge_check_angles(rzz, rx, ry, c.J, c.h, c.dt, theta)
     if problems:
-        raise SystemExit(f"QASM quench{quench} does not match CompareConfig: {problems} — refusing to compare.")
+        raise SystemExit(f"QASM quench{quench} does not match CompareConfig (J={c.J}, h={c.h}, "
+                         f"dt={c.dt}, theta={theta:+.6f}) up to gauge: {problems} — refusing to compare.")
+    log(f"  signs: literal circuit is {label} of CompareConfig, gauge-equivalent [derived]")
     # Bond SET under the two plausible (x,y)->qubit maps; the true map is not in the dataset.
     Lx, Ly = c.data_Lx, c.data_Ly
     ours = set(square_bonds(Lx, Ly, c.boundary))                 # q = y*Lx + x (repo row-major)
@@ -75,6 +87,7 @@ def verify_circuits(root: str, quench: int, theta: float, log) -> bool:
     if not (bonds == ours or bonds == col):
         log("  [unverified] QASM bond set matches neither index map: the reduced-lattice boundary "
             "condition is NOT confirmed by the circuits; treat the comparison as unanchored.")
+        return False
     return True
 
 
@@ -92,18 +105,16 @@ def trotter_vs_exact(Lx: int, Ly: int, theta: float, steps, log) -> None:
         f"{np.abs(circ - exact).max():.4f}  (the circuit, not continuous H, is what H2 ran)")
 
 
-def main() -> None:
+def main(argv=None) -> bool:
+    """Run the comparison; returns True iff data/q1_compare.txt was written."""
     ap = argparse.ArgumentParser()
     ap.add_argument("--data", default=CONFIG.compare.data_path)
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
     c = CONFIG.compare
     data = ZenodoData(args.data)          # clear error if missing
-    fixtures = os.path.join(REPO, "tests", "fixtures")
-    synthetic = is_synthetic(args.data) or os.path.realpath(args.data).startswith(os.path.realpath(fixtures))
-    readme = os.path.join(args.data, "README.md")
     # Positive check, not just a synthetic blacklist: data/ is written only for a source that
     # carries the dataset README and whose published circuits verified for every quench.
-    trusted = not synthetic and os.path.isfile(readme)
+    synthetic, trusted = source_status(args.data)
     out = []
 
     tag = "[SYNTHETIC FIXTURE] " if synthetic else ("" if trusted else "[UNVERIFIED SOURCE] ")
@@ -128,6 +139,8 @@ def main() -> None:
         trusted = verify_circuits(args.data, q, theta, log) and trusted
         cmp = compare_z2(data, q, theta, c.sizes, c.boundary, c.J, c.h, c.dt,
                          CONFIG.ceilings.statevector_max_spins, c.modes, c.n_data)
+        for line in cmp.provenance():
+            log("  estimator/shots — " + line)
         for line in cmp.table():
             log("  " + line)
         a, b = c.sizes[0], c.sizes[-1]
@@ -138,11 +151,12 @@ def main() -> None:
     if not trusted:
         print("NOT written to data/: source is synthetic, lacks the dataset README, or its circuits "
               "were not verified. Output above is for inspection only.", file=sys.stderr)
-    else:
-        out_dir = os.path.join(REPO, CONFIG.data_dir)   # repo-relative, whatever the cwd
-        os.makedirs(out_dir, exist_ok=True)
-        with open(os.path.join(out_dir, "q1_compare.txt"), "w", encoding="utf-8") as fh:
-            fh.write("\n".join(out) + "\n")
+        return False
+    out_dir = os.path.join(REPO, CONFIG.data_dir)   # repo-relative, whatever the cwd
+    os.makedirs(out_dir, exist_ok=True)
+    with open(os.path.join(out_dir, "q1_compare.txt"), "w", encoding="utf-8") as fh:
+        fh.write("\n".join(out) + "\n")
+    return True
 
 
 if __name__ == "__main__":
