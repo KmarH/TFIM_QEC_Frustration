@@ -718,7 +718,7 @@ Journal Entries 44–47.
 - the Quantinuum client install;
 - the `nexus` backend.
 
-**Local only:** this section and handoff/11 postdate `37e6879` and are not pushed. A push needs the project lead's request. Suite 231/231.
+**Published:** section 23 and handoff/11 were pushed with the peer-review fixes (2026-10-14). See section 24 for the current state: default branch `main`, the pre-review state preserved as `alpha`, suite 274/274 on three platforms.
 
 ## 24. Three-machine peer review and the fixes it produced, 2026-10-12/14
 
