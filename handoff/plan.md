@@ -787,6 +787,13 @@ arm; the Quantinuum client; the `nexus` backend. **Not regenerated:**
 
 ## 25. DECIDED-1: the triangular field stays at h/|J| = 0.3, as a weak-field study, 2026-10-15
 
+> **SUPERSEDED the same day by section 26.** The premise below — that the reference's triangular
+> field is h/|J| = 2 — is **wrong**. The paper's Figure 4(e) states "All data taken at
+> (h/|J|, dt|J|)=(0.3, 0.25)", so this project's configuration *does* match the reference. The
+> h/|J| = 2 figure came from the released quench4 circuit files, which carry the square quench's
+> field. Read this section as the record of a decision taken on incomplete evidence; section 26
+> has the resolution. The value h = 0.3 was never changed at any point.
+
 **Pass type:** scope decision and the documentation change it implies. **No code, no constant and
 no number changed.** Suite unchanged at 274/274 on three platforms.
 
