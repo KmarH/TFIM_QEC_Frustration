@@ -11,9 +11,15 @@ Status tags follow the project convention: [established] [derived] [measured] [i
 
 ---
 
-## OPEN-1 — The triangular field: h/|J| = 0.3 or 2?
+## DECIDED-1, formerly OPEN-1 — The triangular field: h/|J| = 0.3 or 2?
 
-**Status: OPEN. This blocks any claim that the triangular work matches the reference experiment.**
+**Status: DECIDED 2026-10-15 by the project lead — option (a) below. The field stays at
+h/|J| = 0.3, and the triangular work is a self-contained weak-field study, not a reproduction of
+the reference's triangular quench. Every claim tying it to the reference's field is withdrawn.**
+
+**What this means in one line.** `h/|J| = 0.3` is now justified on physics grounds — it is the
+regime in which the emergent-Gauss-law description is valid — and no longer by the reference. The
+reference's triangular circuits study a different regime, and this project does not reproduce them.
 
 Q2, Q3 and the Gauss-law thread all run at h/|J| = 0.3, described in several places as "matching
 arXiv:2503.20870 §V". That description is not currently supportable, because the project's own two
@@ -50,24 +56,63 @@ order, noiseless):
   experiment start in" question is therefore not answerable from the data release at all,
   independently of the field value. This confirms open question T-5 by direct inspection. [measured]
 
-**The decision.** Either:
+**The decision.** The options were:
 
-- **(a)** Keep h ≤ 0.5 and relabel this work as a deliberately chosen, self-contained study of the
-  weak-field frustrated regime, with no published counterpart. Drop every "matching §V" and
-  "describes the reference experiment" claim. This is cheap and is what the repository text has
-  been corrected to say in the interim.
-- **(b)** Build a genuine h/|J| = 2 study. This needs different machinery — not a
+- **(a) CHOSEN (2026-10-15).** Keep h ≤ 0.5 and state this work as a deliberately chosen,
+  self-contained study of the weak-field frustrated regime, with no published counterpart. Drop
+  every "matching §V" and "describes the reference experiment" claim.
+- **(b) Not chosen.** Build a genuine h/|J| = 2 study. This needs different machinery — not a
   first-order-in-h effective sector theory — and an initial state chosen on some basis other than
-  "what the released QASM shows", since the QASM shows nothing there.
+  "what the released QASM shows", since the QASM shows nothing there. It is a new piece of
+  research rather than a re-run, which is why it was not taken as a correction to this one.
 
-**What would settle the underlying factual question:** checking the paper's PDF or Supplemental
-Material (not the HTML mirror, which both research threads note truncates parts of §V and the
-Methods) for whether it describes *multiple* triangular runs at different field strengths, one of
-which could genuinely be h/|J| = 0.3 while the released quench4 represents another at h/|J| = 2.
-Until then, treat 0.3 as **unconfirmed against the dataset the project actually has**.
+**Why (a) is defensible, and not merely convenient.** The choice of h/|J| = 0.3 is the regime in
+which the question this thread asks is meaningful:
 
-**Interim handling (applied):** no physics constant was changed. The documentation no longer claims
-the triangular work matches the reference.
+- The sector-restricted / quantum-dimer description is an effective theory to **first order in
+  h/|J|**. It needs h ≪ |J| to be a controlled approximation at all.
+- Leakage out of the defect-free sector scales as about **h²** (the measured exponent is 2.08),
+  so at h ≤ 0.3 the in-sector population stays dominant and conditioning on it is a correction
+  rather than a reinterpretation.
+- The project's own field scan already shows the in-sector verdicts stable for h ≤ 0.3 and
+  straining at h = 0.5 (26% of the weight out of sector) — so 0.3 sits inside the validated range
+  and 0.5 is its stress point.
+- At h/|J| = 2 none of that holds: noiselessly the in-sector probability collapses to 0.13–0.63
+  within a *single* Trotter step, and the in-sector weight falls with system size (0.55 at N = 9,
+  0.11 at N = 12), so on the reference's 7×8 torus Gauss-law post-selection would retain an
+  exponentially small share of shots even with zero noise. [measured]
+
+So this is not "the reference's parameter, approximated". It is a different, deliberately chosen
+regime, and the thing being studied — whether an emergent Gauss law is a usable mitigation
+resource — only has content where the constraint exists.
+
+**What this decision does NOT claim.** It does not resolve the underlying factual question about
+what the paper says. Treat h/|J| = 0.3 as **unconfirmed against the dataset the project has**:
+the released quench4 circuits are at 2. Settling that would need the paper's PDF or Supplemental
+Material (not the HTML mirror, which both research threads record as truncating parts of §V and
+the Methods), to see whether it describes *multiple* triangular runs at different field strengths.
+If it turns out there is a published h/|J| = 0.3 triangular run after all, this decision stays
+correct but the framing could then legitimately cite it.
+
+**Scope of the change (applied 2026-10-15).** No physics constant was changed, and no number
+moved: `h = 0.3` and `dt = 0.25` are exactly as before, and the test suite is unchanged at
+274/274 on three platforms. What changed is what the results are claimed to be *about*:
+
+- Q3 and the Gauss-law write-ups now state the weak-field scope up front and carry the
+  justification above, instead of "as in the reference §V".
+- Q2 is relabelled as a **ground-state** exact-diagonalization result and noted to be robust to
+  this decision either way: the 3–5× weakening also holds at h/|J| = 2 (4.98 on the matched 4×4
+  pair, against 4.59 at h = 1). [measured]
+- `config.py`'s triangular blocks, the report, the findings map and the README no longer tie the
+  field to the reference.
+- The research notes and handoff briefs that recorded the original readings were **not
+  rewritten** — they are dated records, and rewriting them is what would make a conflict like
+  this hard to find again. Each carries a dated note pointing here instead.
+
+**Independent of this decision:** the released quench4 circuits prepare `ry(0)` on all 54 qubits
+with zero `x` gates, so they encode neither candidate winding-sector initial state. "Matching the
+reference's winding sector" is therefore not answerable from the data release at any field value.
+This confirms open question T-5 by direct inspection. [measured]
 
 ---
 

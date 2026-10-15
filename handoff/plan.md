@@ -744,7 +744,7 @@ real problems were about which experiment the numbers describe.
    it never reached `GaussLawConfig`/`Q3BaselineConfig`; `research/04` independently confirmed 0.3
    from the paper's prose, whose §V body was never read. At `h/|J| = 2` the sector framework is
    not a controlled approximation at all. **No constant was changed** — recorded as `DECISIONS.md`
-   OPEN-1, the project lead's decision.
+   DECIDED-1 (formerly OPEN-1); resolved 2026-10-15, see section 25.
 2. The dt = 0.25 defect-density and `P_out` "Trotter inflation" figures were attributed to the
    reference circuit; in that circuit's own ordering the bias has the **opposite sign** (3×6
    defect density 1.390 ZZ-outside vs 0.604 circuit-order). Fixed additively:
@@ -779,3 +779,47 @@ weakened. No existing `data/` file modified; one added. No physics constant chan
 (D-RC, `DECISIONS.md` OPEN-3) — the Q1 "encoding helps" GO rests on it; the 6×6 noise-scaling
 arm; the Quantinuum client; the `nexus` backend. **Not regenerated:**
 `data/encoded_codes.txt` §5 (hours of Selene) and `data/q1_compare.txt` (needs the dataset).
+
+## 25. DECIDED-1: the triangular field stays at h/|J| = 0.3, as a weak-field study, 2026-10-15
+
+**Pass type:** scope decision and the documentation change it implies. **No code, no constant and
+no number changed.** Suite unchanged at 274/274 on three platforms.
+
+**The decision.** Of the two options recorded in `DECISIONS.md` OPEN-1, the project lead chose
+**(a)**: keep `h ≤ 0.5` and state the triangular thread as a deliberately chosen, self-contained
+study of the weak-field frustrated regime. It does **not** reproduce the reference's triangular
+quench, whose released quench4 circuits are at `h/|J| = 2`. Option (b), building a genuine
+`h/|J| = 2` study, was not taken: it needs different machinery (the sector theory is first order
+in `h/|J|`) and an initial state the data release does not contain, so it is new research rather
+than a correction.
+
+**The justification now cited in the docs is physics, not the reference.** `h/|J| = 0.3` is where
+the sector-restricted quantum-dimer description holds: it is a first-order-in-`h/|J|` effective
+theory, leakage out of the defect-free sector goes as about `h²` (measured exponent 2.08), and
+this project's own field scan finds the in-sector verdicts stable at `h ≤ 0.3` and straining at
+`h = 0.5` (26% of the weight out of sector). At `h/|J| = 2` the in-sector probability collapses to
+0.13–0.63 within a single Trotter step and the in-sector weight falls with system size (0.55 at
+N = 9, 0.11 at N = 12), so the constraint the thread tests barely exists there.
+
+**What changed.** Every claim tying the triangular field to the reference was withdrawn and
+replaced with the scope statement plus that justification: `README.md`, `docs/report/report.tex`
+§Model, `docs/findings_vs_questions.md` (plus a frame qualifier on the Gauss-law floor, which is
+≈0.0092 in circuit order and ≈0.0135 in this repo's ordering), `docs/q3_thermalization.md`,
+`docs/gauss_law_dimers.md`, `docs/q2_frustration.md`, `config.py`'s triangular blocks (comments
+only), and the Q3/Gauss scripts' and modules' docstrings. `DECISIONS.md` OPEN-1 became DECIDED-1.
+
+**Q2 is unaffected** and is now labelled as what it is: a **ground-state** exact-diagonalization
+result, reported at `h ≤ 1`. Its 3–5× weakening also holds at `h/|J| = 2` (4.98 on the matched
+4×4 pair, against 4.59 at `h = 1`), so it does not depend on this decision at all.
+
+**The historical record was annotated, not rewritten.** `research/04`, `research/05`,
+`research/scout/sweeps/01`, and `handoff/03`, `handoff/09`, `handoff/11` keep their original
+wording and carry a dated note pointing at `DECISIONS.md`. Rewriting them would destroy the audit
+trail that made this conflict findable — `research/05` had the right answer in October 2026 and it
+simply never propagated to the config.
+
+**Still open, unchanged by this decision:** the factual question of what the paper's §V body
+actually says (its HTML truncates; the PDF or Supplemental Material would settle whether more than
+one triangular run exists), randomized compiling (`DECISIONS.md` OPEN-3), and the Q1 lattice
+implementation (OPEN-2). Independently of the field: the released quench4 circuits prepare
+`ry(0)` with no `x` gates, so they fix neither winding sector, which confirms T-5 by inspection.
