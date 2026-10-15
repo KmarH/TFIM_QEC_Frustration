@@ -246,11 +246,60 @@ comparison thereafter.
 **Status: OPEN. This is a precondition for the Q1 conclusion, not a refinement.**
 
 The "encoding helps at η ≈ 0.05" GO rests explicitly on randomized compiling (decision D-RC,
-★ FLAG-0, `report.tex` §Q1, `handoff/11`). There is no twirling implementation in `src/`. It is
-disclosed in the handoff, but it gates the headline Q1 claim, so it is recorded here too.
+★ FLAG-0, `report.tex` §Q1, `handoff/11`). It gates the headline Q1 claim, so it is recorded here
+as well as in the handoff.
+
+### Randomized compiling is a HARDWARE technique, and twirling the simulation is a no-op
+
+This is easy to misread, so it is worth stating plainly. Randomized compiling conjugates each
+entangling gate with random Paulis, runs many instances on the device and averages. Its effect is
+to convert the device's *actual* error channel — which has coherent components — into a stochastic
+**Pauli** channel.
+
+This project's noise model is **already** a Pauli channel: depolarizing with a ZZ-biased fraction
+η (`src/encoded_codes.py`). Twirling preserves a Pauli channel's diagonal, so twirling something
+that is already Pauli changes nothing. **Implementing RC and rerunning the predictions would not
+move a single number.** [derived]
+
+So the dependency runs the other way round from what "not implemented" suggests. RC is not needed
+to *compute* the Q1 prediction; it is needed to make the prediction's central assumption *true of
+the hardware*. Without RC on H2, the device is not well described by a Pauli channel and the whole
+Stim / first-order accounting stops applying to it.
+
+### Why that threatens Q1 specifically, and not just generally
+
+The failure is not symmetric. `docs/encoded_tfim.md` already works this out: the over-rotation
+option is only a "Pauli-twirled stand-in"; un-twirled coherent ε is "the only in-range flip risk,
+and this model cannot show the flip itself"; and on a logical-ZZ gate the un-twirled coherent ZZ
+component is **ZZ-aligned, which raises the effective η toward the crossover**. η is precisely the
+quantity the Q1 verdict turns on (η\* ≈ 0.25 at 2×2). So without RC the error moves in the one
+direction, in the one parameter, that erodes encoding's advantage. [inferred, from the project's
+own noise analysis]
+
+### What "implementing" it therefore means
+
+Not a classical-prediction change, but **hardware readiness**: emit randomized-compiled circuits
+on the submission path, so the emulator and hardware runs can be switched on without further
+circuit work, and prove locally that twirling preserves the logic.
+
+For an arbitrary-angle `ZZPhase(α)` the twirl rule is exact and simple: pick a random two-qubit
+Pauli P; if P **commutes** with Z⊗Z the gate is unchanged, and if P **anticommutes** the angle is
+negated, since `P·exp(−iθZZ/2)·P† = exp(+iθZZ/2)`. The inserted Paulis then propagate to a final
+Pauli frame that must be applied to the Z-basis readout. [derived]
 
 When it is built, re-verify the transparency check (encoded == bare at zero noise) with twirling
-switched on.
+switched on — this matters more than usual because Iceberg uses mid-circuit measurement and reset,
+so the Pauli frame has to be tracked across those.
+
+### One genuine classical-side question it raises
+
+The committed acceptance and undetected-rate predictions are computed on **un-twirled** circuits.
+RC inserts Paulis. On H2 these can normally be absorbed into the native arbitrary-angle
+single-qubit rotations at no extra gate cost, in which case nothing changes — but that is an
+assumption, not a measurement here. If they are *not* absorbed, the single-qubit error budget
+grows, and this project already measured that Selene charges `p_1q` on about **3.85× more native
+operations** than pytket-level counting suggests (`data/selene_gap.txt`). So the gate-count
+overhead of twirling should be checked rather than assumed. [unverified]
 
 ---
 
