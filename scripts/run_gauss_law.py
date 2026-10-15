@@ -91,7 +91,8 @@ def scaling(log) -> None:
             + f"  slope={slope(hs, gs):.2f}")
     log("h_scan = " + " ".join(f"{h:g}" for h in hs))
     # noiseless acceptance of zero-defect postselection at our working h (physics floor cost;
-    # h/|J| = 0.3 is our own choice, not the reference's triangular field; DECISIONS.md DECIDED-1)
+    # h/|J| = 0.3 matches the reference's own triangular field, arXiv:2503.20870 Fig. 4(e)/§V;
+    # see config.GaussLawConfig)
     for Lx, Ly in [(3, 3), (3, 6)]:
         d = TriangularDimers(Lx, Ly)
         i0 = d.product_state_index(d.three_sublattice_spins())

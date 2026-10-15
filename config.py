@@ -157,13 +157,17 @@ class GaussLawConfig:
     Frustrated model in OUR convention H = -J sum ZZ - h sum X needs J < 0 (AFM), matching
     arXiv:2503.20870 Sec. V's AFM sign choice.
 
-    h = 0.3, dt = 0.25 here is OUR OWN choice, not a reproduction of the reference's triangular
-    quench: the reference's own released quench4 circuits run at h/|J| = 2, not 0.3
-    (DECISIONS.md DECIDED-1). h/|J| = 0.3 is chosen on physics grounds: it is the weak-field point
-    where the emergent-Gauss-law / dimer description below is a controlled (first-order in
-    h/|J|) approximation, with sector leakage O((h/|J|)^2) and stable in-sector verdicts up to
-    h = 0.3 (docs/gauss_law_dimers.md, docs/q3_thermalization.md). dt = 0.25 is still the
-    reference's own time step. So: J = -1, h = 0.3, dt = 0.25 here.
+    h = 0.3, dt = 0.25 here matches the reference's own triangular quench (arXiv:2503.20870
+    Fig. 4(e) caption: "All data taken at (h/|J|, dt|J|)=(0.3, 0.25)"; §V body sets the regime
+    as weak transverse field, 9x6 torus, also Methods §VII.1) [established]. It is also the
+    weak-field point where the emergent-Gauss-law / dimer description below is a controlled
+    (first-order in h/|J|) approximation, with sector leakage O((h/|J|)^2) and stable in-sector
+    verdicts up to h = 0.3 (docs/gauss_law_dimers.md, docs/q3_thermalization.md) -- this
+    corroborates the reference's own choice of regime rather than substituting for it. The
+    reference's *released* quench4 circuit files instead carry the square quench's field angle
+    (rx(0.5) where rx(0.0375) is expected) and an all-zero initial state; that is a defect in the
+    data release, not a second value from the paper (research/05-zenodo-dataset-map.md). So:
+    J = -1, h = 0.3, dt = 0.25 here.
 
     Noise model for the mitigation benchmark [assumption, not hardware-calibrated]:
     after every Trotter step, an independent single-qubit Pauli channel on every
@@ -297,15 +301,17 @@ class Q3BaselineConfig:
 
     Ensemble [derived]: uniform (infinite temperature) over the defect-free configurations of
     the initial winding sector W0 that single flippable-spin moves connect to the initial
-    state. Model as in GaussLawConfig (J < 0 frustrated, h/|J| = 0.3, dt = 0.25 -- our own
-    weak-field choice, not the reference's triangular quench; DECISIONS.md DECIDED-1).
+    state. Model as in GaussLawConfig (J < 0 frustrated, h/|J| = 0.3, dt = 0.25 -- matching the
+    reference's own triangular quench, arXiv:2503.20870 Fig. 4(e)/§V/Methods §VII.1
+    [established]; see GaussLawConfig's docstring).
     Every number produced is a CLASSICAL statistical/simulated reference, not an H2 result.
     """
 
     J: float = -1.0
     dt: float = 0.25
     h_curves: tuple = (0.1, 0.2, 0.3, 0.5)   # ideal relaxation curves (0.3 = our working point,
-                                             # DECISIONS.md DECIDED-1); handoff/08 A2
+                                             # matching the reference's own value, see
+                                             # GaussLawConfig); handoff/08 A2
                                              # broadened from (0.1, 0.3). Leak table covers h <= 0.3:
                                              # its prediction at 0.5 is an extrapolation.
     qdm_times: float = 12.0            # total_time = qdm_times / h (H_QDM time unit is 1/h)
@@ -344,8 +350,8 @@ class Q3BaselineConfig:
     # --- handoff/08 Part B1: noisy + Iceberg-encoded curves (src/noisy_q3.py) ---
     # Noise = the research/06 H2 PRIOR from SensitivityConfig (p2_prior, p1_ratio, zz_bias_prior):
     # an ASSUMED model; every noisy number is a classical prediction, NOT an H2 result.
-    noisy_h: float = 0.3                                   # our working field only (DECISIONS.md
-                                                           # DECIDED-1); not the reference's h/|J|=2
+    noisy_h: float = 0.3                                   # our working field, matching the
+                                                           # reference's own value (GaussLawConfig)
     noisy_bare_cases: tuple = ((3, 3, "3-sublattice"), (3, 4, "flippable"))
     noisy_ice_cases: tuple = ((3, 4, "flippable"),)        # Iceberg needs even k: 3x3 (k=9) is out
     noisy_ice_steps: int = 48                              # encoded window (t = 12): post-selection

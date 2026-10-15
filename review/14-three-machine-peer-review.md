@@ -1,12 +1,19 @@
 # KiroTest: peer review final report
 
 > **Addendum, 2026-10-15 — what has happened since.** This report is kept as written, as the
-> record of the review. Two things have changed since: the findings were applied (see
-> `handoff/plan.md` §24), and **the triangular h/|J| question this report calls open has been
-> decided** — option (a), the field stays at 0.3 and the triangular thread is stated as a
-> weak-field study rather than a reproduction of the reference (`handoff/plan.md` §25,
-> `DECISIONS.md` DECIDED-1). Where the text below says that decision is open, read it as open *at
-> the time of review*. The other two open items, randomized compiling and the Q1 lattice
+> record of the review. Since then the findings were applied (`handoff/plan.md` §24), and **the
+> triangular h/|J| question this report calls open has been resolved — against this report's
+> premise.** The paper's Figure 4(e) states "All data taken at (h/|J|, dt|J|)=(0.3, 0.25)", so
+> **h/|J| = 0.3 is correct and the project's triangular configuration does match the reference's
+> §V.** The `h/|J| = 2` finding below is a correct reading of the released quench4 circuit files,
+> but those files carry the reference's *square*-quench field and are not the experiment's
+> circuits. See `DECISIONS.md` RESOLVED-1 and `handoff/plan.md` §25–26.
+>
+> So where this report treats h/|J| = 2 as the reference's triangular field, read it as the value
+> the released circuits imply — not the experiment's. The review's *other* conclusions are
+> unaffected, including the ordering sign error and the Q1 qubit-budget finding, and its
+> measurements at h/|J| = 2 remain valid as calculations; they simply describe a regime the
+> reference never ran. The two remaining open items, randomized compiling and the Q1 lattice
 > implementation, are still open.
 
 > **Final.** R-Laptop's machine became unreachable during Round 3, so R-Oracle took over its four disputes (D1, D2, D3a, D11) in a Round 3b. R-Laptop's own Round 3 was recovered afterwards and **agrees with R-Oracle's Round 3b on all four**, independently: D1 minor, D2 dismissed, D3a split the same way, D11 upheld. So those four rulings carry two independent verdicts each.

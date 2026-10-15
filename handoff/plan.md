@@ -787,6 +787,13 @@ arm; the Quantinuum client; the `nexus` backend. **Not regenerated:**
 
 ## 25. DECIDED-1: the triangular field stays at h/|J| = 0.3, as a weak-field study, 2026-10-15
 
+> **SUPERSEDED the same day by section 26.** The premise below — that the reference's triangular
+> field is h/|J| = 2 — is **wrong**. The paper's Figure 4(e) states "All data taken at
+> (h/|J|, dt|J|)=(0.3, 0.25)", so this project's configuration *does* match the reference. The
+> h/|J| = 2 figure came from the released quench4 circuit files, which carry the square quench's
+> field. Read this section as the record of a decision taken on incomplete evidence; section 26
+> has the resolution. The value h = 0.3 was never changed at any point.
+
 **Pass type:** scope decision and the documentation change it implies. **No code, no constant and
 no number changed.** Suite unchanged at 274/274 on three platforms.
 
@@ -828,3 +835,59 @@ actually says (its HTML truncates; the PDF or Supplemental Material would settle
 one triangular run exists), randomized compiling (`DECISIONS.md` OPEN-3), and the Q1 lattice
 implementation (OPEN-2). Independently of the field: the released quench4 circuits prepare
 `ry(0)` with no `x` gates, so they fix neither winding sector, which confirms T-5 by inspection.
+
+## 26. RESOLVED-1: the triangular field IS the reference's 0.3 — section 25 reversed, 2026-10-15
+
+**Pass type:** evidence, and the reversal of the previous section. **No code, no constant and no
+number changed** — again. Suite unchanged at 274/274 on three platforms.
+
+**What happened.** Section 25 reframed the triangular thread as a self-contained weak-field study
+on the belief that the reference's triangular field was `h/|J| = 2`. The paper's full text was
+then retrieved and **that belief was wrong**. The reframing is withdrawn.
+
+**The evidence** (arXiv:2503.20870v3, read in full):
+- **Figure 4(e), verbatim: "All data taken at (h/|J|, dt|J|)=(0.3, 0.25)."** [established]
+- §V, "Emergent gauge theory on a frustrated lattice", sets the regime: "For weak transverse field
+  (0 < h ≪ J)". [established]
+- The triangular lattice is **9×6** (§V, and Methods §VII.1). One triangular run, one field; the
+  max/min winding sectors are two initial states within it. The paper states the *square* quenches
+  use h = 2|J|, explicitly a different system. [established]
+- Earlier fetches failed only because the HTML is 244,452 characters and truncated before Figure 4.
+  `research/04`'s caveat that §V's body was never reached is now closed — and it had been right.
+
+**Why the circuits said otherwise, and why they are wrong.** `quench4_step1.qasm` holds
+162 × `rzz(0.5)`, 108 × `rx(0.5)`, 54 × `ry(0)` on `qreg q[54]`. The counts are correct for 9×6
+(162 = 3N bonds, 108 = two half-layers), so the geometry is genuinely triangular — but the angles
+are **quench1's**, i.e. the square quench's field. At `dt|J| = 0.25` that is `h/|J| = 2`; the
+paper's 0.3 would need `rx(0.0375)`, about 13× smaller. The dataset's gauge identities only flip
+signs and cannot bridge a magnitude. The release separately documents that the quench4 circuits are
+initialized to `|0…0>` while the experiments used two winding bitstrings, so the field is a second
+instance of the same defect — in files the README offers "to cross-check against the gate angles
+and circuit geometry we used". [measured]
+
+**The physics was the tell.** §V reports dimer correlations relaxing toward Markov-chain Monte
+Carlo values inside winding sectors. That cannot happen at `h/|J| = 2`, where this project's own
+reviewers measured the in-sector probability collapsing to 0.13–0.63 within a single Trotter step.
+That argument identified which source had to be wrong before the text was ever retrieved, and it
+is the generalisable lesson: when a released artefact and the publication disagree, check which one
+the physics can support.
+
+**What changed in the repo.** The reference citation for the triangular field is restored, now
+sourced to Figure 4(e) and tagged [established], in `README.md`, `docs/report/report.tex` §Model,
+`docs/findings_vs_questions.md`, `docs/q3_thermalization.md`, `docs/gauss_law_dimers.md`,
+`config.py` (comments only) and `scripts/run_gauss_law.py`. `DECISIONS.md` DECIDED-1 became
+**RESOLVED-1**, keeping the full OPEN → DECIDED → RESOLVED sequence on purpose. The weak-field
+argument from section 25 is **kept**, reframed as corroboration. The new finding about the quench4
+circuits is recorded in `research/05-zenodo-dataset-map.md`, the dataset map, which is where a
+future reader would look.
+
+**Kept from section 25, independent of the reversal:** Q2's relabelling as a **ground-state**
+exact-diagonalization result, and its h/|J| = 2 robustness check (ratio 4.98 on the matched 4×4
+pair). Both stand on their own.
+
+**T-5 narrows.** The two winding sectors **are** identified in the release, as the
+`quench4_min_winding_*` and `quench4_max_winding_*` data files. Only the explicit initial
+bitstrings and matching circuits are absent.
+
+**Still open:** randomized compiling (`DECISIONS.md` OPEN-3) and the Q1 lattice implementation
+(OPEN-2). Nothing in this pass touches either.
