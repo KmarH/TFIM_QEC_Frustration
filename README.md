@@ -22,13 +22,14 @@ Priorities: (1) logical vs physical on physical observables, (2) frustration on 
 >    the released 7×8 data as context rather than as the bare arm. Lattice size, calibration and
 >    mitigation all differ from the released run, so encoding is *not* the only axis that varies
 >    with respect to it — only with respect to this project's own bare arm.
-> 2. The triangular-lattice work (Q3, Gauss law) is a **deliberately chosen study of the weak-field
->    regime h ≤ 0.5**, and does **not** reproduce the reference's triangular quench, whose released
->    circuits are at h/|J| = 2. Decided 2026-10-15; see [`DECISIONS.md`](DECISIONS.md) DECIDED-1.
->    The field is chosen on physics grounds: the emergent-Gauss-law description is a first-order-in-h
->    effective theory, and at h/|J| = 2 the constraint it relies on barely exists (noiselessly the
->    in-sector probability collapses within one Trotter step). Q2 is unaffected — it is a ground-state
->    result and its 3–5× weakening holds at h/|J| = 2 as well.
+> 2. The triangular-lattice work **does** match the reference's §V (h/|J| = 0.3, dt|J| = 0.25, on a
+>    9×6 torus), per its Figure 4(e): *"All data taken at (h/|J|, dt|J|)=(0.3, 0.25)."* Resolved
+>    2026-10-15 on evidence; see [`DECISIONS.md`](DECISIONS.md) RESOLVED-1.
+>    **Do not infer the triangular parameters from the released quench4 circuit files:** they carry
+>    the reference's *square*-quench field (`rx(0.5)`, i.e. h/|J| = 2, where h/|J| = 0.3 needs
+>    `rx(0.0375)`) and are initialized to |0…0> rather than the experiment's winding bitstrings.
+>    The release itself documents the second of those. Details in
+>    [`research/05-zenodo-dataset-map.md`](research/05-zenodo-dataset-map.md).
 
 The framing is physics plus QEC methodology, **not** quantum advantage: local observables of
 Trotterized 2D Ising dynamics at these sizes are classically reachable
@@ -49,15 +50,17 @@ Trotterized 2D Ising dynamics at these sizes are classically reachable
   matched 4×4 pair, triangular nearest-neighbour correlations are 3–5× weaker than on the square lattice.
   Reproduced bit-for-bit on three platforms, and the ratio also holds at the reference field h/|J| = 2
   (4.98 on 4×4), so it does not depend on the open h/|J| decision.
-- **Thermalization (Q3).** A classical study of the **weak-field regime h ≤ 0.5**, not of the reference
-  experiment (see scope correction 2 above): a Monte Carlo baseline per winding sector; the ideal curves
-  relax to the finite-cluster value rather than the infinite-temperature one; the time step sits below a
-  measured Trotter threshold. Under assumed noise, Gauss-law post-selection is the cheap mitigation that
-  works, and noise can mimic thermalization.
-- **Gauss law as mitigation.** Mostly no; a modest yes for detection against bit-flip-type noise only.
-  Like Q3, this holds in the weak-field regime h ≤ 0.5 under the assumed noise model. At the
-  reference's h/|J| = 2 the dimer picture does not apply at all: even with *no* noise, 45–95% of the
-  weight sits outside the defect-free sector on 9–12 sites, and that fraction falls with system size.
+- **Thermalization (Q3).** A classical study at the reference's own triangular parameters
+  (h/|J| = 0.3, dt|J| = 0.25 — the weak-field regime §V works in): a Monte Carlo baseline per winding
+  sector; the ideal curves relax to the finite-cluster value rather than the infinite-temperature one;
+  the time step sits below a measured Trotter threshold. Under assumed noise, Gauss-law post-selection
+  is the cheap mitigation that works, and noise can mimic thermalization. The field scan runs to
+  h = 0.5, which is a stress point rather than a result (26% of the weight leaves the sector there).
+- **Gauss law as mitigation.** Mostly no; a modest yes for detection against bit-flip-type noise only,
+  under the assumed noise model. This is inherently a weak-field statement, which is why the reference
+  studies the frustrated lattice at h/|J| = 0.3: by h/|J| = 2 the dimer picture is gone — even with
+  *no* noise, 45–95% of the weight sits outside the defect-free sector on 9–12 sites, and that
+  fraction falls with system size.
 
 The full write-up is [`docs/report/report.tex`](docs/report/report.tex) (LaTeX, compiles on Overleaf), and
 [`docs/findings_vs_questions.md`](docs/findings_vs_questions.md) maps each conclusion to its evidence.

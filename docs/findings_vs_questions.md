@@ -10,14 +10,16 @@ not tested), **[unverified]** (not checked), **[pending]** (not yet built this r
 "Done" per SCOPE §2 means *evidence with uncertainties, compared to the reference article* —
 not plots. Rows below state what evidence exists now and what is still required for "done."
 
-> **Scope of the triangular rows (decided 2026-10-15, [`DECISIONS.md`](../DECISIONS.md)
-> DECIDED-1).** The Q3 and Gauss-law threads are a deliberately chosen study of the **weak-field
-> regime h ≤ 0.5**; they do **not** reproduce the reference's triangular quench, whose released
-> circuits are at h/|J| = 2. The field is chosen because the sector-restricted dimer description
-> is a first-order-in-h/|J| effective theory and the constraint it tests barely survives at
-> h/|J| = 2. So for these rows, "compared to the reference article" applies to conventions, the
-> time step and the noise prior — not to the triangular field. Q2 is a **ground-state** result and
-> is unaffected: its 3–5× weakening also holds at h/|J| = 2 (4.98 on the matched 4×4 pair).
+> **Scope of the triangular rows (resolved 2026-10-15, [`DECISIONS.md`](../DECISIONS.md)
+> RESOLVED-1).** The Q3 and Gauss-law threads run at the reference's own triangular parameters —
+> h/|J| = 0.3, dt|J| = 0.25, on a 9×6 torus — per its Figure 4(e), *"All data taken at
+> (h/|J|, dt|J|)=(0.3, 0.25)"* [established]. So "compared to the reference article" applies to the
+> triangular field as well. **But do not infer those parameters from the released quench4 circuit
+> files:** they carry the reference's *square*-quench field (`rx(0.5)`, i.e. h/|J| = 2, where 0.3
+> needs `rx(0.0375)`) and are initialized to |0…0> rather than the experiment's winding bitstrings.
+> Details in [`research/05-zenodo-dataset-map.md`](../research/05-zenodo-dataset-map.md). Q2 is a
+> **ground-state** result on its own field grid (h ≤ 1) and is robust either way: its 3–5×
+> weakening also holds at h/|J| = 2 (4.98 on the matched 4×4 pair).
 
 ---
 

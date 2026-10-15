@@ -179,19 +179,28 @@ on periodic tori with row-major site index $n=y L_x+x$ (qubit 0 the most signifi
   sign the frustrated model is $J=-1$ \est. The triangular torus uses bonds along $(1,0),(0,1),(1,1)$
   (``square + one diagonal''), $h/|J|=0.3$, $dt\,|J|=0.25$.
 
-  \textbf{Scope of the triangular work (decided 2026-10-15).} This is a deliberately chosen study of
-  the \emph{weak-field} frustrated regime, $h\le0.5$. It does \textbf{not} reproduce the reference's
-  triangular quench, whose released circuits are at $h/|J|=2$ --- $r_{zz}(0.5)$, $r_x(0.5)/r_x(1.0)$
-  in every file, identical to the square quenches. The field is chosen on physics grounds, not from the
-  reference: the sector-restricted quantum-dimer description is an effective theory to \emph{first order}
-  in $h/|J|$, leakage out of the defect-free sector scales as about $h^2$ (measured exponent 2.08), and
-  this project's own field scan finds the in-sector verdicts stable for $h\le0.3$ and straining at
-  $h=0.5$ (26\% of the weight out of sector). At $h/|J|=2$ none of that holds: noiselessly the in-sector
-  probability collapses to 0.13--0.63 within a \emph{single} Trotter step and the in-sector weight falls
-  with system size (0.55 at $N=9$, 0.11 at $N=12$) \mea, so the constraint whose usefulness this thread
-  tests barely exists there. Independently of the field, the released quench-4 circuits prepare $r_y(0)$
-  on all 54 qubits with no $x$ gates, so they fix neither candidate winding sector. See
-  \texttt{DECISIONS.md} DECIDED-1.
+  These are the reference's own triangular parameters: its Figure 4(e) states ``All data taken at
+  $(h/|J|, dt|J|)=(0.3, 0.25)$'', \S V works in the weak-field regime $0<h\ll J$, and the lattice is
+  $9\times6$ \est.
+
+  \textbf{Do not infer these parameters from the released quench-4 circuits.} Those files carry the
+  \emph{square} quench's field: $162\times r_{zz}(0.5)$ and $108\times r_x(0.5)$ on
+  \texttt{qreg q[54]}, identical in angle to quench~1, which at $dt|J|=0.25$ means $h/|J|=2$, whereas
+  $h/|J|=0.3$ requires $r_x(0.0375)$ --- about $13\times$ smaller \mea. The gate \emph{counts} are
+  right for $9\times6$ ($162=3N$ bonds), so the geometry is genuinely triangular; only the field is
+  wrong. The release separately documents that the quench-4 circuits are initialized to
+  $|0\ldots0\rangle$ rather than the experiment's two winding bitstrings, so this is a second
+  instance of the same defect. See \texttt{research/05-zenodo-dataset-map.md} and
+  \texttt{DECISIONS.md} RESOLVED-1.
+
+  \textbf{Why the weak field is the right regime.} The sector-restricted quantum-dimer description is
+  an effective theory to \emph{first order} in $h/|J|$; leakage out of the defect-free sector scales as
+  about $h^2$ (measured exponent 2.08); and this project's field scan finds the in-sector verdicts
+  stable for $h\le0.3$ and straining at $h=0.5$ (26\% of the weight out of sector). At $h/|J|=2$ none
+  of it holds --- noiselessly the in-sector probability collapses to 0.13--0.63 within a \emph{single}
+  Trotter step and the in-sector weight falls with system size (0.55 at $N=9$, 0.11 at $N=12$) \mea.
+  That is also the consistency argument that identified which of the two conflicting sources had to be
+  wrong: the relaxation \S V reports cannot occur at $h/|J|=2$.
 \item \textbf{Observables.} $Z_2=\langle(\sum_iZ_i)^2\rangle/N^2$ (second moment, not the connected variance);
   connected $\langle Z_iZ_j\rangle_c$ binned by distance; dimer occupations $n_b=(1+Z_iZ_j)/2$, triangle
   defects $D_t$, winding numbers $(W_x,W_y)$ and flippable spins $\Pi_s$ (\S\ref{sec:gauss}).
