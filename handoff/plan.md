@@ -245,6 +245,11 @@ Write-up: `docs/gauss_law_dimers.md`.
 - `src/dimers.py`: `TriangularDimers` with dimer n_b, defect D_t, charge, winding W_x/W_y, flippability, H_QDM, C_r by distance, and winding FCS.
 - `src/gauss_mitigation.py`: exact noisy density matrix and Pauli trajectories, plus estimators: postselect, self-mitigation, ZNE, and the PEC γ.
 - `config.py`: new `GaussLawConfig` (J = −1 AFM in our sign, h = 0.3, dt = 0.25, matching the reference §V).
+  > **Superseded 2026-10-15 (section 25, `DECISIONS.md` DECIDED-1).** "matching the reference §V"
+  > does not hold: the reference's released quench4 circuits are at h/|J| = 2. The value h = 0.3 is
+  > unchanged and is now justified as a deliberate choice of the weak-field regime, where the
+  > sector-restricted dimer description is valid. Kept as written, as the record of what was
+  > believed at the time.
 - `scripts/run_gauss_law.py` → `data/gauss_law_scaling.txt`, `data/gauss_law_mitigation.txt`.
 - `tests/test_dimers.py` (34 tests). Suite: **93/93**.
 
