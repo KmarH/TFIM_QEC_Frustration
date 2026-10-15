@@ -177,13 +177,21 @@ on periodic tori with row-major site index $n=y L_x+x$ (qubit 0 the most signifi
   (Trotter-vs-exact gap up to 0.066 for quench 1 and 0.298 for quench 2 on $4\times4$ \mea).
 \item \textbf{Frustrated model.} 2503.20870 writes $H=J\sum ZZ+h\sum X$ with antiferromagnetic $J>0$; in our
   sign the frustrated model is $J=-1$ \est. The triangular torus uses bonds along $(1,0),(0,1),(1,1)$
-  (``square + one diagonal''), $h/|J|=0.3$, $dt\,|J|=0.25$. \textbf{Open:} the reference's own released
-  quench-4 (triangular) circuits are at $h/|J|=2$, not $0.3$ --- $r_{zz}(0.5)$, $r_x(0.5)/r_x(1.0)$ in every
-  file, identical to the square quenches. The $0.3$ comes from the paper's abstract and intro (its \S V body
-  was never read), and the two readings were never reconciled. The triangular work in this report should
-  therefore be read as a study of the weak-field regime $h\le0.5$, \emph{not} as reproducing the reference's
-  triangular quench; at $h/|J|=2$ the dimer and emergent-Gauss-law description does not apply at all. See
-  \texttt{DECISIONS.md} OPEN-1.
+  (``square + one diagonal''), $h/|J|=0.3$, $dt\,|J|=0.25$.
+
+  \textbf{Scope of the triangular work (decided 2026-10-15).} This is a deliberately chosen study of
+  the \emph{weak-field} frustrated regime, $h\le0.5$. It does \textbf{not} reproduce the reference's
+  triangular quench, whose released circuits are at $h/|J|=2$ --- $r_{zz}(0.5)$, $r_x(0.5)/r_x(1.0)$
+  in every file, identical to the square quenches. The field is chosen on physics grounds, not from the
+  reference: the sector-restricted quantum-dimer description is an effective theory to \emph{first order}
+  in $h/|J|$, leakage out of the defect-free sector scales as about $h^2$ (measured exponent 2.08), and
+  this project's own field scan finds the in-sector verdicts stable for $h\le0.3$ and straining at
+  $h=0.5$ (26\% of the weight out of sector). At $h/|J|=2$ none of that holds: noiselessly the in-sector
+  probability collapses to 0.13--0.63 within a \emph{single} Trotter step and the in-sector weight falls
+  with system size (0.55 at $N=9$, 0.11 at $N=12$) \mea, so the constraint whose usefulness this thread
+  tests barely exists there. Independently of the field, the released quench-4 circuits prepare $r_y(0)$
+  on all 54 qubits with no $x$ gates, so they fix neither candidate winding sector. See
+  \texttt{DECISIONS.md} DECIDED-1.
 \item \textbf{Observables.} $Z_2=\langle(\sum_iZ_i)^2\rangle/N^2$ (second moment, not the connected variance);
   connected $\langle Z_iZ_j\rangle_c$ binned by distance; dimer occupations $n_b=(1+Z_iZ_j)/2$, triangle
   defects $D_t$, winding numbers $(W_x,W_y)$ and flippable spins $\Pi_s$ (\S\ref{sec:gauss}).

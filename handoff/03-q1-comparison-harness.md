@@ -49,6 +49,14 @@ re-derive conventions from guesses; follow that note.** The load-bearing facts:
   **Only the products J·dt, h·dt are fixed by the gates** — pick a convention (e.g. |J|=1,
   dt=0.25, h=2) and state it.
 
+  > **Note added 2026-10-15 — see [`DECISIONS.md`](../DECISIONS.md) DECIDED-1.** "The brief's old
+  > triangular value 0.3 was WRONG; use 2" is right **for this harness**: the released quench4
+  > circuits are at h/|J| = 2 (`research/05-zenodo-dataset-map.md`). The correction never
+  > propagated to the triangular Gauss-law / Q3 work. That work kept h/|J| = 0.3 and called it the
+  > reference's value, because `research/04-gauss-law-citations.md` had read 0.3 from the paper's
+  > prose. Under decision (a), 0.3 stays, but only as a deliberately chosen weak-field study. It
+  > is not a reproduction of quench4. Nothing in this brief changes.
+
 ## The hard constraint you must confront (do not paper over)
 The dataset's square experiments are **N=56 qubits**. This repo's exact backends (ED /
 statevector) top out at **~22–24 spins** (SCOPE §5). **You cannot exactly simulate the 56-qubit

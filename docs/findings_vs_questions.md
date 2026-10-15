@@ -10,6 +10,15 @@ not tested), **[unverified]** (not checked), **[pending]** (not yet built this r
 "Done" per SCOPE §2 means *evidence with uncertainties, compared to the reference article* —
 not plots. Rows below state what evidence exists now and what is still required for "done."
 
+> **Scope of the triangular rows (decided 2026-10-15, [`DECISIONS.md`](../DECISIONS.md)
+> DECIDED-1).** The Q3 and Gauss-law threads are a deliberately chosen study of the **weak-field
+> regime h ≤ 0.5**; they do **not** reproduce the reference's triangular quench, whose released
+> circuits are at h/|J| = 2. The field is chosen because the sector-restricted dimer description
+> is a first-order-in-h/|J| effective theory and the constraint it tests barely survives at
+> h/|J| = 2. So for these rows, "compared to the reference article" applies to conventions, the
+> time step and the noise prior — not to the triangular field. Q2 is a **ground-state** result and
+> is unaffected: its 3–5× weakening also holds at h/|J| = 2 (4.98 on the matched 4×4 pair).
+
 ---
 
 ## The four questions
@@ -68,7 +77,7 @@ matrix on 3×3 + 400-trajectory cross-check on 3×4, **illustrative, NOT H2-cali
 | use of the emergent Gauss law | verdict | basis | status |
 |---|---|---|---|
 | **Error correction** | **NO for the passive emergent constraint** | distance 1 (undetectable weight-1 Z anywhere, X/Y on flippable spins); no syndrome→recovery; constraint violated by the ideal dynamics itself. *(Separately: with added ancillas coupled to the local generators + mid-circuit measurement + feedback, Z₂-LGT bit-flip correction has been demonstrated in 1+1d — arXiv:2405.18504 [established]; that is an engineered monitored scheme the project did not model, not correction from the bare emergent constraint.)* | [derived]+[measured]; pointer [established] |
-| **Error detection / post-selection on defects** | **modest YES, X/Y (bit-flip-type) noise only** | 2–8× bias reduction on spin correlators at p ≤ 3e-3, 1.1–1.8× cost; **floored by an O((h/J)²) physics bias** (~0.013 at h/|J|=0.3); acceptance worsens with size even noiseless | [measured] |
+| **Error detection / post-selection on defects** | **modest YES, X/Y (bit-flip-type) noise only** | 2–8× bias reduction on spin correlators at p ≤ 3e-3, 1.1–1.8× cost; **floored by an O((h/J)²) physics bias** (at h/|J| = 0.3: ≈0.0092 in the published circuits' Strang ordering, ≈0.0115 in continuous time, ≈0.0135 in this repo's ZZ-outside ordering — quote the frame with the number, see `data/trotter_order_compare.txt`); acceptance worsens with size even noiseless | [measured] |
 | …under **dephasing** | **NO** | Z errors commute with every D_t (invisible when they occur; ~70× weaker response later); post-selection only moves the residual sign, not the floor | [derived]+[measured] |
 | **Depolarizing self-mitigation from the defect density** (the draft's idea) | **NO as a general method** | F_gauss ≠ per-observable decay under *local* noise; makes some observables up to **32× worse** (the maximum in `data/gauss_law_mitigation.txt`: bit-flip p = 1e-2 at t = 3.25, dimer-dimer; 25× for depolarizing p = 3e-3. The earlier "13×" came from one row of `docs/gauss_law_dimers.md` and was not the worst case); exact only if the channel were *global* depolarizing | [measured] |
 | **Exact-symmetry methods** (GUESS, symmetry-adjusted shadows, Cai) | **not applicable** to a Z-product quench | ⟨P⟩=⟨ΠX⟩=0 on a Z-basis product state and Pauli channels keep it 0 — no sector to project; TFIM lacks the U(1) the shadow method needs | [derived] |

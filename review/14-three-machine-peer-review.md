@@ -1,5 +1,14 @@
 # KiroTest: peer review final report
 
+> **Addendum, 2026-10-15 — what has happened since.** This report is kept as written, as the
+> record of the review. Two things have changed since: the findings were applied (see
+> `handoff/plan.md` §24), and **the triangular h/|J| question this report calls open has been
+> decided** — option (a), the field stays at 0.3 and the triangular thread is stated as a
+> weak-field study rather than a reproduction of the reference (`handoff/plan.md` §25,
+> `DECISIONS.md` DECIDED-1). Where the text below says that decision is open, read it as open *at
+> the time of review*. The other two open items, randomized compiling and the Q1 lattice
+> implementation, are still open.
+
 > **Final.** R-Laptop's machine became unreachable during Round 3, so R-Oracle took over its four disputes (D1, D2, D3a, D11) in a Round 3b. R-Laptop's own Round 3 was recovered afterwards and **agrees with R-Oracle's Round 3b on all four**, independently: D1 minor, D2 dismissed, D3a split the same way, D11 upheld. So those four rulings carry two independent verdicts each.
 >
 > R-Laptop's Round 3 adds two facts used below: Q2's 3–5× weakening **also holds at the reference field h/|J| = 2** (ratio 4.98 on the matched 4×4 pair), and the in-sector weight at h = 2 **falls with system size** (0.55 at N = 9, 0.11 at N = 12), so on the reference's 7×8 torus Gauss-law post-selection would keep an exponentially small fraction of shots even with no noise.

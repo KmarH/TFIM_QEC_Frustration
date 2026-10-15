@@ -22,10 +22,13 @@ Priorities: (1) logical vs physical on physical observables, (2) frustration on 
 >    the released 7×8 data as context rather than as the bare arm. Lattice size, calibration and
 >    mitigation all differ from the released run, so encoding is *not* the only axis that varies
 >    with respect to it — only with respect to this project's own bare arm.
-> 2. The triangular-lattice work (Q2, Q3, Gauss law) runs at h/|J| = 0.3. The reference
->    experiment's own released circuits are at **h/|J| = 2**. This is an **open decision**, not a
->    settled match; see [`DECISIONS.md`](DECISIONS.md). Nothing in this repository should be read as
->    reproducing the reference's triangular quench.
+> 2. The triangular-lattice work (Q3, Gauss law) is a **deliberately chosen study of the weak-field
+>    regime h ≤ 0.5**, and does **not** reproduce the reference's triangular quench, whose released
+>    circuits are at h/|J| = 2. Decided 2026-10-15; see [`DECISIONS.md`](DECISIONS.md) DECIDED-1.
+>    The field is chosen on physics grounds: the emergent-Gauss-law description is a first-order-in-h
+>    effective theory, and at h/|J| = 2 the constraint it relies on barely exists (noiselessly the
+>    in-sector probability collapses within one Trotter step). Q2 is unaffected — it is a ground-state
+>    result and its 3–5× weakening holds at h/|J| = 2 as well.
 
 The framing is physics plus QEC methodology, **not** quantum advantage: local observables of
 Trotterized 2D Ising dynamics at these sizes are classically reachable

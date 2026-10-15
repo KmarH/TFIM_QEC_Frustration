@@ -4,7 +4,9 @@
 
 > **Status:** classical exact diagonalization only. Every number is [measured] (exact, so there is no sampling error) or [derived]. **None is an H2 or hardware result.** No noise, no encoding. The clock-order parameter (K3) and diffusion (K5) are **not** built.
 
-Model: H = −J Σ ZZ − h Σ X with **J = −1** (antiferromagnetic in our sign), periodic tori, h ∈ {0, 0.1, 0.3, 0.6, 1.0} (as in `data/frustration_compare.txt`).
+Model: H = −J Σ ZZ − h Σ X with **J = −1** (antiferromagnetic in our sign), periodic tori, h ∈ {0, 0.1, 0.3, 0.6, 1.0} (the grid of `data/frustration_compare.txt`).
+
+> **What kind of result this is (2026-10-15).** Q2 is a **ground-state exact-diagonalization** statement about the two lattices. It is **not quench dynamics**, and it is not a reproduction of any run in arXiv:2503.20870. The field grid is this project's own choice, reported at **h/|J| ≤ 1**. It is **not** the reference's triangular field: the reference's released quench4 circuits are at h/|J| = 2 (`research/05-zenodo-dataset-map.md`), whereas the project's triangular dynamics work runs at a self-chosen h/|J| = 0.3 (`DECISIONS.md` DECIDED-1, option (a)). **Q2's conclusion does not depend on that decision.** The 3–5× nearest-neighbour weakening also holds at h/|J| = 2 (A.3), so it stands whichever field one takes.
 
 ## Part A — distance-resolved connected correlations, square vs triangular (reviewed ACCEPT, review/12)
 
@@ -34,9 +36,9 @@ Model: H = −J Σ ZZ − h Σ X with **J = −1** (antiferromagnetic in our sig
 | square 3×4 | **−2/3** |
 | square 4×5 | −0.8 |
 
-`data/frustration_compare.txt` (3×4) and the interpretation in `scripts/compare_frustration.py` call the 3×4 square lattice "unfrustrated". **That is not true at 3×4**: its square reference already carries odd-length frustration. Its −0.667 vs −0.333 energy-per-bond contrast is *partly* boundary frustration.
+`data/frustration_compare.txt` (3×4) and the interpretation in `scripts/compare_frustration.py` call the 3×4 square lattice "unfrustrated". **That is not true at 3×4**: its square comparison lattice already carries odd-length frustration. Its −0.667 vs −0.333 energy-per-bond contrast is *partly* boundary frustration.
 
-**The only square torus with both lengths ≥ 3 within the ED ceiling that is a clean unfrustrated reference is 4×4.** 4×4 is therefore the main matched pair here; 3×4 is kept for continuity and flagged. This was not silently changed in the existing files (they are not this brief's files); it is raised as T-19.
+**The only square torus with both lengths ≥ 3 within the ED ceiling that is a clean unfrustrated baseline is 4×4.** 4×4 is therefore the main matched pair here; 3×4 is kept for continuity and flagged. This was not silently changed in the existing files (they are not this brief's files); it is raised as T-19.
 
 ### A.3 Results [measured; data/frustration_correlations.txt]
 
@@ -53,7 +55,8 @@ Model: H = −J Σ ZZ − h Σ X with **J = −1** (antiferromagnetic in our sig
 
 **Reading.**
 - **Nearest-neighbour suppression is robust.**
-  - On the matched 4×4 pair the triangular C(1) is 3–5× weaker than on the bipartite square (−0.20…−0.33 vs −0.936…−1.00). On 3×4 the ratio is ≈ 2×, but that square torus is not bipartite.
+  - On the matched 4×4 pair the triangular C(1) is 3–5× weaker than on the bipartite square (−0.20…−0.33 vs −0.936…−1.00; ratio 3.01 at h = 0.1 rising to 4.59 at h = 1.0). On 3×4 the ratio is ≈ 2×, but that square torus is not bipartite.
+  - **It holds at h/|J| = 2 as well**, the field of the reference's released triangular circuits: square C(1) = −0.7285, triangular −0.1463, ratio **4.98** on the matched 4×4 pair (even-sector ground state). This was first computed by an independent reviewer (`review/14-three-machine-peer-review/round3-R-Laptop.md`, Q2 side check) and reproduced on 2026-10-15 with `src/frustration.py` to four digits **[measured; not in `data/frustration_correlations.txt`, whose grid stops at h = 1]**. The weakening is therefore not a weak-field artefact, and Q2 does not depend on the DECIDED-1 field decision.
   - The triangular C(1) is near −1/3 ("one frustrated bond per triangle") at small h and falls to −0.27 (h = 0.6) and −0.20 (h = 1.0).
   - With ⟨Z⟩ = 0, C(1) is exactly the **ZZ part** of the energy per bond (E_ZZ / (−J · n_bonds)). So it restates that signature in correlation form rather than adding to it.
 - **What the distance resolution adds.** On the bipartite square the connected correlations **do not decay across the torus**: |C(r)| ≈ 0.94–1.00 at every distance and field scanned (finite-size Néel order). On the triangular lattice they are much weaker at long distance and **fall fast with h** (4×4: C(2) = +0.44 → +0.07 from h = 0.1 to 1.0, while the square stays ≥ 0.935). Caveat on "same h": equal h is not equal distance from each lattice's critical field. The square-lattice TFIM critical field is h_c ≈ 3.04|J| [unverified — recalled standard QMC value; the source usually cited for it, Blöte & Deng, PRE 66, 066110 (2002), was confirmed only at abstract level (a cluster-MC study of the square-lattice transverse Ising model), and the number itself was not re-read; not computed here]; the triangular one is lower, ≈ 1.6|J| in the Isakov–Moessner phase diagram [unverified — recalled, not re-read]. Part of the triangular "field fragility" is that offset.
@@ -71,6 +74,7 @@ The positive √3 shell on the 3-sublattice-compatible direction (3×4) is the r
 ### A.5 What Part A does not claim
 
 - No thermodynamic-limit or phase statement. These are N = 12–16 exact ground states.
+- No dynamics. Nothing here is a quench, a Trotter circuit or a comparison against the reference's measured data.
 - No clock order.
 - No dimer or defect comparison with the square lattice: that structure is triangular-only. (The presence-vs-absence contrast was planned for Part B, which is cancelled.)
 
