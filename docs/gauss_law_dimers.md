@@ -5,12 +5,17 @@ Deliverable for `handoff/02-triangular-dimer-gauss-law.md`.
 - Tests: `tests/test_dimers.py`.
 - Data: `data/gauss_law_scaling.txt`, `data/gauss_law_mitigation.txt`, produced by `scripts/run_gauss_law.py`. Settings live in `config.py: GaussLawConfig`.
 
-> **Scope (DECISIONS.md DECIDED-1, decided 2026-10-15):** this study runs at h ≤ 0.5, with h/|J| = 0.3
-> as the working point. The reference's own released triangular (quench4) circuits run at
-> h/|J| = 2, not 0.3. h/|J| = 0.3 is a deliberate choice of regime — the weak-field point where the
-> emergent-Gauss-law / dimer description below is a controlled approximation — not an attempt to
-> match or reproduce the reference's triangular experiment. See `DECISIONS.md` DECIDED-1 for the full
-> reasoning.
+> **Scope:** this study runs at h ≤ 0.5, with h/|J| = 0.3 as the working point, matching the
+> reference's own triangular quench (§V): Figure 4(e) caption states "All data taken at
+> (h/|J|, dt|J|)=(0.3, 0.25)", and §V's body sets the regime as weak transverse field
+> (0 < h ≪ J) on a 9×6 torus (also Methods §VII.1) — exactly this project's configuration
+> **[established]**. It is also the weak-field point where the emergent-Gauss-law / dimer
+> description below is a controlled approximation, which is why the reference's own choice of a
+> weak field is the right regime for this physics. The reference's **released** quench4 circuit
+> *files* instead carry the square quench's field (`rx(0.5)` where `rx(0.0375)` is expected at
+> h/|J| = 0.3) and an all-zero initial state; that is a defect in the data release, not evidence
+> about the experiment — see `research/05-zenodo-dataset-map.md`. Do not cross-check against
+> those circuit files' angles.
 
 Status tags:
 - **[established]**: in a source I checked.
@@ -27,18 +32,25 @@ Status tags:
 **[established, confirmed in 2503.20870 v3 full text — research/04-gauss-law-citations.md]**
 arXiv:2503.20870 §V writes the triangular experiment as
 H = J Σ⟨jk⟩ Z_j Z_k + h Σ_j X_j with "antiferromagnetic (AFM) J>0 couplings, which exhibits
-geometric frustration", on a 9×6 torus at dt|J| = 0.25. The paper's own prose (read twice
-independently) gives h/|J| = 0.3 — but its own **released** quench4 circuits instead run at
-h/|J| = 2 (`research/05-zenodo-dataset-map.md`), and the project never reconciled the two
-readings (`DECISIONS.md` DECIDED-1). Against the dataset the project actually has, 0.3 is
-**unconfirmed** as the reference's own triangular value.
+geometric frustration", on a 9×6 torus at dt|J| = 0.25. **Figure 4(e)'s caption states verbatim:
+"All data taken at (h/|J|, dt|J|)=(0.3, 0.25)"**, and §V's body independently sets the regime as
+weak transverse field (0 < h ≪ J); Methods §VII.1 confirms the 9×6 lattice. So **h/|J| = 0.3,
+dt|J| = 0.25, on a 9×6 torus is the reference's own triangular configuration — exactly this
+project's** **[established]**.
 
-**This project's h/|J| = 0.3 is OUR OWN choice of regime** (`DECISIONS.md` DECIDED-1, decided
-2026-10-15), not a reproduction of either reading above: it is the weak-field point where the
-sector-restricted emergent-Gauss-law / dimer description below is a controlled (first-order in
-h/|J|) approximation, chosen on physics grounds rather than to match the reference's triangular
-quench. dt|J| = 0.25 is unaffected by this choice and is still accurately described as the
-reference's own time step.
+The reference's own **released** quench4 circuit *files*, by contrast, carry angles identical to
+the square quench (`rx(0.5)` per half-layer, where `rx(0.0375)` is expected at h/|J| = 0.3,
+dt|J| = 0.25 — about 13× too large) and prepare the all-zero state rather than either winding-
+sector bitstring. That is a defect in the **data release**, not a second value from the paper:
+the gate counts (162 `rzz`, 108 `rx`) confirm the geometry is genuinely the 9×6 triangular torus,
+only the field angle and initial state are wrong. Full analysis in
+`research/05-zenodo-dataset-map.md`; do not cross-check circuit angles against those files.
+
+**This project's h/|J| = 0.3 is therefore the reference's own triangular value**, and is also the
+weak-field point where the sector-restricted emergent-Gauss-law / dimer description below is a
+controlled (first-order in h/|J|) approximation — the physics argument corroborates the
+reference's choice of regime rather than substituting for it. dt|J| = 0.25 is the reference's own
+time step throughout.
 
 Our code uses H = −J Σ ZZ − h Σ X (Stage 1). So **the frustrated model is J_ours = −J_ref < 0**,
 matching the reference's AFM sign choice. `config.GaussLawConfig` sets J = −1, h = 0.3, dt = 0.25.
@@ -162,7 +174,7 @@ The test is `test_stripe_quench_matches_first_order_prediction`.
 **What a violation means.** In noiseless dynamics a defect is real physics: a virtual excitation out of the dimer manifold
 of order (h/J)², enhanced by Trotterization. With noise, a defect is *additionally* created by any bit-flip-type error on a
 non-flippable spin. The noiseless value is the **physics floor**. Only the excess above it can carry information about noise.
-At our working h/|J| = 0.3 (`DECISIONS.md` DECIDED-1) the floor is not small:
+At our working h/|J| = 0.3 (the reference's own value, §1) the floor is not small:
 - noiseless postselection on "zero defects" keeps only 0.979 (min 0.956 over t ≤ 10) of shots on 3×3;
 - it keeps 0.935 (min 0.908); if it simply compounds per 36 triangles, about 0.935³ ≈ 0.82 at 9×6 **[inferred]** on 3×6;
 - the cost grows with the number of triangles even with no noise (108 triangles at 9×6 — **[inferred]**, not simulated at that size).
@@ -174,7 +186,7 @@ After every 2nd-order Trotter step, every qubit independently suffers X, Y, Z wi
 - Channels tested: depolarizing (⅓,⅓,⅓), pure dephasing (0,0,1), bit-flip-type (½,½,0).
 - p ∈ {1e-3, 3e-3, 1e-2} per qubit per step.
 - Main benchmark: exact density matrix on a 3×3 torus. Cross-check: 400 Monte-Carlo trajectories on 3×4.
-- Physics: J = −1, h = 0.3 (our own weak-field choice, `DECISIONS.md` DECIDED-1), dt = 0.25 (the reference's own time step), starting from the most-flippable defect-free product state. Read out at t = 3.25 and t = 10.
+- Physics: J = −1, h = 0.3, dt = 0.25 (both the reference's own values, §1), starting from the most-flippable defect-free product state. Read out at t = 3.25 and t = 10.
 - Error bars assume 10⁴ shots per circuit.
 
 Not modelled: coherent errors, leakage/loss/erasure, crosstalk, SPAM asymmetry, two-qubit correlated errors.
