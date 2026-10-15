@@ -90,7 +90,8 @@ def scaling(log) -> None:
         log(f"{Lx}x{Ly} ED ground state     defect/tri: " + " ".join(f"{v:.3e}" for v in gs)
             + f"  slope={slope(hs, gs):.2f}")
     log("h_scan = " + " ".join(f"{h:g}" for h in hs))
-    # noiseless acceptance of zero-defect postselection at the reference h (physics floor cost)
+    # noiseless acceptance of zero-defect postselection at our working h (physics floor cost;
+    # h/|J| = 0.3 is our own choice, not the reference's triangular field; DECISIONS.md OPEN-1)
     for Lx, Ly in [(3, 3), (3, 6)]:
         d = TriangularDimers(Lx, Ly)
         i0 = d.product_state_index(d.three_sublattice_spins())

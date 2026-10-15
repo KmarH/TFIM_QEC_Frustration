@@ -4,7 +4,12 @@
 
 > **Status of every number here:** a CLASSICAL statistical reference (a uniform ensemble over a winding sector, sampled by MCMC or enumerated exactly), or a classical noiseless state-vector simulation of the ideal Trotter circuit. **None is quantum hardware or an H2 result.** No noise model enters anywhere.
 
-Model: the frustrated triangular TFIM, H = −J Σ ZZ − h Σ X with **J = −1** (AFM in our sign), dt = 0.25, h ∈ {0.1, 0.2, 0.3, 0.5} (0.3 = the reference value; the scan was broadened from {0.1, 0.3} in handoff/08 A2). Periodic tori, row-major sites, dimer/defect/winding definitions from `src/dimers.py` (docs/gauss_law_dimers.md).
+> **Scope (DECISIONS.md OPEN-1, decided 2026-10-15):** this study runs at h ≤ 0.5, working point
+> h/|J| = 0.3. The reference's own released triangular (quench4) circuits run at h/|J| = 2; this
+> is a deliberately chosen weak-field regime, not an attempt to match or reproduce that
+> experiment. See `DECISIONS.md` OPEN-1 for the full reasoning.
+
+Model: the frustrated triangular TFIM, H = −J Σ ZZ − h Σ X with **J = −1** (AFM in our sign), dt = 0.25, h ∈ {0.1, 0.2, 0.3, 0.5} (0.3 = our working point, chosen because it is where the emergent-Gauss-law description is valid, `DECISIONS.md` OPEN-1; the scan was broadened from {0.1, 0.3} in handoff/08 A2). Periodic tori, row-major sites, dimer/defect/winding definitions from `src/dimers.py` (docs/gauss_law_dimers.md).
 
 ---
 
@@ -226,7 +231,7 @@ The error column is the time-max flippable-density error. Margins are threshold 
 - **Where dt = 0.25 sits.**
   - **For h ≤ 0.3** it is below the threshold by both criteria: 1.5–2.0× by the absolute one and 1.3–1.8× by the relative one, with time-max errors of 0.01–0.18 ε.
   - **At h = 0.5 it is past the relative threshold** (0.18–0.24): its error exceeds 10% of the start's own relaxation signal. It sits only 1.3–1.6× below the absolute one.
-  - So at the reference h = 0.3 the working dt is credible, with a modest margin. h = 0.5 at dt = 0.25 is not a faithful continuous-time simulation, which is a second, independent reason to treat it as a stress point.
+  - So at our working h = 0.3 the working dt is credible, with a modest margin. h = 0.5 at dt = 0.25 is not a faithful continuous-time simulation, which is a second, independent reason to treat it as a stress point.
 
 **Trotter bias of the Q3 late-window means at dt = 0.25 (§3 of the data file).**
 - These are measured on the exact snapshot grid of `data/q3_relaxation.txt`, with C1 from window-averaged moments.
