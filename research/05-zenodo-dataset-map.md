@@ -170,15 +170,72 @@ with interior half-layers merging into `rx(2·h·dt)` between consecutive steps.
   the published circuits, not the SI prose, are the executable ground truth). [established from
   circuits; SI prose not independently read]
 
-  > **Note added 2026-10-15 — see [`DECISIONS.md`](../DECISIONS.md) DECIDED-1.** This finding was
-  > **correct**: the reference's triangular quench is at h/|J| = 2, and the three-machine peer
-  > review re-derived it independently from all 80 QASM files (`review/14-three-machine-peer-review.md`). It did **not propagate** at the time, though. `GaussLawConfig` / `Q3BaselineConfig` kept
-  > h/|J| = 0.3, and later documents kept calling 0.3 "the reference's value". The reason is that
-  > `research/04-gauss-law-citations.md` read 0.3 from the paper's prose, and the two threads never
-  > cross-checked. On 2026-10-15 the project lead chose option (a). The triangular work stays at
-  > h/|J| = 0.3 as a deliberately chosen weak-field study, **not** a reproduction of quench4. So
-  > "the harness must use h/|J| = 2" still holds for the Q1 harness against the released data.
-  > It does not apply to the self-contained triangular study.
+  > **FINDING, 2026-10-15 — the released quench4 circuits are DEFECTIVE, and this inference was
+  > wrong.**
+  >
+  > **The reading of the files above is accurate; the inference drawn from it is not.** The circuit
+  > files really do contain `rx(0.5)` for the triangular quench — that part needs no correction and
+  > the three-machine peer review re-derived it independently from all 80 QASM files
+  > (`review/14-three-machine-peer-review.md`). But the files **misrepresent the experiment they
+  > were released to document**, so "the reference's triangular quench is at h/|J| = 2" does not
+  > follow, and **`h/|J| = 0.3` is the reference's triangular field after all.** [established]
+  >
+  > **1. What the paper states.** The full text of arXiv:2503.20870 v3 was read on 2026-10-15
+  > (the earlier fetches truncated before §V — the HTML page is 244,452 characters — which is why
+  > this was open so long, not because the value was absent):
+  > - **Figure 4(e) caption, verbatim: "All data taken at (h/|J|, dt|J|)=(0.3, 0.25)."**
+  > - §V is titled "Emergent gauge theory on a frustrated lattice" and its body sets the regime as
+  >   **"For weak transverse field (0 < h ≪ J)"**.
+  > - The triangular lattice is **9×6, 54 sites** (§V and Methods §VII.1). This note measured the
+  >   snapshot matrix as 6 rows × 9 cols; that transpose is a labelling convention, not a different
+  >   lattice. N = 54 either way.
+  > - There is **exactly one** triangular run at **one** field. The minimal and maximal winding
+  >   sectors are two *initial states inside that single run*, not separate runs or fields.
+  > - `h = 2|J|` is the paper's **square**-lattice quench value, explicitly a different system.
+  >
+  > **2. The measured angle inventory, side by side** [established — read off the QASM on the host
+  > that has the dataset]:
+  >
+  > | file | `rzz` | `rx` (two half-layers) | `ry` (prep) | register |
+  > |---|---|---|---|---|
+  > | `quench1_step1.qasm` (square 7×8) | 112 × `rzz(0.5)` | 112 × `rx(0.5)` | 56 × `ry(0.5235987755982988)` = π/6 | `qreg q[56]` |
+  > | `quench4_step1.qasm` (triangular 9×6) | **162 × `rzz(0.5)`** | **108 × `rx(0.5)`** | 54 × `ry(0)` | `qreg q[54]` |
+  >
+  > **3. The geometry is right; only the angles are wrong.** 162 = 3N bonds for N = 54, which is
+  > exactly a periodic triangular torus (three bond directions per site), and 108 = two half-layers
+  > on 54 qubits. So `quench4` genuinely *is* the triangular lattice — the file is not a mislabelled
+  > square circuit. What it carries is the **square quench's field angle**: `rx(0.5)` with
+  > `dt|J| = 0.25` means `h·dt = 0.5`, i.e. h/|J| = 2.
+  >
+  > **4. The magnitude cannot be reconciled.** At the paper's `h/|J| = 0.3` with `dt = 0.25`,
+  > `h·dt = 0.075`, so each half-layer would be **`rx(0.0375)`** — about **13× smaller** than what
+  > the file contains. [derived] The README's two gauge identities, `(J,h,θ) → (−J,−h,θ)` and
+  > `(J,h,θ) → (J,−h,−θ)`, only flip **signs**; no sign convention turns 0.0375 into 0.5. This is
+  > therefore not a gauge artefact and not a convention mismatch on our side.
+  >
+  > **5. The release already documents the same class of defect in the same files.** Dataset
+  > README, verbatim: *"For quench4, the circuits in the folder are initialized to the |0...0>
+  > state, while the experiments initialized to two different bitstring configurations."* The field
+  > angle is a **second instance of that same problem**, and an undocumented one. The README offers
+  > the circuits "to cross-check against the gate angles and circuit geometry we used" — which is
+  > precisely the use that misled this project. [established]
+  >
+  > **6. Conclusion — [established]: do not use the released quench4 circuits to infer the
+  > triangular experiment's parameters. Use the paper.** The geometry and the bond count in those
+  > files are trustworthy; the field angle and the initial state are not. Anyone cross-checking a
+  > classical simulation of the triangular experiment against `circuits/quench4_*.qasm` will be
+  > misled in both. For the square and hydrodynamics quenches (1–3) no such discrepancy is known:
+  > their angles match the paper's stated `h = 2|J|`, and this note's `h/|J| = 2, dt·|J| = 0.25`
+  > reading stands for those.
+  >
+  > **Consequence for the project.** The project's triangular configuration — `h/|J| = 0.3`,
+  > `dt = 0.25`, 9×6 — **does match the reference's §V**, now properly sourced to Figure 4(e)
+  > rather than assumed. `research/04-gauss-law-citations.md`'s prose reading was right, and
+  > `DECISIONS.md` DECIDED-1's premise (that the paper and the dataset disagree irreconcilably) is
+  > reversed: there is no conflict in the paper, only a defect in the release. The physics
+  > justification for 0.3 — that the sector-restricted dimer description is controlled only for
+  > h ≪ |J| — remains true and now corroborates the choice instead of carrying it alone.
+  > **The Q1 harness is unaffected**: it targets the square quenches, where h/|J| = 2 is correct.
 
 ### Initial states — RESOLVED from the `ry` prep layer [established, 2026-10-06]
 The one-time `ry(θ)` layer at the top of each circuit sets the initial product state
@@ -272,10 +329,12 @@ magnitudes — see the h/|J| discussion above.)
   ALL quenches.** Brief's triangular `h/|J|=0.3` is contradicted by the circuits (should be 2);
   square `(2,0.25)` confirmed.
 
-  > **2026-10-15:** correct as a reading of the reference, but it did not reach the config at the
-  > time. Resolved by [`DECISIONS.md`](../DECISIONS.md) DECIDED-1, option (a): the triangular study
-  > keeps h/|J| = 0.3 as its own weak-field choice and no longer claims to match quench4. See the
-  > fuller note under "CONTRADICTION WITH THE TASK BRIEF" above.
+  > **Corrected 2026-10-15.** True for quenches 1–3. **Not** true for quench4: the paper's
+  > Figure 4(e) states `(h/|J|, dt|J|) = (0.3, 0.25)` for the triangular run, and the released
+  > quench4 circuits carry the square quench's `rx(0.5)` by mistake. The brief's `h/|J| = 0.3`
+  > was right; the circuits are wrong. The resolved statement is **h/|J| = 2 for quenches 1–3,
+  > h/|J| = 0.3 for quench4, dt·|J| = 0.25 throughout.** See the FINDING block under
+  > "CONTRADICTION WITH THE TASK BRIEF" above for the full evidence. [established]
 - ✅ **low-T vs intermediate-T** — differ ONLY in the initial `ry` angle: quench1 `ry(+30°)`
   vs quench2 `ry(−10°)`, at identical J·dt, h·dt.
 - ✅ **hydro inhomogeneous state** — quench3 preps `ry(−10°)` everywhere except `ry(π)` on
@@ -286,9 +345,19 @@ magnitudes — see the h/|J| discussion above.)
   gate angles; the overall time unit is a convention). Fine for comparing dimensionless curves
   vs Trotter step, but needed if the harness wants a physical-time axis. Resolve from SI if a
   physical-time comparison is wanted.
-- **The two quench4 winding-sector initial bitstrings** — the reference QASM uses `|0…0>`; the
-  actual min/max-winding product states are not in the dataset and must come from the SI /
-  paper to reproduce the dimer-correlation data.
+- **The two quench4 winding-sector initial bitstrings (T-5)** — the reference QASM uses `|0…0>`;
+  the actual min/max-winding product states must come from the SI / paper to reproduce the
+  dimer-correlation data.
+
+  > **Narrowed 2026-10-15.** This is less open than written above. The **two sectors themselves
+  > are identified in the release**, as the `quench4_min_winding_*` and `quench4_max_winding_*`
+  > data files (§1–§2) — so which two sectors were run, and which measured curve belongs to
+  > which, are both answerable from the release. [established] What is genuinely missing is only
+  > the **explicit initial bitstrings, and circuits matching them**: every released
+  > `quench4_stepX.qasm` preps `ry(0)` on all 54 qubits with zero `x` gates, which is `|0…0>` and
+  > is in neither sector. The dataset README states this discrepancy itself (see the FINDING in
+  > §3). So T-5 is "the bitstrings and matching circuits are absent", not "the sectors are
+  > absent".
 - **Is the `_err` a 1σ bootstrap stderr or a CI half-width?** README only says "bootstrap
   resampling". Needed for χ²/agreement scoring in the harness.
 - **The explicit (x,y)→qubit map and bond list** — recoverable from the `rzz q[a],q[b]` lines

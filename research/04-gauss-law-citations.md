@@ -137,19 +137,33 @@ Nature 653, 56–62, 2026; DOI 10.48550/arXiv.2503.20870):
   the quantum-dimer description ("emergent gauge-theoretic description in terms of a quantum dimer
   model") are confirmed in the abstract/intro/§V.
 
-  > **CONTRADICTED by the reference's own dataset — see [`DECISIONS.md`](../DECISIONS.md) DECIDED-1.**
-  > A separate research thread (`research/05-zenodo-dataset-map.md`) read the released quench4
-  > ("triangular quench") circuits and found `rzz(0.5)`, `rx(0.5)`/`rx(1.0)` in all of them, i.e.
-  > **h/|J| = 2**, identical to the square quenches. The two threads never cross-checked each
-  > other and the conflict was never resolved. Note also that this item's own paragraph below
-  > records that the §V *body* was never reached, so the reading above rests on the abstract and
-  > intro. Treat h/|J| = 0.3 as **unconfirmed against the dataset the project actually has**.
+  > **CONFIRMED 2026-10-15 — this reading was correct, and the evidence that appeared to contradict
+  > it is itself unreliable.** The paper's full text was read on 2026-10-15 and
+  > **Figure 4(e)'s caption states verbatim: "All data taken at (h/|J|, dt|J|)=(0.3, 0.25)."**
+  > §V's body sets the regime as "For weak transverse field (0 < h ≪ J)" and gives the lattice as
+  > 9×6. So `(h/|J|, dt|J|) = (0.3, 0.25)` for the triangular run is **[established]**, not merely
+  > read from the abstract and intro.
   >
-  > **Decided 2026-10-15 (DECIDED-1, option (a)).** The project lead kept h/|J| = 0.3, but **not**
-  > as the reference's value. The triangular work is now a deliberately chosen study of the
-  > weak-field frustrated regime, justified by its physics: the sector-restricted description is
-  > first order in h/|J|. It is no longer described as reproducing 2503.20870's triangular quench.
-  > The parameter claim above is superseded as a description of the reference.
+  > **The caveat in this item's own paragraph below — that §V's *body* was never reached — is now
+  > closed.** The earlier fetches truncated before Figure 4 (the v3 HTML page is 244,452
+  > characters); the value was never absent. §V and Figure 4(e) have since been read and they
+  > confirm 0.3.
+  >
+  > **On the apparent contradiction.** A separate thread (`research/05-zenodo-dataset-map.md`)
+  > read the released quench4 ("triangular quench") circuits and found `rzz(0.5)` and
+  > `rx(0.5)`/`rx(1.0)`, i.e. h/|J| = 2, identical to the square quenches. **That reading of the
+  > files is accurate, but the files are defective**: they carry the *square* quench's field angle,
+  > and the dataset README already documents the same files as having the wrong initial state too
+  > (`|0…0>` instead of the two winding bitstrings). At the paper's 0.3 the half-layer would be
+  > `rx(0.0375)`, about 13× smaller, and the README's gauge identities only flip signs, so no
+  > convention bridges the gap. The full evidence is recorded in
+  > `research/05-zenodo-dataset-map.md` §3. **Do not treat the released quench4 circuits as
+  > evidence about the triangular experiment's parameters.**
+  >
+  > `DECISIONS.md` DECIDED-1 was taken on the premise that paper and dataset disagreed
+  > irreconcilably; that premise is reversed. The project's h/|J| = 0.3, dt = 0.25, 9×6 triangular
+  > configuration **does** match the reference's §V. The weak-field physics justification for 0.3
+  > remains true and now corroborates the choice rather than carrying it alone.
 
 Not settleable from source with the available tools (PDF fetch blocked by content-type; the
 arxiv.org HTML of v3 truncates before the §V body and the Methods; the ar5iv mirror only hosts the
@@ -223,12 +237,12 @@ No ID failed to resolve. No ID required a corrected locator. (Note the reproduct
    `J_ours = −J_ref` sign mapping → upgrade **[fetched] → [established]** (confirmed in 2503.20870 v3
    full text, Eq. 1).
 
-   > **Superseded 2026-10-15 for h/|J| only — see [`DECISIONS.md`](../DECISIONS.md) DECIDED-1.**
-   > The h/|J| = 0.3 part of this upgrade did not hold. The reference's released quench4 circuits
-   > encode h/|J| = 2 (`research/05-zenodo-dataset-map.md`), and §V's body was never read (the
-   > "Item 3" section above). Under decision (a), 0.3 is the project's own weak-field choice, not a value
-   > established from the reference. The dt·|J| = 0.25, AFM-J>0 and sign-mapping parts are
-   > unaffected.
+   > **Confirmed 2026-10-15 — the upgrade holds, including h/|J|.** §V's body and Figure 4(e) have
+   > now been read: the caption states "All data taken at (h/|J|, dt|J|)=(0.3, 0.25)", so the
+   > h/|J| = 0.3 part is **[established]** on the same footing as dt·|J| = 0.25, AFM-J>0 and the
+   > sign mapping. The released quench4 circuits appear to say h/|J| = 2
+   > (`research/05-zenodo-dataset-map.md`), but those files carry the square quench's field angle
+   > and are not reliable evidence about the experiment — see Item 3 above.
 3. §6 bullet "that 2203.08905 used Gauss-law *postselection*" → **drop from [unverified]**; verified
    in full text (Methods §I.6).
 4. §6 bullet "the draft's quotes and the '5×10⁻⁵ crossover' attributed to 2608.21103" → **drop from

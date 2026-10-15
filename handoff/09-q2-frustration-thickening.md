@@ -45,12 +45,18 @@ by lattice distance**, C(r), for square and triangular at matched size/field, as
   state by ED (`run_ed`). At h=0 the ground state is degenerate — handle exactly as the existing script does:
   do not interpret single-vector ⟨ZZ⟩/M_z at h=0 (basis-dependent); the h>0 correlations are the signal.
 
-  > **Note added 2026-10-15 — see [`DECISIONS.md`](../DECISIONS.md) DECIDED-1.** This field grid is
-  > the project's own. It is not the reference's triangular field, which its released quench4
-  > circuits put at h/|J| = 2 (`research/05-zenodo-dataset-map.md`). Q2 is a ground-state ED result,
-  > not quench dynamics, and its 3–5× weakening also holds at h/|J| = 2 (ratio 4.98 on the matched
-  > 4×4 pair; `docs/q2_frustration.md` A.3). So the DECIDED-1 decision (option (a): the triangular
-  > dynamics stay at a self-chosen h/|J| = 0.3) leaves this brief's result unchanged.
+  > **Note added 2026-10-15, corrected the same day.** This field grid (h ∈ {0, 0.1, 0.3, 0.6,
+  > 1.0}) is the project's own choice, and that part stands. But the earlier version of this note
+  > went on to say 0.3 is "not the reference's triangular field" — **that is wrong.** The paper's
+  > Figure 4(e) states verbatim "All data taken at (h/|J|, dt|J|)=(0.3, 0.25)", and §V's body sets
+  > a weak transverse field on a 9×6 lattice, so **h/|J| = 0.3 *is* the reference's triangular
+  > field** and the project's triangular dynamics work matches §V. The h/|J| = 2 reading came from
+  > the released `quench4_*.qasm` files, which carry the square quench's field angle and are
+  > defective (`research/05-zenodo-dataset-map.md` §3). [established]
+  >
+  > Q2 itself is untouched either way: it is a **ground-state ED** result, not quench dynamics, and
+  > its 3–5× weakening also holds at h/|J| = 2 (ratio 4.98 on the matched 4×4 pair;
+  > `docs/q2_frustration.md` A.3). This brief's result is unchanged.
 - **Interpretation to record (honestly):** on the unfrustrated square lattice C(r) should show the stronger /
   more ordered AFM correlation; on triangular, frustration should weaken/modify it — but flag the
   disorder-line/floating-phase caveat so a non-monotonic or incommensurate C(r) is not misread.

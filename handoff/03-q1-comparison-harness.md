@@ -49,13 +49,25 @@ re-derive conventions from guesses; follow that note.** The load-bearing facts:
   **Only the products J·dt, h·dt are fixed by the gates** — pick a convention (e.g. |J|=1,
   dt=0.25, h=2) and state it.
 
-  > **Note added 2026-10-15 — see [`DECISIONS.md`](../DECISIONS.md) DECIDED-1.** "The brief's old
-  > triangular value 0.3 was WRONG; use 2" is right **for this harness**: the released quench4
-  > circuits are at h/|J| = 2 (`research/05-zenodo-dataset-map.md`). The correction never
-  > propagated to the triangular Gauss-law / Q3 work. That work kept h/|J| = 0.3 and called it the
-  > reference's value, because `research/04-gauss-law-citations.md` had read 0.3 from the paper's
-  > prose. Under decision (a), 0.3 stays, but only as a deliberately chosen weak-field study. It
-  > is not a reproduction of quench4. Nothing in this brief changes.
+  > **Corrected 2026-10-15.** "The brief's old triangular value 0.3 was WRONG; use 2" **is itself
+  > wrong**, and so was the note previously here. The paper's Figure 4(e) states verbatim "All
+  > data taken at (h/|J|, dt|J|)=(0.3, 0.25)" for the triangular run, and §V's body sets a weak
+  > transverse field on a 9×6 lattice — so **0.3 is the reference's triangular field**, matching
+  > this project's triangular work. The released `quench4_*.qasm` files do contain `rx(0.5)`, but
+  > those files are **defective**: they carry the square quench's field angle (and, as the dataset
+  > README itself documents, the wrong initial state). Evidence:
+  > `research/05-zenodo-dataset-map.md` §3. [established]
+  >
+  > **For this harness, nothing changes in practice.** Q1 targets the **square** quenches
+  > (quench1/quench2), where `h/|J| = 2, dt·|J| = 0.25` is correct and confirmed by both the paper
+  > and the circuits. The resolved spec is **h/|J| = 2 for quenches 1–3, h/|J| = 0.3 for quench4,
+  > dt·|J| = 0.25 throughout** — so if the loader is ever pointed at quench4 for a physics
+  > comparison, it must not take its field from that circuit.
+  >
+  > Same note on "(real winding bitstrings not in dataset)" above, which is stronger than the
+  > facts: the two **sectors** *are* in the release, as the `quench4_min_winding_*` /
+  > `quench4_max_winding_*` data files. Only the explicit initial bitstrings and circuits matching
+  > them are missing (open question T-5, narrowed in `research/05` "STILL OPEN"). [established]
 
 ## The hard constraint you must confront (do not paper over)
 The dataset's square experiments are **N=56 qubits**. This repo's exact backends (ED /
