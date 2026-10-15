@@ -128,6 +128,16 @@ class LocalSim:
             if typ == OpType.H:
                 sv.apply1(_H, qs[0])
                 self._pauli_noise(sv, qs, self.noise.p1)
+            elif typ in (OpType.X, OpType.Y, OpType.Z):
+                # explicit twirl Pauli (src/twirl.py). Deliberately noiseless in THIS classical
+                # model [assumed, modeling choice]: Noise.p1 represents the SAME rate this
+                # project already uses for every other 1-qubit gate, and charging it here too
+                # would make a twirled run strictly noisier than an untwirled one even though
+                # both see the same stochastic Pauli channel -- breaking the no-op property this
+                # module exists to preserve (tests/test_twirl.py). On real/native hardware this
+                # gate is NOT free -- see scripts/twirl_gate_count.py's measured native 1q-gate
+                # cost (DECISIONS.md OPEN-3); that cost is accounted there, not as extra p1 here.
+                sv.apply1(_PAULI[typ.name], qs[0])
             elif typ == OpType.CX:
                 sv.apply2(_CX, qs[0], qs[1])
                 self._pauli_noise(sv, qs, self.noise.p2)

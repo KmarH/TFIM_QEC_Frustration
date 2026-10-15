@@ -27,23 +27,35 @@ gate's generator; the PHYSICALLY EMITTED gate has its angle sign-flipped accordi
 only way to keep an EXACT Pauli-frame algebra through an arbitrary, non-Clifford rotation angle --
 conjugating an arbitrary-angle rotation BY a Pauli stays a rotation of the same type; conjugating a
 Pauli THROUGH an arbitrary-angle rotation does not generally stay a Pauli). A FRESH, independently
-random Pauli pair is then drawn and XORed into the outgoing frame -- not emitted as a separate
-physical gate. That fresh contribution is what "propagates through the rest of the circuit": it
-rides along in the frame (cheaply, for free -- no extra 1q/2q gates) until it either changes the
-sign of a LATER ZZPhase/XXPhase gate it is carried into, or reaches a Z-basis measurement, where an
-X or Y component must flip the recorded classical bit (frame_readout_flips below). This is also
-why mid-circuit Reset matters: a reset forces the physical qubit to a KNOWN state (|0>) regardless
-of any pending frame, so frame on a reset qubit always clears to I with no correction needed for
-the reset itself (only for whatever measurement preceded it).
+random Pauli pair is then drawn for the two qubits and PHYSICALLY EMITTED as an explicit X/Y/Z gate
+immediately after the (sign-adjusted) rotation, on whichever qubit drew a non-identity Pauli; the
+outgoing frame is set to this fresh draw XORed with the incoming frame (same bit-level composition
+as any other Pauli-after-Pauli product).
 
-Known limitation [stated, not hidden]: the very FIRST ZZPhase/XXPhase touch of any given qubit
-(frame_in = I, trivially commuting) is not itself varied across twirl instances -- its physical
-angle is always the original alpha. Protection accrues from that gate's own fresh draw onward, for
-every LATER gate that reuses the qubit. In this project's circuits every physical qubit is reused
-across many ZZPhase gates per Trotter step (e.g. the Iceberg "t"/"b" ancillas), so this affects at
-most the first few gates of a whole shot, never the bulk of the circuit. tests/test_twirl.py's
-coherent-error case uses a 2-gate circuit specifically so the gate under study is not a first
-touch.
+[CORRECTNESS NOTE, found in audit 2026-10-15]: an earlier version of this function tried to make
+the fresh draw free by only updating the frame dict, never emitting a gate for it, reasoning that
+"it rides along for free until it flips a later gate's sign or a final readout". That reasoning is
+WRONG: the incoming frame can be absorbed for free into the gate's sign because P in P R(alpha) P^-1
+= +-R(alpha) is an identity about THIS SAME, already-present P; a FRESH, independently-drawn P has
+no such relationship to establish -- it is a NEW Pauli that must be physically realized by SOME
+gate for the frame bookkeeping to remain true, exactly as a real device twirl physically inserts a
+random Pauli layer between two-qubit gates. Omitting that gate made the twirled circuit's actual
+output differ from the untwirled one by more than a Pauli frame (confirmed both analytically for a
+2-gate chain and numerically via exact statevector comparison -- see the "must fail without the
+explicit emission" check in tests/test_twirl.py). Emitting the fresh draw explicitly, as this
+version does, is NOT free: it costs up to two extra 1-qubit gates per twirled 2-qubit gate (see
+scripts/twirl_gate_count.py, Step 3 of the randomized-compiling brief, DECISIONS.md OPEN-3). This
+also means EVERY ZZPhase/XXPhase touch -- including the very first one on a given qubit -- is now
+varied across twirl instances (the earlier "known limitation" about first touches no longer
+applies, since the fresh gate is emitted regardless of whether the incoming frame was trivial).
+
+A fresh Pauli, once emitted, still needs to be tracked forward exactly like any other Pauli: it
+rides in the frame until it either changes the sign of a LATER ZZPhase/XXPhase gate it is carried
+into, or reaches a Z-basis measurement, where an X or Y component must flip the recorded classical
+bit (frame_readout_flips below). This is also why mid-circuit Reset matters: a reset forces the
+physical qubit to a KNOWN state (|0>) regardless of any pending frame, so frame on a reset qubit
+always clears to I with no correction needed for the reset itself (only for whatever measurement
+preceded it).
 
 Status tags: the Pauli-algebra identities above are [established]; the frame-propagation scheme
 built from them is [derived]; nothing here is [measured] or [assumed] -- there is no noise model
@@ -79,6 +91,9 @@ def _get(frame: Dict[int, PauliLabel], q: int) -> PauliLabel:
     return frame.get(q, "I")
 
 
+_EMIT_PAULI = {"X": lambda c, q: c.X(q), "Y": lambda c, q: c.Y(q), "Z": lambda c, q: c.Z(q)}
+
+
 def twirl_circuit(circuit: Circuit, rng: np.random.Generator,
                    frame_in: Optional[Dict[int, PauliLabel]] = None) -> TwirlResult:
     """Twirl every ZZPhase/XXPhase gate in `circuit`, threading an optional incoming Pauli
@@ -86,7 +101,9 @@ def twirl_circuit(circuit: Circuit, rng: np.random.Generator,
     through them); any other gate type raises, matching the strict op-set this project's
     authored segments use (src/encoded_tfim.py, src/encoded_codes.py: only H, CX, ZZPhase,
     XXPhase appear). Reproducible: the only randomness drawn is from `rng`, one 4-bit uniform
-    choice per twirled gate, in program order.
+    choice per twirled gate, in program order. The fresh draw at each twirled gate is emitted as
+    an explicit X/Y/Z gate on whichever qubit(s) drew a non-identity Pauli (see the module
+    docstring's correctness note) -- NOT free; up to two extra 1-qubit gates per twirled gate.
     """
     n = circuit.n_qubits
     frame: Dict[int, PauliLabel] = dict(frame_in) if frame_in else {}
@@ -121,6 +138,12 @@ def twirl_circuit(circuit: Circuit, rng: np.random.Generator,
             else:
                 new_c.XXPhase(alpha * s_in, a, b)
             draw = rng.integers(0, 2, size=4)
+            lbl_a = _FROM_BITS[(int(draw[0]), int(draw[1]))]
+            lbl_b = _FROM_BITS[(int(draw[2]), int(draw[3]))]
+            if lbl_a != "I":
+                _EMIT_PAULI[lbl_a](new_c, a)
+            if lbl_b != "I":
+                _EMIT_PAULI[lbl_b](new_c, b)
             frame[a] = _FROM_BITS[(xa ^ int(draw[0]), za ^ int(draw[1]))]
             frame[b] = _FROM_BITS[(xb ^ int(draw[2]), zb ^ int(draw[3]))]
         else:

@@ -227,6 +227,11 @@ def _segment_to_stim(c: stim.Circuit, seg: Circuit, noise: StimNoise, mode: str)
             c.append("H", qs)
             if noise.p1 and "h" in on:
                 c.append("DEPOLARIZE1", qs, noise.p1)
+        elif typ in (OpType.X, OpType.Y, OpType.Z):
+            # explicit twirl Pauli (src/twirl.py). Deliberately noiseless here too, for the same
+            # reason as src/backends_qc.py's LocalSim.run_segment -- see that comment and
+            # scripts/twirl_gate_count.py for the real (native) gate-count cost this elides.
+            c.append(typ.name, qs)
         elif typ == OpType.CX:
             c.append("CX", qs)
             if noise.p2 and "cx" in on:
