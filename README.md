@@ -116,8 +116,10 @@ not its call. Claims carry status tags: [established] checked source, [derived] 
 
 ## What is next (hardware-gated)
 
-0. **Resolve the two open decisions in [`DECISIONS.md`](DECISIONS.md)** (the triangular h/|J|, and
-   the Q1 lattice) and **implement randomized compiling**, which the Q1 prediction is conditional on.
+0. **Implement randomized compiling** ([`DECISIONS.md`](DECISIONS.md) OPEN-3), which the Q1
+   prediction is conditional on, and settle the Q1 lattice implementation (OPEN-2, decided in
+   principle: one reduced torus that fits both arms, 6×8 recommended). The triangular h/|J|
+   question was settled on 2026-10-15 (DECIDED-1).
 1. Calibration run on the H2 emulator (Iceberg 2×2, one Trotter step) against the local predictions.
 2. Measure H2's two-qubit error composition and rerun the sensitivity analysis.
 3. The decisive test: encoded vs bare on H2 at matched shots, **on one reduced lattice that fits both
