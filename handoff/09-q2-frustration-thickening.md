@@ -44,6 +44,13 @@ by lattice distance**, C(r), for square and triangular at matched size/field, as
 - Report C(r) vs r for both lattices at h ∈ {0, 0.1, 0.3, 0.6, 1.0} (match `frustration_compare.txt`), ground
   state by ED (`run_ed`). At h=0 the ground state is degenerate — handle exactly as the existing script does:
   do not interpret single-vector ⟨ZZ⟩/M_z at h=0 (basis-dependent); the h>0 correlations are the signal.
+
+  > **Note added 2026-10-15 — see [`DECISIONS.md`](../DECISIONS.md) OPEN-1.** This field grid is
+  > the project's own. It is not the reference's triangular field, which its released quench4
+  > circuits put at h/|J| = 2 (`research/05-zenodo-dataset-map.md`). Q2 is a ground-state ED result,
+  > not quench dynamics, and its 3–5× weakening also holds at h/|J| = 2 (ratio 4.98 on the matched
+  > 4×4 pair; `docs/q2_frustration.md` A.3). So the OPEN-1 decision (option (a): the triangular
+  > dynamics stay at a self-chosen h/|J| = 0.3) leaves this brief's result unchanged.
 - **Interpretation to record (honestly):** on the unfrustrated square lattice C(r) should show the stronger /
   more ordered AFM correlation; on triangular, frustration should weaken/modify it — but flag the
   disorder-line/floating-phase caveat so a non-monotonic or incommensurate C(r) is not misread.
