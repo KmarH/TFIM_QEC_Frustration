@@ -4,12 +4,12 @@
 
 > **Status of every number here:** a CLASSICAL statistical reference (a uniform ensemble over a winding sector, sampled by MCMC or enumerated exactly), or a classical noiseless state-vector simulation of the ideal Trotter circuit. **None is quantum hardware or an H2 result.** No noise model enters anywhere.
 
-> **Scope (DECISIONS.md OPEN-1, decided 2026-10-15):** this study runs at h ≤ 0.5, working point
+> **Scope (DECISIONS.md DECIDED-1, decided 2026-10-15):** this study runs at h ≤ 0.5, working point
 > h/|J| = 0.3. The reference's own released triangular (quench4) circuits run at h/|J| = 2; this
 > is a deliberately chosen weak-field regime, not an attempt to match or reproduce that
-> experiment. See `DECISIONS.md` OPEN-1 for the full reasoning.
+> experiment. See `DECISIONS.md` DECIDED-1 for the full reasoning.
 
-Model: the frustrated triangular TFIM, H = −J Σ ZZ − h Σ X with **J = −1** (AFM in our sign), dt = 0.25, h ∈ {0.1, 0.2, 0.3, 0.5} (0.3 = our working point, chosen because it is where the emergent-Gauss-law description is valid, `DECISIONS.md` OPEN-1; the scan was broadened from {0.1, 0.3} in handoff/08 A2). Periodic tori, row-major sites, dimer/defect/winding definitions from `src/dimers.py` (docs/gauss_law_dimers.md).
+Model: the frustrated triangular TFIM, H = −J Σ ZZ − h Σ X with **J = −1** (AFM in our sign), dt = 0.25, h ∈ {0.1, 0.2, 0.3, 0.5} (0.3 = our working point, chosen because it is where the emergent-Gauss-law description is valid, `DECISIONS.md` DECIDED-1; the scan was broadened from {0.1, 0.3} in handoff/08 A2). Periodic tori, row-major sites, dimer/defect/winding definitions from `src/dimers.py` (docs/gauss_law_dimers.md).
 
 ---
 
