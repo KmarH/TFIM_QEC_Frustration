@@ -26,15 +26,24 @@ noise model.
 | Q3 thermalization | Per-sector MCMC baseline; relaxation to the finite-cluster value; dt = 0.25 below the Trotter threshold for h ≤ 0.3; Gauss post-selection is the effective mitigation; noise can mimic thermalization | Matched H2 curves |
 | Gauss-law thread | Mostly no; modest yes for detection against X/Y noise only, floored at O((h/J)²) | — (verdict closed) |
 
-> **Note added 2026-10-15 — see [`DECISIONS.md`](../DECISIONS.md) DECIDED-1.** This table was written while the
-> project still described the triangular field h/|J| = 0.3 as the reference's. It is not: the released quench4 circuits are
-> at h/|J| = 2 (`research/05-zenodo-dataset-map.md`).
-> - **Q1 row:** "reproduces the published circuits" refers to the released circuits at h/|J| = 2. That reproduction
->   does not extend to the triangular Q2 / Q3 / Gauss-law work, which runs at a different field.
-> - **Q3 and Gauss-law rows:** "h ≤ 0.3" and the O((h/J)²) floor describe the project's own weak-field study. Under
->   decision (a), that study stays at h/|J| = 0.3 deliberately. It has no counterpart in the reference, so "Matched
->   H2 curves" means a new H2 run at that field, not a comparison with quench4.
-> - **Q2 row:** a ground-state ED result. It holds at h/|J| = 2 too (ratio 4.98), so it is unaffected.
+> **Note added 2026-10-15, corrected the same day.** The earlier version of this note said the table was wrong to
+> describe the triangular field h/|J| = 0.3 as the reference's. **That correction was itself wrong, and the table as
+> written is right.** The paper's full text was read on 2026-10-15: Figure 4(e)'s caption states verbatim "All data
+> taken at (h/|J|, dt|J|)=(0.3, 0.25)", §V's body sets a weak transverse field (0 < h ≪ J), and the lattice is 9×6 —
+> this project's configuration. **h/|J| = 0.3 is the reference's triangular field.** [established]
+> - The h/|J| = 2 reading came from the released `quench4_*.qasm` files. Those files are **defective**: they carry
+>   the square quench's field angle, and the dataset README already documents the same files as having the wrong
+>   initial state (`|0…0>` rather than the two winding bitstrings). Evidence:
+>   `research/05-zenodo-dataset-map.md` §3. Do not infer the triangular experiment's parameters from them.
+> - **Q1 row:** unchanged. "Reproduces the published circuits" is about the **square** quenches, where h/|J| = 2 is
+>   the paper's own value and the circuits agree.
+> - **Q3 and Gauss-law rows:** unchanged. "h ≤ 0.3" and the O((h/J)²) floor describe work at the reference's §V
+>   field, so "Matched H2 curves" is a comparison in the reference's regime — with the standing caveat that the
+>   released quench4 circuits cannot be used to set up that comparison.
+> - **Q2 row:** a ground-state ED result. It holds at h/|J| = 2 too (ratio 4.98), so it is unaffected either way.
+> - **T-5** (the quench4 winding-sector initial states) is narrower than it has been stated: the two **sectors** are
+>   identified in the release, as the `quench4_min_winding_*` / `quench4_max_winding_*` data files. What is missing
+>   is the explicit initial bitstrings and circuits matching them. [established]
 
 ## 3. Decisions in force (all the project lead's; registers: `Conversation history/open-questions.md`)
 
