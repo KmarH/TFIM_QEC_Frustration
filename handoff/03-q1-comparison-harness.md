@@ -49,7 +49,7 @@ re-derive conventions from guesses; follow that note.** The load-bearing facts:
   **Only the products J·dt, h·dt are fixed by the gates** — pick a convention (e.g. |J|=1,
   dt=0.25, h=2) and state it.
 
-  > **Note added 2026-10-15 — see [`DECISIONS.md`](../DECISIONS.md) OPEN-1.** "The brief's old
+  > **Note added 2026-10-15 — see [`DECISIONS.md`](../DECISIONS.md) DECIDED-1.** "The brief's old
   > triangular value 0.3 was WRONG; use 2" is right **for this harness**: the released quench4
   > circuits are at h/|J| = 2 (`research/05-zenodo-dataset-map.md`). The correction never
   > propagated to the triangular Gauss-law / Q3 work. That work kept h/|J| = 0.3 and called it the

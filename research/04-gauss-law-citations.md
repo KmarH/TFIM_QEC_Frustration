@@ -137,7 +137,7 @@ Nature 653, 56–62, 2026; DOI 10.48550/arXiv.2503.20870):
   the quantum-dimer description ("emergent gauge-theoretic description in terms of a quantum dimer
   model") are confirmed in the abstract/intro/§V.
 
-  > **CONTRADICTED by the reference's own dataset — see [`DECISIONS.md`](../DECISIONS.md) OPEN-1.**
+  > **CONTRADICTED by the reference's own dataset — see [`DECISIONS.md`](../DECISIONS.md) DECIDED-1.**
   > A separate research thread (`research/05-zenodo-dataset-map.md`) read the released quench4
   > ("triangular quench") circuits and found `rzz(0.5)`, `rx(0.5)`/`rx(1.0)` in all of them, i.e.
   > **h/|J| = 2**, identical to the square quenches. The two threads never cross-checked each
@@ -145,7 +145,7 @@ Nature 653, 56–62, 2026; DOI 10.48550/arXiv.2503.20870):
   > records that the §V *body* was never reached, so the reading above rests on the abstract and
   > intro. Treat h/|J| = 0.3 as **unconfirmed against the dataset the project actually has**.
   >
-  > **Decided 2026-10-15 (OPEN-1, option (a)).** The project lead kept h/|J| = 0.3, but **not**
+  > **Decided 2026-10-15 (DECIDED-1, option (a)).** The project lead kept h/|J| = 0.3, but **not**
   > as the reference's value. The triangular work is now a deliberately chosen study of the
   > weak-field frustrated regime, justified by its physics: the sector-restricted description is
   > first order in h/|J|. It is no longer described as reproducing 2503.20870's triangular quench.
@@ -223,7 +223,7 @@ No ID failed to resolve. No ID required a corrected locator. (Note the reproduct
    `J_ours = −J_ref` sign mapping → upgrade **[fetched] → [established]** (confirmed in 2503.20870 v3
    full text, Eq. 1).
 
-   > **Superseded 2026-10-15 for h/|J| only — see [`DECISIONS.md`](../DECISIONS.md) OPEN-1.**
+   > **Superseded 2026-10-15 for h/|J| only — see [`DECISIONS.md`](../DECISIONS.md) DECIDED-1.**
    > The h/|J| = 0.3 part of this upgrade did not hold. The reference's released quench4 circuits
    > encode h/|J| = 2 (`research/05-zenodo-dataset-map.md`), and §V's body was never read (the
    > "Item 3" section above). Under decision (a), 0.3 is the project's own weak-field choice, not a value

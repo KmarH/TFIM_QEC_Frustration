@@ -170,7 +170,7 @@ with interior half-layers merging into `rx(2·h·dt)` between consecutive steps.
   the published circuits, not the SI prose, are the executable ground truth). [established from
   circuits; SI prose not independently read]
 
-  > **Note added 2026-10-15 — see [`DECISIONS.md`](../DECISIONS.md) OPEN-1.** This finding was
+  > **Note added 2026-10-15 — see [`DECISIONS.md`](../DECISIONS.md) DECIDED-1.** This finding was
   > **correct**: the reference's triangular quench is at h/|J| = 2, and the three-machine peer
   > review re-derived it independently from all 80 QASM files (`review/14-three-machine-peer-review.md`). It did **not propagate** at the time, though. `GaussLawConfig` / `Q3BaselineConfig` kept
   > h/|J| = 0.3, and later documents kept calling 0.3 "the reference's value". The reason is that
@@ -273,7 +273,7 @@ magnitudes — see the h/|J| discussion above.)
   square `(2,0.25)` confirmed.
 
   > **2026-10-15:** correct as a reading of the reference, but it did not reach the config at the
-  > time. Resolved by [`DECISIONS.md`](../DECISIONS.md) OPEN-1, option (a): the triangular study
+  > time. Resolved by [`DECISIONS.md`](../DECISIONS.md) DECIDED-1, option (a): the triangular study
   > keeps h/|J| = 0.3 as its own weak-field choice and no longer claims to match quench4. See the
   > fuller note under "CONTRADICTION WITH THE TASK BRIEF" above.
 - ✅ **low-T vs intermediate-T** — differ ONLY in the initial `ry` angle: quench1 `ry(+30°)`

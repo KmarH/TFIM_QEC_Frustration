@@ -790,7 +790,7 @@ arm; the Quantinuum client; the `nexus` backend. **Not regenerated:**
 **Pass type:** scope decision and the documentation change it implies. **No code, no constant and
 no number changed.** Suite unchanged at 274/274 on three platforms.
 
-**The decision.** Of the two options recorded in `DECISIONS.md` OPEN-1, the project lead chose
+**The decision.** Of the two options recorded in `DECISIONS.md` DECIDED-1, the project lead chose
 **(a)**: keep `h ≤ 0.5` and state the triangular thread as a deliberately chosen, self-contained
 study of the weak-field frustrated regime. It does **not** reproduce the reference's triangular
 quench, whose released quench4 circuits are at `h/|J| = 2`. Option (b), building a genuine
@@ -811,7 +811,7 @@ replaced with the scope statement plus that justification: `README.md`, `docs/re
 §Model, `docs/findings_vs_questions.md` (plus a frame qualifier on the Gauss-law floor, which is
 ≈0.0092 in circuit order and ≈0.0135 in this repo's ordering), `docs/q3_thermalization.md`,
 `docs/gauss_law_dimers.md`, `docs/q2_frustration.md`, `config.py`'s triangular blocks (comments
-only), and the Q3/Gauss scripts' and modules' docstrings. `DECISIONS.md` OPEN-1 became DECIDED-1.
+only), and the Q3/Gauss scripts' and modules' docstrings. `DECISIONS.md` DECIDED-1 became DECIDED-1.
 
 **Q2 is unaffected** and is now labelled as what it is: a **ground-state** exact-diagonalization
 result, reported at `h ≤ 1`. Its 3–5× weakening also holds at `h/|J| = 2` (4.98 on the matched

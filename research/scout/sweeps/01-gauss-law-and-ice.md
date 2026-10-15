@@ -18,7 +18,7 @@ From `docs/gauss_law_dimers.md §5`, `docs/findings_vs_questions.md`, `research/
 - **Postselection on D=0: modest YES, X/Y (bit-flip-type) noise only**; 2–8× bias cut on spin correlators at p≤3e-3, 1.1–1.8× cost;
   **floored at O((h/J)²)** (~0.013 at h/|J|=0.3); **acceptance worsens with size** even noiseless.
 
-  > **Note added 2026-10-15 — see [`DECISIONS.md`](../../../DECISIONS.md) OPEN-1.** h/|J| = 0.3 is the project's own
+  > **Note added 2026-10-15 — see [`DECISIONS.md`](../../../DECISIONS.md) DECIDED-1.** h/|J| = 0.3 is the project's own
   > weak-field choice, not the field of 2503.20870's triangular quench: the released quench4 circuits are at h/|J| = 2
   > (`research/05-zenodo-dataset-map.md`). Under decision (a) the 0.3 study is kept as a deliberately chosen regime. At
   > h/|J| = 2 the O((h/J)²) floor and the dimer description behind it are not a controlled approximation. So the

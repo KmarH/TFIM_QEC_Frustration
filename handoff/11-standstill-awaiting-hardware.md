@@ -26,7 +26,7 @@ noise model.
 | Q3 thermalization | Per-sector MCMC baseline; relaxation to the finite-cluster value; dt = 0.25 below the Trotter threshold for h ≤ 0.3; Gauss post-selection is the effective mitigation; noise can mimic thermalization | Matched H2 curves |
 | Gauss-law thread | Mostly no; modest yes for detection against X/Y noise only, floored at O((h/J)²) | — (verdict closed) |
 
-> **Note added 2026-10-15 — see [`DECISIONS.md`](../DECISIONS.md) OPEN-1.** This table was written while the
+> **Note added 2026-10-15 — see [`DECISIONS.md`](../DECISIONS.md) DECIDED-1.** This table was written while the
 > project still described the triangular field h/|J| = 0.3 as the reference's. It is not: the released quench4 circuits are
 > at h/|J| = 2 (`research/05-zenodo-dataset-map.md`).
 > - **Q1 row:** "reproduces the published circuits" refers to the released circuits at h/|J| = 2. That reproduction
