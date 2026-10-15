@@ -1,0 +1,17 @@
+# Randomized-compiling gate-count cost -- 2026-10-15 20:26 [classical simulators only; NOT an H2 result]
+# DECISIONS.md OPEN-3: does the twirl's explicit Pauli insertion absorb into native 1q rotations for free, or does it cost real native ops?
+
+Iceberg 2x2 (4 logical, 8 physical), 3 Trotter steps
+
+untwirled:  native rzz=112  rxy=214  rz=208  (1q total=422)
+twirled:    native rzz=112  rxy=265  rz=230  (1q total=495)
+
+2q (rzz) ratio: x1.000  (should be 1.0 -- twirling never changes the number of two-qubit gates)
+1q (rxy+rz) ratio: x1.173
+1q extra native ops added by the twirl: 73
+
+pytket-level: 48 twirled ZZPhase gates (prep + 3 Trotter layers), 74 explicit Pauli (X/Y/Z) gates emitted for the fresh draws (0.77 per qubit-slot, of a possible 1.0 -- 3/4 expected since each draw is non-identity with probability 3/4)
+
+per-Trotter-step native 1q cost added: 24.3 (for comparison, Selene's measured pytket-level-vs-native gap elsewhere in this project is x3.85 on the UNTWIRLED circuit -- data/selene_gap.txt)
+
+Answer to DECISIONS.md OPEN-3: the twirl's Pauli insertions do NOT absorb into native rotations for free on this stack -- they compile to their own native rxy/rz operations, each subject to Selene's p_1q charge like any other native 1-qubit op [measured, this script].
