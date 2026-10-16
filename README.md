@@ -1,5 +1,11 @@
 # TFIM with logical vs physical qubits, aimed at Quantinuum H2
 
+> **Start here.** [`DECISIONS.md`](DECISIONS.md) is the single source of truth for what is decided,
+> what is still open and why. [`handoff/plan.md`](handoff/plan.md) is the numbered journal — one
+> section per pass, newest last. Those two answer "what is the state of this project?" without
+> reading anything else. `review/` and `research/` are evidence, consulted when a specific claim is
+> in question, not read end to end.
+
 A classical groundwork for an article that will compute the **same physical observables of the
 transverse-field Ising model (TFIM)** with **logical (error-detected) qubits** on Quantinuum H2,
 against **bare (unencoded) qubits run on the same lattice at matched shots**, using the released

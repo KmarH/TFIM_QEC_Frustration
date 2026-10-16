@@ -36,3 +36,6 @@ figures/*.svg
 
 # Conversation history — kept separate from the project; not part of the codebase
 Conversation history/
+
+# Local review/scratch dirs (never project content)
+review-rc/

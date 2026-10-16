@@ -736,8 +736,9 @@ Linux x86_64, Python 3.14), **R-Main** (Windows 11, Python 3.13, also orchestrat
 rounds: independent review with separate focus areas, mutual cross-verification of every
 finding, then adjudication of each disagreement with a decisive check. About 40 numbers were
 re-derived from code that does not import this project. Reports: `review/14-three-machine-peer-review.md`
-(consolidated) and `review/14-three-machine-peer-review/` (all nine per-round reports, the
-Round-3b cover, and the dispute assignments).
+(consolidated). The nine per-round reports, the Round-3b cover and the dispute
+assignments were later removed from the working tree to keep the repository lean; they remain in
+git history at commit 88c8c2a.
 
 **Headline.** No fabricated number and no arithmetic error. Every independent re-derivation
 matched; every reproduction that ran matched its committed data file, often byte for byte. The
