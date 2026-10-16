@@ -11,8 +11,9 @@ import numpy as np
 import pytest
 from pytket import Circuit, OpType
 
-from src import twirl
-from src.backends_qc import Noise, build_guppy_program_twirled, local_exact_logical_z2, run_twirled
+from src import backends_qc, twirl
+from src.backends_qc import (Noise, build_guppy_program_twirled, local_exact_logical_z2, run,
+                             run_twirled)
 from src.encoded_tfim import IcebergTFIM, accepted, build_stim, twirl_program, z2_from_logical
 
 I2 = np.eye(2, dtype=complex)
@@ -477,3 +478,144 @@ def test_selene_accepts_twirled_program_at_zero_noise():
     exact = local_exact_logical_z2(s, n_steps)
     z, se = z2_from_logical(s.logical_from_bits(np.array([r.final for r in recs])))
     assert abs(z - exact) < 5 * se + 1e-9
+
+
+# --------------------------------------------------------------------------- #
+# The rc switch itself (EncodedConfig.rc wired into backends_qc.run).
+# Before this, rc/rc_period/rc_instances were dead config: run() never read them, so the
+# switch a caller flipped did nothing at all. An independent review flagged that.
+# --------------------------------------------------------------------------- #
+def test_run_rc_default_off_is_unchanged():
+    """rc defaults to False, and with it off run() must be bit-identical to the old path."""
+    s = spec(2, 2, theta=np.pi / 6, J=1.0, h=2.0, dt=0.25)
+    noise = Noise(p1=0.0, p2=0.0, pm=0.0, p_init=0.0)
+    a = run(s, 2, 8, noise, "local-sim", seed=5, max_spins=24)
+    b = run(s, 2, 8, noise, "local-sim", seed=5, max_spins=24, rc=False)
+    assert [r.final.tolist() for r in a] == [r.final.tolist() for r in b]
+    assert all(accepted(r) for r in a)
+
+
+def test_run_rc_divides_the_shot_budget_and_loses_none():
+    """RC spreads a fixed budget over randomizations; it must not invent or drop shots."""
+    s = spec(2, 2, theta=np.pi / 6, J=1.0, h=2.0, dt=0.25)
+    noise = Noise(p1=0.0, p2=0.0, pm=0.0, p_init=0.0)
+    for shots, inst in ((12, 4), (10, 4), (7, 3), (5, 5)):      # incl. a non-divisible case
+        recs = run(s, 2, shots, noise, "local-sim", seed=1, max_spins=24,
+                   rc=True, rc_instances=inst, rc_seed=99)
+        assert len(recs) == shots, f"shots={shots} instances={inst} returned {len(recs)}"
+
+
+def test_run_rc_zero_noise_matches_untwirled():
+    """At zero noise every twirled shot must be accepted and the pooled logical Z2 must agree
+    with the exact value, within sampling error -- the measurement outcomes are still random at
+    zero noise, so this is a statistical check (5 sigma, the project's convention), not an
+    exact one."""
+    s = spec(2, 2, theta=np.pi / 6, J=1.0, h=2.0, dt=0.25)
+    noise = Noise(p1=0.0, p2=0.0, pm=0.0, p_init=0.0)
+    shots = 400
+    exact = local_exact_logical_z2(s, 2)
+    plain = run(s, 2, shots, noise, "local-sim", seed=3, max_spins=24)
+    twirled = run(s, 2, shots, noise, "local-sim", seed=3, max_spins=24,
+                  rc=True, rc_instances=8, rc_seed=7)
+    assert all(accepted(r) for r in twirled), "zero noise must never discard a twirled shot"
+    for label, recs in (("untwirled", plain), ("twirled", twirled)):
+        z, se = z2_from_logical(s.logical_from_bits(np.array([r.final for r in recs])))
+        assert abs(z - exact) < 5 * se + 1e-9, f"{label}: Z2 {z} vs exact {exact} (se {se})"
+
+
+def test_run_rc_rejects_more_instances_than_shots():
+    s = spec(2, 2, theta=np.pi / 6, J=1.0, h=2.0, dt=0.25)
+    noise = Noise(p1=0.0, p2=0.0, pm=0.0, p_init=0.0)
+    with pytest.raises(ValueError, match="exceeds shots"):
+        run(s, 2, 3, noise, "local-sim", seed=0, max_spins=24, rc=True, rc_instances=4)
+    with pytest.raises(ValueError, match="rc_instances must be"):
+        run(s, 2, 8, noise, "local-sim", seed=0, max_spins=24, rc=True, rc_instances=0)
+
+
+def test_run_rc_still_refuses_nexus():
+    """rc must not open the hardware path: with no hardware arguments the SCOPE §5 gate refuses
+    before anything else, and enabling rc does not change that."""
+    s = spec(2, 2, theta=np.pi / 6, J=1.0, h=2.0, dt=0.25)
+    noise = Noise(p1=0.0, p2=0.0, pm=0.0, p_init=0.0)
+    with pytest.raises(NotImplementedError):
+        run(s, 2, 8, noise, "nexus", seed=0, max_spins=24, rc=True, rc_instances=2)
+    # ...and reaching for hardware with rc on is refused by the gate, not let through.
+    with pytest.raises(PermissionError, match="per-run approval token"):
+        run(s, 2, 8, noise, "nexus", seed=0, max_spins=24, rc=True, rc_instances=2,
+            allow_hardware=True, max_cost_hqc=1.0, device="H2-emulator")
+
+
+def test_run_twirled_instances_get_independent_noise_streams():
+    """noise_seed + i let adjacent calls share noise streams; seeds are now spawned."""
+    s = spec(2, 2, theta=np.pi / 6, J=1.0, h=2.0, dt=0.25)
+    noise = Noise(p1=5e-3, p2=5e-3, pm=0.0, p_init=0.0)
+    a = run_twirled(s, 2, 6, noise, 0, 24, rc_seed=1, n_instances=3)
+    b = run_twirled(s, 2, 6, noise, 1, 24, rc_seed=1, n_instances=3)
+    # same twirls (rc_seed shared), different noise seeds -> instance i of a must not be the
+    # same stream as instance i-1 of b, which is what noise_seed + i produced before.
+    assert [[r.final.tolist() for r in inst] for inst in a[1:]] != \
+           [[r.final.tolist() for r in inst] for inst in b[:-1]]
+
+
+# --------------------------------------------------------------------------- #
+# The hardware gate (SCOPE §5 double gate + HQC ceiling). The submission call itself is still
+# NotImplementedError -- docs/nexus_toggle.md items 3-5 need a live Nexus login, device
+# identifier and Guppy/HUGR route confirmed -- but the GATE must be airtight now, because it is
+# the thing standing between a loop and a credit spend.
+# --------------------------------------------------------------------------- #
+def _hw_kwargs(**over):
+    kw = dict(allow_hardware=True, approval=backends_qc.NEXUS_APPROVAL,
+              max_cost_hqc=5.0, device="H2-emulator")
+    kw.update(over)
+    return kw
+
+
+def test_nexus_refuses_without_allow_hardware():
+    s = spec(2, 2); noise = Noise()
+    with pytest.raises(PermissionError, match="allow_hardware is False"):
+        run(s, 1, 1, noise, "nexus", seed=0, max_spins=24, **_hw_kwargs(allow_hardware=False))
+
+
+def test_nexus_refuses_without_the_per_run_approval_token():
+    """allow_hardware alone must not be enough, and a truthy value must not substitute."""
+    s = spec(2, 2); noise = Noise()
+    for bad in (None, "", "yes", "true", True, "i approve spending hqc on this run"):
+        with pytest.raises(PermissionError, match="per-run approval token"):
+            run(s, 1, 1, noise, "nexus", seed=0, max_spins=24, **_hw_kwargs(approval=bad))
+
+
+def test_nexus_refuses_without_a_positive_hqc_ceiling():
+    """There is deliberately no 'unlimited': 0 and negatives must refuse."""
+    s = spec(2, 2); noise = Noise()
+    for bad in (0.0, -1.0):
+        with pytest.raises(ValueError, match="max_cost_hqc"):
+            run(s, 1, 1, noise, "nexus", seed=0, max_spins=24, **_hw_kwargs(max_cost_hqc=bad))
+
+
+def test_nexus_refuses_a_program_too_big_for_h2():
+    """The encoded program must fit H2's 56 qubits (DECISIONS.md OPEN-2)."""
+    from pytket.extensions.quantinuum import H2
+    assert backends_qc.H2_N_QUBITS == H2.n_qubits          # constant tracks the client's data
+    big = spec(7, 8)                                       # 7x8 encoded needs k+4 = 60 > 56
+    assert big.n_phys > backends_qc.H2_N_QUBITS
+    with pytest.raises(ValueError, match="has 56"):
+        run(big, 1, 1, Noise(), "nexus", seed=0, max_spins=200, **_hw_kwargs())
+
+
+def test_nexus_still_unimplemented_once_every_gate_passes(capsys):
+    """With all gates satisfied it must reach -- and stop at -- NotImplementedError, after
+    printing the ceiling it would have submitted under."""
+    s = spec(2, 2); noise = Noise()
+    with pytest.raises(NotImplementedError):
+        run(s, 2, 10, noise, "nexus", seed=0, max_spins=24, **_hw_kwargs())
+    out = capsys.readouterr().out
+    assert "max_cost=5.0 HQC" in out and "approval token accepted" in out
+
+
+def test_nexus_bare_call_keeps_the_documented_stub_contract():
+    """CLAUDE.md promises `nexus` is "a stub that raises NotImplementedError", and
+    tests/test_encoded_tfim.py pins that. Adding the gate must not change it: a caller passing
+    no hardware arguments still gets NotImplementedError, not a gate error."""
+    s = spec(2, 2)
+    with pytest.raises(NotImplementedError, match="credentials"):
+        run(s, 1, 1, Noise(), "nexus", seed=0, max_spins=24)

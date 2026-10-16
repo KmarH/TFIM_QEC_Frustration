@@ -241,9 +241,48 @@ comparison thereafter.
 
 ---
 
-## OPEN-3 — Randomized compiling is not implemented
+## OPEN-3 — Randomized compiling (implemented 2026-10-16; submission path still open)
 
-**Status: OPEN. This is a precondition for the Q1 conclusion, not a refinement.**
+**Status: IMPLEMENTED 2026-10-16, and the `[unverified]` gate-count item below is now measured.
+What remains open is the hardware submission path (the `nexus` backend), not the twirling. This
+is still a precondition for the Q1 conclusion, not a refinement.**
+
+**What exists now.** `src/twirl.py` twirls every `ZZPhase` (and `XXPhase`, unused in practice),
+threading a Pauli frame through the H/CX-only syndrome segments and across their resets;
+`encoded_tfim.twirl_program` builds one instance of the whole encoded program with its classical
+corrections; and `backends_qc.run(..., rc=True, rc_instances=N)` is the switch — OFF by default,
+dividing a fixed shot budget over N twirled instances and pooling the records, since randomized
+compiling spreads a budget over randomizations rather than granting extra shots. The local-sim,
+Stim and Selene paths all consume it. Covered by 86 tests in `tests/test_twirl.py`.
+
+**Two bugs were found and fixed before merge, both by independent review.** Worth recording,
+because both were invisible to the tests as first written:
+- The fresh random Pauli drawn at each twirled gate was XORed into the frame **without any gate
+  being emitted for it**, on the reasoning that it "rides along for free". Free absorption applies
+  to a Pauli already physically present, not to a newly drawn one — so every twirled shot carried
+  an uncorrected random logical error, even at zero noise.
+- `build_stim(..., basis="X")` applied the **Z-basis** correction mask. The data is conjugated by
+  H before measuring, so an X-basis readout is flipped by the frame's Z-component, not its
+  X-component; it was wrong for every seed tested. The test meant to cover it **could not fail**:
+  Stim's `compile_detector_sampler` reference-subtracts, so a noiseless deterministic circuit
+  yields all-zero detectors whatever the correction is (corrupting every bit of the mask went
+  undetected, 0/36). It now compares raw measurement records in both bases and asserts the mask
+  is load-bearing (30/30 corruptions caught).
+
+**Gate-count answer, settling the `[unverified]` item below.** Iceberg 2×2, 3 Trotter steps,
+through Selene's native pipeline: **two-qubit gates unchanged (×1.000)** — twirling never adds an
+entangler — and **one-qubit native gates 422 → 495 (×1.17)**. So the twirling Paulis do **not**
+absorb into the native arbitrary-angle rotations for free; they compile to their own native ops,
+each exposed to `p_1q`. See `scripts/twirl_gate_count.py` → `data/twirl_gate_count.txt`. No
+committed prediction was rewritten on the strength of this. [measured]
+
+**On the reference's cadence.** 2503.20870 applies RC every two Trotter layers; this
+implementation twirls every `ZZPhase`, which is a *superset* of those locations. For a Pauli
+channel it is a no-op either way, and against coherent error finer twirling is never worse. So
+`EncodedConfig.rc_period` is job-packaging granularity — how many layers go into one submitted
+job — not a change to the distribution over twirled circuits, and it stays unused until the
+`nexus` backend exists. Any phrasing claiming to "match 2503.20870's RC protocol" would be
+inaccurate: this twirls more, not differently.
 
 The "encoding helps at η ≈ 0.05" GO rests explicitly on randomized compiling (decision D-RC,
 ★ FLAG-0, `report.tex` §Q1, `handoff/11`). It gates the headline Q1 claim, so it is recorded here
@@ -300,6 +339,31 @@ assumption, not a measurement here. If they are *not* absorbed, the single-qubit
 grows, and this project already measured that Selene charges `p_1q` on about **3.85× more native
 operations** than pytket-level counting suggests (`data/selene_gap.txt`). So the gate-count
 overhead of twirling should be checked rather than assumed. [unverified]
+
+---
+
+## DECIDED-4 — Active error correction is in scope for THIS article
+
+**Status: DECIDED 2026-10-16 by the project lead. Active error correction for the distance-3/4
+codes (G4 / HW-2) belongs to this article, and nothing is deferred to a later paper.**
+
+Until now the d ≥ 3 codes were run as **detect-and-discard**: a detected fault throws the shot
+away. `docs/findings_vs_questions.md` records decoding-instead-of-discarding as "the main lever"
+left untouched for Q4. That lever is now in scope.
+
+**Why this matters to the existing Q4 conclusion, and should be stated plainly in the write-up.**
+"Iceberg is recommended" currently rests on a comparison in which the distance-3/4 codes are
+denied the thing that justifies having distance 3 or 4 at all. They buy ≈1.2× on the undetectable
+residual while paying 2.9–3.9× in acceptance and 6.6–8.6× in two-qubit gates — but they pay that
+acceptance cost *because* they discard rather than correct. With active correction the trade moves
+in their favour by construction, since the discarded shots are the ones a decoder would recover.
+So the recommendation is conditional on the detect-and-discard regime, and this decision is what
+makes testing that conditional part of the article rather than future work.
+
+**What it implies, not yet built:** a decoder for the Steane / 5-qubit / concatenated codes, the
+syndrome extraction to feed it, and a re-run of the Q4 comparison with correction enabled against
+the same residual/acceptance/gate-count axes. `handoff/05` already frames this as G4 and requires
+it to be designed and verified in Stim and Selene before hardware.
 
 ---
 

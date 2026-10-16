@@ -34,6 +34,14 @@ BACKENDS = ("local-sim", "selene", "nexus")
 NEXUS_MSG = ("Nexus backend: requires Quantinuum credentials/credits; flip toggle when access "
              "is granted")
 
+# The per-run approval token a caller must pass to reach hardware, alongside allow_hardware=True
+# (SCOPE §5's double gate). It is deliberately a sentence a human has to type, not a boolean, so
+# it cannot be satisfied by a default argument, a stray True, or an automated retry.
+NEXUS_APPROVAL = "I approve spending HQC on this run"
+# H2's qubit count, read from pytket-quantinuum's own device data (QuantinuumBackendData for H2),
+# not hardcoded from a doc: the encoded program must fit (DECISIONS.md OPEN-2).
+H2_N_QUBITS = 56
+
 
 @dataclass
 class Noise:
@@ -269,7 +277,8 @@ def _local_shot_twirled(spec: IcebergTFIM, prog: TwirledProgram, sim: LocalSim,
 
 
 def run_twirled(spec: IcebergTFIM, n_steps: int, shots: int, noise: Noise, noise_seed: int,
-                max_spins: int, rc_seed: int, n_instances: int) -> List[List[ShotRecord]]:
+                max_spins: int, rc_seed: int, n_instances: int,
+                extra_shots: int = 0) -> List[List[ShotRecord]]:
     """local-sim execution of `n_instances` independent, reproducible randomized-compiling
     instances (src.encoded_tfim.twirl_program, seeded from `rc_seed`), `shots` local-sim shots
     each. At zero noise every instance reproduces the untwirled program's ShotRecords exactly
@@ -280,11 +289,15 @@ def run_twirled(spec: IcebergTFIM, n_steps: int, shots: int, noise: Noise, noise
     segs = _segments(spec)
     sync = set(spec.syndrome_steps(n_steps))
     children = np.random.SeedSequence(rc_seed).spawn(n_instances)
+    # Spawn the per-instance NOISE seeds too, rather than noise_seed + i: adjacent calls with
+    # noise seeds differing by less than n_instances would otherwise share noise streams.
+    noise_children = np.random.SeedSequence(noise_seed).spawn(n_instances)
     out: List[List[ShotRecord]] = []
-    for i, child in enumerate(children):
+    for i, (child, noise_child) in enumerate(zip(children, noise_children)):
+        shots_i = shots + (1 if i < extra_shots else 0)
         prog = twirl_program(spec, n_steps, child)
-        sim = LocalSim(noise, noise_seed + i)
-        out.append([_local_shot_twirled(spec, prog, sim, segs, sync) for _ in range(shots)])
+        sim = LocalSim(noise, int(noise_child.generate_state(1, dtype=np.uint32)[0]))
+        out.append([_local_shot_twirled(spec, prog, sim, segs, sync) for _ in range(shots_i)])
     return out
 
 
@@ -483,14 +496,89 @@ def _parse_selene(entries) -> ShotRecord:
 # --------------------------------------------------------------------------- #
 # Toggle
 # --------------------------------------------------------------------------- #
+def _nexus_preflight(spec: IcebergTFIM, n_steps: int, shots: int, *, allow_hardware: bool,
+                     approval: Optional[str], max_cost_hqc: float,
+                     device: Optional[str]) -> None:
+    """Enforce SCOPE §5's double gate and the spending cap BEFORE anything could be submitted.
+
+    Raises on the first unmet condition, so a caller can never reach a submission by accident.
+    This runs even though `run()` then raises NotImplementedError, because the gate is the part
+    that must be correct and tested now: the submission call itself needs a Nexus login, a device
+    identifier and the Guppy/HUGR submission route confirmed against live documentation
+    (docs/nexus_toggle.md items 3-5, all still [unverified]), none of which can be exercised here.
+
+    On success it PRINTS the cost ceiling and job shape it would submit under, so the number is on
+    the record before the spend, not after it (docs/nexus_toggle.md item 6).
+    """
+    if not allow_hardware:
+        raise PermissionError(
+            "nexus backend refused: HardwareConfig.allow_hardware is False. Nothing will be "
+            "submitted. Set it consciously (SCOPE §5) -- it is not a default.")
+    if approval != NEXUS_APPROVAL:
+        raise PermissionError(
+            "nexus backend refused: missing the per-run approval token. Pass "
+            f"approval={NEXUS_APPROVAL!r} for THIS run. allow_hardware alone is not enough: "
+            "SCOPE §5 requires both, so that no loop or retry can spend credits unattended.")
+    if not max_cost_hqc or max_cost_hqc <= 0:
+        raise ValueError(
+            "nexus backend refused: HardwareConfig.max_cost_hqc must be a positive HQC ceiling. "
+            "It is passed to pytket-quantinuum as `max_cost`, which the backend enforces "
+            "server-side. There is no 'unlimited' value by design.")
+    if not device:
+        raise ValueError("nexus backend refused: no device name given (HardwareConfig.device).")
+    n_phys = spec.n_phys
+    if n_phys > H2_N_QUBITS:
+        raise ValueError(
+            f"nexus backend refused: the encoded program needs {n_phys} physical qubits, but H2 "
+            f"has {H2_N_QUBITS}. Choose a smaller lattice (DECISIONS.md OPEN-2).")
+    print(f"[nexus preflight] device={device!r} qubits={n_phys}/{H2_N_QUBITS} steps={n_steps} "
+          f"shots={shots} max_cost={max_cost_hqc} HQC (server-enforced ceiling); "
+          "approval token accepted.")
+
+
 def run(spec: IcebergTFIM, n_steps: int, shots: int, noise: Noise, backend: str, seed: int,
-        max_spins: int) -> List[ShotRecord]:
-    """Execute the encoded program for `n_steps` Trotter steps and return per-shot records."""
+        max_spins: int, rc: bool = False, rc_instances: int = 1,
+        rc_seed: Optional[int] = None, allow_hardware: bool = False,
+        approval: Optional[str] = None, max_cost_hqc: float = 0.0,
+        device: Optional[str] = None) -> List[ShotRecord]:
+    """Execute the encoded program for `n_steps` Trotter steps and return per-shot records.
+
+    `rc` is the randomized-compiling switch (EncodedConfig.rc, DECISIONS.md OPEN-3), OFF by
+    default; with it off this function behaves exactly as before. With it on, the `shots`
+    budget is DIVIDED over `rc_instances` independent twirled instances and their records are
+    pooled into the single returned list -- randomized compiling spreads a fixed shot budget
+    over randomizations, it does not grant extra shots. Under this project's Pauli noise models
+    the pooled result reproduces the untwirled prediction (tests/test_twirl.py); the switch
+    exists so the H2 emulator can be driven with randomized-compiled circuits, which is where
+    it actually does something, since real hardware noise is not already Pauli.
+    """
     if backend not in BACKENDS:
         raise ValueError(f"unknown backend {backend!r}; choose one of {BACKENDS}")
     if backend == "nexus":
+        # CLAUDE.md promises `nexus` is "a stub that raises NotImplementedError", so a plain call
+        # keeps doing exactly that. The gate's specific refusals are for a caller who is actually
+        # reaching for hardware -- i.e. who supplied any hardware argument. Either way nothing is
+        # submitted; this only decides which refusal is the more informative one.
+        if allow_hardware or approval is not None or max_cost_hqc or device is not None:
+            _nexus_preflight(spec, n_steps, shots, allow_hardware=allow_hardware,
+                             approval=approval, max_cost_hqc=max_cost_hqc, device=device)
         raise NotImplementedError(NEXUS_MSG)
+    if rc and rc_instances < 1:
+        raise ValueError(f"rc_instances must be >= 1, got {rc_instances}")
     check_physical_ceiling(spec.n_phys, max_spins)        # before any allocation
+    if rc:
+        if rc_instances > shots:
+            raise ValueError(f"rc_instances ({rc_instances}) exceeds shots ({shots}): each "
+                             "instance would get zero shots")
+        per = shots // rc_instances
+        extra = shots - per * rc_instances                # hand out the remainder, lose nothing
+        rcs = seed if rc_seed is None else rc_seed
+        if backend == "local-sim":
+            batches = run_twirled(spec, n_steps, per, noise, seed, max_spins, rcs, rc_instances,
+                                  extra_shots=extra)
+            return [r for batch in batches for r in batch]
+        return _run_selene_twirled(spec, n_steps, per, extra, noise, seed, max_spins, rcs,
+                                   rc_instances)
     if backend == "local-sim":
         sim = LocalSim(noise, seed)
         segs = _segments(spec)
@@ -506,6 +594,31 @@ def run(spec: IcebergTFIM, n_steps: int, shots: int, noise: Noise, backend: str,
     res = (prog.emulator(n_qubits=spec.n_phys).with_shots(shots).with_simulator(Quest())
            .with_seed(seed).with_error_model(em).run())
     return [_parse_selene(s.entries) for s in res.results]
+
+
+def _run_selene_twirled(spec: IcebergTFIM, n_steps: int, per: int, extra: int, noise: Noise,
+                        seed: int, max_spins: int, rc_seed: int,
+                        n_instances: int) -> List[ShotRecord]:
+    """Selene emulator execution of `n_instances` twirled instances, records pooled."""
+    from selene_sim import DepolarizingErrorModel, Quest
+    if noise.p_idle:
+        raise ValueError("selene's DepolarizingErrorModel has no idle term; set p_idle = 0")
+    rc_children = np.random.SeedSequence(rc_seed).spawn(n_instances)
+    noise_children = np.random.SeedSequence(seed).spawn(n_instances)
+    out: List[ShotRecord] = []
+    for i, (rc_child, noise_child) in enumerate(zip(rc_children, noise_children)):
+        shots_i = per + (1 if i < extra else 0)
+        if shots_i == 0:
+            continue
+        prog = twirl_program(spec, n_steps, rc_child)
+        main_fn = build_guppy_program_twirled(spec, prog)
+        ns = int(noise_child.generate_state(1, dtype=np.uint32)[0])
+        em = DepolarizingErrorModel(random_seed=ns, p_1q=noise.p1, p_2q=noise.p2,
+                                    p_meas=noise.pm, p_init=noise.p_init)
+        res = (main_fn.emulator(n_qubits=spec.n_phys).with_shots(shots_i)
+               .with_simulator(Quest()).with_seed(ns).with_error_model(em).run())
+        out.extend(_parse_selene(s.entries) for s in res.results)
+    return out
 
 
 # --------------------------------------------------------------------------- #

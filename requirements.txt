@@ -38,8 +38,18 @@ pillow==12.3.0
 pyparsing==3.3.3
 python-dateutil==2.9.0.post0
 
+# --- Quantinuum client (emulator + hardware submission path; DECISIONS.md OPEN-3) ---
+# Required to reach the H2 EMULATOR, not only hardware. Installing it does NOT enable hardware:
+# the `nexus` backend in src/backends_qc.py stays double-gated (allow_hardware=True AND an
+# explicit per-run approval, SCOPE/CLAUDE.md), and no credential is stored in this repo.
+# Verified with `pip install --dry-run` against this pinned set: it pulls only itself plus
+# pytket-qir and pyqir, and does NOT move pytket 2.18.4, numpy, scipy, stim, selene-sim or
+# guppylang. Its own declared requirement is pytket~=2.17, which 2.18.4 satisfies.
+pytket-quantinuum==0.59.3
+pytket-qir==2.0.2
+pyqir==0.12.6
+
 # --- Deferred (SCOPE §7 full stack; add when their stages/cross-checks begin) ---
-# pytket-quantinuum
 # qiskit               # cross-validation
 # qermit               # mitigation on the unencoded reference
 # pandas
