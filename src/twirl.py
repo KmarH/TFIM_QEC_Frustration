@@ -151,11 +151,25 @@ def twirl_circuit(circuit: Circuit, rng: np.random.Generator,
     return TwirlResult(new_c, frame)
 
 
-def frame_readout_flips(frame: Dict[int, PauliLabel], qubits: Sequence[int]) -> np.ndarray:
-    """Classical bit-flip mask (int8, same length/order as `qubits`) a Z-basis measurement of
-    each listed qubit must be XORed with to recover the untwirled/ideal outcome: 1 iff the
-    frame on that qubit is X or Y (anticommutes with the Z measurement), 0 for I or Z."""
-    return np.array([_TO_BITS[_get(frame, q)][0] for q in qubits], dtype=np.int8)
+def frame_readout_flips(frame: Dict[int, PauliLabel], qubits: Sequence[int],
+                        basis: str = "Z") -> np.ndarray:
+    """Classical bit-flip mask (int8, same length/order as `qubits`) a measurement of each
+    listed qubit must be XORed with to recover the untwirled/ideal outcome: 1 iff the frame
+    on that qubit anticommutes with the observable actually measured.
+
+    `basis` selects which component of the frame matters. Getting it wrong is silent, which is
+    why it is a named argument rather than an assumption:
+      "Z" (default) -- flip iff the frame is X or Y (the frame's X-component).
+      "X"           -- flip iff the frame is Z or Y (the frame's Z-component). Use this when the
+                       readout conjugates the data by H before measuring, as
+                       `encoded_tfim.build_stim(..., basis="X")` does: after that H the
+                       computational-basis measurement reads the original X observable, so it is
+                       the frame's Z-component that flips the bit, not its X-component.
+    """
+    if basis not in ("Z", "X"):
+        raise ValueError(f"basis must be 'Z' or 'X', got {basis!r}")
+    bit = 0 if basis == "Z" else 1          # _TO_BITS values are (x_bit, z_bit)
+    return np.array([_TO_BITS[_get(frame, q)][bit] for q in qubits], dtype=np.int8)
 
 
 def clear_frame(frame: Dict[int, PauliLabel], qubits: Sequence[int]) -> None:

@@ -337,7 +337,11 @@ def build_stim(spec: IcebergTFIM, n_steps: int, basis: str = "Z", mode: str = "i
     if basis == "X":
         c.append("H", d)
     if twirled is not None:
-        for q, flip in zip(d, twirled.final_flip):
+        # The H above rotates the data, so the X-basis readout is flipped by the frame's
+        # Z-component; using final_flip (the Z-basis mask) here is wrong for every frame that
+        # differs in those components.
+        flips = twirled.final_flip_x if basis == "X" else twirled.final_flip
+        for q, flip in zip(d, flips):
             if flip:
                 c.append("X", [q])
     fin = [m(q) for q in d]
@@ -412,7 +416,8 @@ class TwirledProgram:
     trotter_layers: List[Circuit]
     round0_flip: Tuple[int, int, int, int]
     round_flip: Dict[int, Tuple[int, int, int, int]]
-    final_flip: np.ndarray
+    final_flip: np.ndarray                  # Z-basis data readout (frame's X-component)
+    final_flip_x: np.ndarray                # X-basis data readout (frame's Z-component)
 
 
 def twirl_program(spec: IcebergTFIM, n_steps: int, seed: int) -> TwirledProgram:
@@ -453,8 +458,12 @@ def twirl_program(spec: IcebergTFIM, n_steps: int, seed: int) -> TwirledProgram:
             xa, fx = syn_round("X")
             round_flip[s] = (za, fz, xa, fx)
 
-    final_flip = twirl.frame_readout_flips(frame, spec.data)
-    return TwirledProgram(prep_res.circuit, trotter_layers, round0_flip, round_flip, final_flip)
+    # Both readout bases, from the same final frame: a Z-basis data measurement is flipped by
+    # the frame's X-component, an X-basis one (H then measure) by its Z-component.
+    final_flip = twirl.frame_readout_flips(frame, spec.data, basis="Z")
+    final_flip_x = twirl.frame_readout_flips(frame, spec.data, basis="X")
+    return TwirledProgram(prep_res.circuit, trotter_layers, round0_flip, round_flip,
+                          final_flip, final_flip_x)
 
 
 def weight1_injection_all_detected(spec: IcebergTFIM, n_steps: int) -> Tuple[bool, List[str]]:

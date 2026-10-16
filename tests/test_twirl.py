@@ -412,12 +412,50 @@ def test_build_stim_twirled_none_is_unchanged():
 
 
 def test_build_stim_with_twirled_clean_run_silent():
+    """Kept as a smoke check only. It CANNOT fail on its own: see
+    test_build_stim_twirled_final_readout_matches_untwirled for why, and for the real check."""
     s = spec(2, 2, theta=np.pi / 6, J=1.0, h=2.0, dt=0.25)
     prog = twirl_program(s, 2, seed=4)
     for basis in ("Z", "X"):
         circ = build_stim(s, 2, basis=basis, twirled=prog)
         d, _ = circ.compile_detector_sampler(seed=0).sample(200, separate_observables=True)
         assert not d.any()
+
+
+@pytest.mark.parametrize("basis,field", [("Z", "final_flip"), ("X", "final_flip_x")])
+def test_build_stim_twirled_final_readout_matches_untwirled(basis, field):
+    """The twirled Stim image must reproduce the untwirled circuit's final data-measurement
+    distribution in BOTH readout bases.
+
+    Why this compares raw measurement records rather than detectors: Stim's
+    `compile_detector_sampler` reference-subtracts, so a noiseless deterministic circuit gives
+    all-zero detectors whatever the final correction is. An independent review showed the
+    detector-based check above cannot fail -- corrupting every bit of the correction went
+    undetected 0/36 -- and that this hid a real bug: `basis="X"` applied the Z-basis mask (the
+    frame's X-component) although the data is conjugated by H first, so the X readout is flipped
+    by the frame's Z-component instead. Every seed was wrong in basis X.
+
+    So: compare raw records, and assert the correction is actually load-bearing.
+    """
+    s = spec(2, 2, theta=np.pi / 6, J=1.0, h=2.0, dt=0.25)
+    n_data = len(s.data)
+    ref = build_stim(s, 2, basis=basis).compile_sampler(seed=0).sample(400)
+    want = {tuple(r) for r in ref[:, -n_data:].astype(int)}
+
+    for seed in range(6):
+        prog = twirl_program(s, 2, seed=seed)
+        got = build_stim(s, 2, basis=basis, twirled=prog).compile_sampler(seed=0).sample(400)
+        assert {tuple(r) for r in got[:, -n_data:].astype(int)} == want, (
+            f"twirled basis={basis} seed={seed}: final data distribution differs from untwirled")
+
+    caught = 0
+    for seed in range(3):
+        for bit in range(n_data):
+            prog = twirl_program(s, 2, seed=seed)
+            getattr(prog, field)[bit] ^= 1
+            got = build_stim(s, 2, basis=basis, twirled=prog).compile_sampler(seed=0).sample(400)
+            caught += {tuple(r) for r in got[:, -n_data:].astype(int)} != want
+    assert caught == 3 * n_data, f"only {caught}/{3 * n_data} corruptions of {field} detected"
 
 
 def test_selene_accepts_twirled_program_at_zero_noise():
