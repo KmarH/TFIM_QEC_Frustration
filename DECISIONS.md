@@ -367,6 +367,50 @@ it to be designed and verified in Stim and Selene before hardware.
 
 ---
 
+## DECIDED-5 — The 6×6 noise-scaling arm (T-17 / R-14)
+
+**Status: DECIDED and built 2026-10-16 by the project lead (D1–D7), classically validated, blind
+reviewed (`review/15`). Nothing has run on H2.** Every number is a classical prediction under the
+ASSUMED research/06 prior. Design: `docs/q3_noise_scaling.md`. Derivation:
+`research/derivations/01-noise-scaling-arm.md`. Sources: `research/07-noise-scaling.md`.
+
+### D-NS1 — Purpose (2026-10-16)
+Decided: diagnostic first; extrapolation only when its χ² test passes. Options: diagnostic only | ZNE only | both.
+Why: T-17 needs "does it move with the noise", and the same runs give the extrapolation. By: user.
+Rests on: derivations/01 (d); 2407.04770 (precedent). Revisit if: H2 time is so short that only λ = {1, 3} fits.
+
+### D-NS2 — Amplification (2026-10-16)
+Decided: Pauli insertion before the 2q gates for the λ ladder, plus one folded λ = 3 point. Options: insertion | folding | both.
+Why: insertion is the reference's method and costs ≈ 1× HQC; the fold tests the insertion model. By: user.
+Rests on: 2503.20870 §VII.2, 2005.10921, derivations/01 (a, b). Revisit if: a learned H2 noise model (G2) disagrees with the fold check.
+
+### D-NS3 — Arms scaled (2026-10-16)
+Decided: bare + Gauss post-selection only; Iceberg runs at λ = 1. Options: bare only | also Iceberg.
+Why: at λ = 3, Iceberg survives only to t ≈ 1.4 at 6×6 [derived accounting]. By: user. Rests on: derivations/01 (c).
+Revisit if: H2's real error is far below the prior.
+
+### D-NS4 — λ set and fit (2026-10-16)
+Decided: λ = {1, 2, 3}, exponential. Options: {1, 2, 3} | {1, 3} | {1, 4}.
+Why: the third point makes the fit falsifiable. By: user. Rests on: derivations/01 (d). Revisit if: the budget forces the diagnostic-only fallback {1, 3}.
+
+### D-NS5 — Fit asymptote (2026-10-16)
+Decided: fixed at the infinite-T value (B_W₀ conditioned, the full-space value raw). Options: fixed B_W₀ | free | the reference's 0.
+Why: it leaves 1 dof for χ²; the reference's B = 0 is biased for densities. By: user.
+Rests on: derivations/01; Cai 2007.01265; Kim 2023. Revisit if: the χ² test fails systematically on H2 data.
+
+### D-NS6 — Folded circuits compile at TKET level 0 (2026-10-16)
+Decided: `NoiseScalingConfig.compile_opt_level = 0`; frozen tests T4/T5 moved to 3×3; new frozen test T17. Options: 3×3 + T17 | 3×3 only | dense oracle.
+Why: an offline H2-1 compile at levels 1–2 (2 is the default) cancels ZZ(a)ZZ(−a)ZZ(a), giving 2Q counts of 27/27 instead of 27/81 [measured]. The λ = 3 point would silently run as λ = 1. By: user.
+Rests on: research/07 (no-opt), review/15. Revisit if: the submission path (`nexus`) is built. Server-side optimisation must also be off.
+
+### D-NS7 — 6×6 window and resolution (2026-10-16)
+Decided: t = 1–3, slope resolution 0.005 per unit λ, one fold at t = 2: ≈ 8.3×10⁴ HQC [derived estimate].
+Options: t ≤ 3 @ 0.005 | t ≤ 8 @ 0.01 (≈ 4.4×10⁵) | 500 shots per circuit (≈ 5.3×10⁴).
+Why: late λ = 3 points lose ~98% of shots to post-selection. By: user.
+Consequence: **no late-time (t > 3) 6×6 value may be called thermalization.** Revisit if: G2 gives H2's real 2q error. Recompute the plan then.
+
+---
+
 ## Applied corrections (no decision needed)
 
 These were wrong independently of the decisions above and have been fixed:

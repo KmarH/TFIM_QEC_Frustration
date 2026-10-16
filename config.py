@@ -405,6 +405,45 @@ class Q2FrustrationConfig:
 
 
 @dataclass
+class NoiseScalingConfig:
+    """6x6 noise-scaling arm, T-17 / R-14 (src/noise_scaling.py, docs/q3_noise_scaling.md,
+    research/derivations/01-noise-scaling-arm.md). Decisions D1-D5 of 2026-10-16 (the project lead):
+    diagnostic first, then extrapolation; Pauli insertion before 2q gates for the lam ladder, plus
+    one folded point; bare + Gauss post-selection only; lam = (1, 2, 3); exponential fit with the
+    asymptote FIXED at the infinite-T value (sector B_W0 conditioned, full space raw).
+    Every number produced is a CLASSICAL PREDICTION under the ASSUMED research/06 prior, not H2.
+    """
+
+    lams: tuple = (1, 2, 3)            # D4: insertion ladder (nominal 2q-error scale)
+    fold_lam: int = 3                  # D2: the one folded check point (odd: G (G^-1 G)^k)
+    z_min: float = 3.0                 # [assumed] slope "resolved" at |z| >= 3
+    p_consistent: float = 0.05         # [assumed] fit reported only if chi2 p-value >= this
+    fold_scope: tuple = ("rot-zz",)    # D2/spec: fold and insert 2q (logical-ZZ) gates only
+    # [measured, offline H2-1 compile, research/derivations/01] TKET optimisation levels 1 and 2
+    # (2 = Quantinuum's default) cancel ZZ(a) ZZ(-a) ZZ(a) back to one gate, silently turning the
+    # folded lam = 3 point into lam = 1. Folded circuits must compile at level 0 (and be submitted
+    # with server-side optimisation off). Guarded by tests/test_noise_scaling.py (T17).
+    compile_opt_level: int = 0
+    # 6x6 target (T-18) and its sector baseline B_W0 (data/q3_size.txt, MCMC [measured])
+    target: tuple = (6, 6, "3-sublattice")
+    b_w0_target: float = 0.30884
+    # 3x4 classical validation (trajectories exist there; data/q3_noisy.txt) and sigma_1 cases
+    val_case: tuple = (3, 4, "flippable")
+    val_steps: int = 32                # t <= 8
+    val_record_every: int = 4
+    val_traj: int = 400
+    val_batches: int = 20
+    sigma_cases: tuple = ((3, 4, "flippable"), (3, 6, "3-sublattice"))
+    # shot plan for the 6x6 arm (illustrative until the project lead fixes the budget)
+    plan_times: tuple = (1.0, 2.0, 3.0)  # D7 (2026-10-16): early window only; no late-time 6x6
+                                         # thermalization claim. Recompute once G2 is known.
+    fold_plan_time: float = 2.0       # [assumed] D2: the ONE folded lam=3 check sits at this t
+    plan_shots: int = 500              # [assumed] per circuit per lam point, pre post-selection
+    plan_slope: float = 0.005          # [assumed] smallest conditioned slope dO/dlam_eff to resolve
+                                       # at z_min (3x4 cond drift ~0.008 at the prior; 6x6 rates 3x)
+
+
+@dataclass
 class RunConfig:
     """Top-level run configuration — the one object the rest of the code reads."""
 
@@ -421,6 +460,7 @@ class RunConfig:
     sensitivity: SensitivityConfig = field(default_factory=SensitivityConfig)
     q3: Q3BaselineConfig = field(default_factory=Q3BaselineConfig)
     q2: Q2FrustrationConfig = field(default_factory=Q2FrustrationConfig)
+    noise_scaling: NoiseScalingConfig = field(default_factory=NoiseScalingConfig)
 
     # Reproducibility / IO
     seed: int = 1234
