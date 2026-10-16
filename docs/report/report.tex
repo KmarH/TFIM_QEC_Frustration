@@ -729,6 +729,13 @@ Two decisions from this work apply to the hardware runs. An encoded Q3 run canno
 A Q3 curve reaching $B_{W_0}$ is not called thermalization unless it is compared with the noise (T-17); at $6\times6$
 no classical noisy prediction is possible ($36>24$ spins), so that run includes a noise-scaling arm. Under the assumed
 prior the $6\times6$ Iceberg arm reaches only early times (survival 10\% at $t\approx3.8$) \cp.
+The arm is now designed (\code{docs/q3\_noise\_scaling.md}): Pauli insertion before the 2q gates at
+$\lambda\in\{1,2,3\}$ plus one folded $\lambda=3$ point, on the bare + Gauss-post-selected arm only. A weighted
+$\lambda$-slope test is the primary output. A zero-noise value from $O(\lambda)=B+(O_0-B)e^{-g\lambda}$, with $B$ fixed
+at the infinite-temperature value, is reported only when its $\chi^2$ test passes. On $3\times4$ the raw slope is
+resolved at every time, while the conditioned observable moves by only $\approx0.001$--$0.003$ per unit $\lambda$
+\mea{} \cp. Folded circuits must compile at TKET level 0, because levels 1--2 cancel the fold \mea. The $6\times6$ arm is
+planned at $t\le3$ (decision D7).
 
 % =====================================================================================
 \section{Limitations}\label{sec:limits}

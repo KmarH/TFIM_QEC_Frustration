@@ -71,6 +71,8 @@ noise model.
 3. **Build randomized compiling into the encoded programs.** It is not built yet; D-RC requires it and the
    "encoding helps" prediction rests on it. Verify locally that twirled and untwirled agree at zero noise.
 4. Design the **6×6 noise-scaling arm** (T-17), for example by gate folding at 1×/2×/3×. Not designed yet.
+   *[2026-10-16: DONE, classically. Pauli insertion λ = {1, 2, 3} + one fold, bare + Gauss only, t ≤ 3. See
+   `handoff/12`, `docs/q3_noise_scaling.md`, DECISIONS.md DECIDED-5. Folded circuits must compile at TKET level 0.]*
 5. Replace the `nexus` stub following `docs/nexus_toggle.md` (steps 1–7). Path (b) submits the Guppy/HUGR
    program so feed-forward runs on the device. Whether Nexus accepts it is open (HW-3).
 

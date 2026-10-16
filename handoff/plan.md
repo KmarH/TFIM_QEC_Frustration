@@ -892,3 +892,39 @@ bitstrings and matching circuits are absent.
 
 **Still open:** randomized compiling (`DECISIONS.md` OPEN-3) and the Q1 lattice implementation
 (OPEN-2). Nothing in this pass touches either.
+
+## 27. DECIDED-5: the 6×6 noise-scaling arm (T-17 / R-14), designed and classically validated, 2026-10-16
+
+**Pass type:** research-flow, through all stages: KB → derive → decisions D1–D7 → frozen tests → implement → blind review → handoff.
+**Classical predictions under the ASSUMED prior; nothing ran on H2.**
+
+**Built.**
+- `src/noise_scaling.py` (new, additive):
+  - Pauli insertion and folding (both pytket circuits and the `run_bare_scaled` trajectories);
+  - first-order Stim scaling, which reuses `encoded_codes` through a restored `to_stim` wrapper;
+  - the weighted slope test, the fixed-asymptote exponential fit, and the HQC formula.
+- `config.py`: `NoiseScalingConfig`.
+- `scripts/run_noise_scaling.py` → `data/noise_scaling.txt`.
+- Docs: `docs/q3_noise_scaling.md`, a `report.tex` §Q3 paragraph, and `DECISIONS.md` DECIDED-5.
+- KB: `research/07-noise-scaling.md`, `research/sources.md` (new index), and `research/derivations/01-noise-scaling-arm{,-testspec}.md`.
+
+**Decisions (the project lead):**
+- D1 diagnostic first;
+- D2 insertion + one fold;
+- D3 bare + Gauss only;
+- D4 λ = {1, 2, 3};
+- D5 B fixed at infinite T;
+- D6 compile level 0, T4/T5 on 3×3, new T17;
+- D7 t ≤ 3 at slope 0.005, ≈ 8.3×10⁴ HQC.
+
+**Key findings.**
+- [measured] An offline H2-1 compile at TKET levels 1–2 cancels the fold (27/27 two-qubit gates instead of 27/81). Unguarded, the λ = 3 point would have run as λ = 1.
+- [measured, 3×4] Gauss post-selection already removes most of the noise effect on the conditioned flippable density (0.0002–0.0027 from ideal at λ = 1). The diagnostic still resolves ≈ 0.001–0.003 slopes when the SE is small.
+- [derived] Late-time 6×6 λ = 3 points lose about 98% of shots to post-selection, so no late-time 6×6 thermalization claim is possible within any modest budget.
+
+**Tests.**
+- Frozen file SHA-256 `FED386D4…5EF8`.
+- Suite (397 = 372 + 25): local 397/397 (Win, Py 3.13, 432 s); OLP 397/397 (review B); OVM 397/397 (aarch64, Py 3.12.14, 342 s).
+
+**Review:** `review/15`. Both minor; no open major.
+**Handoff:** `handoff/12`. **Still open:** OPEN-2, the OPEN-3 submission path, G2. O-NS1 is a tighter T14 (needs approval).
