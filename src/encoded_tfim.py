@@ -227,6 +227,11 @@ def _segment_to_stim(c: stim.Circuit, seg: Circuit, noise: StimNoise, mode: str)
             c.append("H", qs)
             if noise.p1 and "h" in on:
                 c.append("DEPOLARIZE1", qs, noise.p1)
+        elif typ in (OpType.X, OpType.Y, OpType.Z):
+            # explicit twirl Pauli (src/twirl.py). Deliberately noiseless here too, for the same
+            # reason as src/backends_qc.py's LocalSim.run_segment -- see that comment and
+            # scripts/twirl_gate_count.py for the real (native) gate-count cost this elides.
+            c.append(typ.name, qs)
         elif typ == OpType.CX:
             c.append("CX", qs)
             if noise.p2 and "cx" in on:
@@ -241,7 +246,8 @@ def _segment_to_stim(c: stim.Circuit, seg: Circuit, noise: StimNoise, mode: str)
 
 def build_stim(spec: IcebergTFIM, n_steps: int, basis: str = "Z", mode: str = "identity",
                noise: Optional[StimNoise] = None, readout: bool = True,
-               inject: Optional[List[Tuple[int, str, int]]] = None) -> stim.Circuit:
+               inject: Optional[List[Tuple[int, str, int]]] = None,
+               twirled: Optional["TwirledProgram"] = None) -> stim.Circuit:
     """Stim image of the encoded program.
 
     basis "Z": prep |0^n> (logical |0..0> after the round-0 S_X projection), Z readout,
@@ -249,6 +255,12 @@ def build_stim(spec: IcebergTFIM, n_steps: int, basis: str = "Z", mode: str = "i
                (needed so Z-type logical faults are visible). In 'identity' mode the logical
                state stays a Zbar (resp. Xbar) eigenstate, so observables are deterministic.
     inject: [(after_step, pauli, qubit)] probability-1 errors after a Trotter segment.
+    twirled: an OPTIONAL randomized-compiling instance (twirl_program(); DECISIONS.md OPEN-3).
+             When given, its twirled prep/trotter circuits replace spec.prep_segment()/
+             trotter_segment(), and a deterministic (noiseless) X is inserted immediately
+             before each A/F and final-data measurement wherever its Pauli frame requires one
+             -- so every DETECTOR/OBSERVABLE_INCLUDE below sees exactly the bits the untwirled
+             circuit would have produced. Default None reproduces the original image exactly.
     """
     noise = noise or StimNoise()
     on = set(noise.classes)
@@ -281,10 +293,19 @@ def build_stim(spec: IcebergTFIM, n_steps: int, basis: str = "Z", mode: str = "i
     if basis == "X":
         c.append("H", d)                                  # |+^n>: S_X = +1 deterministic
     prev = {"Z": None, "X": None}
+    round_idx = [0]                                        # 0 = round-0, else the Trotter step s
 
     def round_():
-        for kind in ("Z", "X"):
+        flip = None
+        if twirled is not None:
+            flip = twirled.round0_flip if round_idx[0] == 0 else twirled.round_flip[round_idx[0]]
+        for i, kind in enumerate(("Z", "X")):
             _segment_to_stim(c, spec.syndrome_segment(kind), noise, mode)
+            if flip is not None:
+                if flip[2 * i]:
+                    c.append("X", [A])
+                if flip[2 * i + 1]:
+                    c.append("X", [F])
             ma, mf = m(A), m(F)
             det([mf])
             deterministic = (kind == "Z") if basis == "Z" else (kind == "X")
@@ -299,20 +320,30 @@ def build_stim(spec: IcebergTFIM, n_steps: int, basis: str = "Z", mode: str = "i
     round_()
     # logical ry(theta) prep: its gates carry noise in every mode; in 'identity' mode they act
     # as identity (logical state stays an eigenstate of the readout-basis logicals)
-    _segment_to_stim(c, spec.prep_segment(), noise, mode)
+    _segment_to_stim(c, twirled.prep if twirled else spec.prep_segment(), noise, mode)
     sync = set(spec.syndrome_steps(n_steps))
     for s in range(1, n_steps + 1):
-        _segment_to_stim(c, spec.trotter_segment(), noise, mode)
+        _segment_to_stim(c, twirled.trotter_layers[s - 1] if twirled else spec.trotter_segment(),
+                         noise, mode)
         idle()
         for (after, p, q) in inject or []:
             if after == s:
                 c.append({"X": "X_ERROR", "Y": "Y_ERROR", "Z": "Z_ERROR"}[p], [q], 1.0)
         if s in sync:
+            round_idx[0] = s
             round_()
     if not readout:
         return c
     if basis == "X":
         c.append("H", d)
+    if twirled is not None:
+        # The H above rotates the data, so the X-basis readout is flipped by the frame's
+        # Z-component; using final_flip (the Z-basis mask) here is wrong for every frame that
+        # differs in those components.
+        flips = twirled.final_flip_x if basis == "X" else twirled.final_flip
+        for q, flip in zip(d, flips):
+            if flip:
+                c.append("X", [q])
     fin = [m(q) for q in d]
     det(fin + [prev[basis]])                                # final parity vs last S_basis
     for i in range(spec.k):
@@ -366,6 +397,73 @@ def single_fault_report(spec: IcebergTFIM, n_steps: int, p: float = 1e-3) -> Dic
                         paulis.add("".join(f"{t.gate_target.pauli_type}{t.gate_target.value}" for t in loc.flipped_pauli_product))
         out[cls] = {"mechanisms": n_mech, "undetected_logical": n_bad, "paulis": sorted(paulis)}
     return out
+
+
+# --------------------------------------------------------------------------- #
+# Randomized compiling hook (DECISIONS.md OPEN-3, D-RC; src/twirl.py). ADDITIVE, OFF by
+# default (EncodedConfig.rc) -- nothing above this point is touched or changed by it.
+# --------------------------------------------------------------------------- #
+@dataclass
+class TwirledProgram:
+    """One randomized-compiling instance of the encoded program (round-0 syndrome, logical
+    ry(theta) prep, n_steps Trotter layers with syndrome rounds interspersed per
+    spec.syndrome_steps). `*_flip` entries are the classical (sz, fz, sx, fx) / data-bit
+    XOR corrections a caller must apply to the RAW measurement outcomes it gets back when it
+    runs `prep`/`trotter_layers` in place of the untwirled segments -- see src/twirl.py's
+    module docstring for why this is a classical correction, not an extra physical gate."""
+
+    prep: Circuit
+    trotter_layers: List[Circuit]
+    round0_flip: Tuple[int, int, int, int]
+    round_flip: Dict[int, Tuple[int, int, int, int]]
+    final_flip: np.ndarray                  # Z-basis data readout (frame's X-component)
+    final_flip_x: np.ndarray                # X-basis data readout (frame's Z-component)
+
+
+def twirl_program(spec: IcebergTFIM, n_steps: int, seed: int) -> TwirledProgram:
+    """Build one twirled instance of the full IcebergTFIM program. Twirls every ZZPhase in
+    `prep_segment`/`trotter_segment` (src.twirl.twirl_circuit) and threads the resulting Pauli
+    frame continuously through the H/CX-only `syndrome_segment` calls (no new randomness is
+    drawn there -- it has no ZZPhase gates -- but the frame must still propagate through it to
+    know the correction for the A/F measurements, then clear across their reset)."""
+    from src import twirl
+
+    rng = np.random.default_rng(seed)
+    frame: Dict[int, str] = {}
+    sync = set(spec.syndrome_steps(n_steps))
+
+    def syn_round(kind: str) -> Tuple[int, int]:
+        nonlocal frame
+        res = twirl.twirl_circuit(spec.syndrome_segment(kind), rng, frame)
+        frame = res.frame
+        flips = twirl.frame_readout_flips(frame, [spec.A, spec.F])
+        twirl.clear_frame(frame, [spec.A, spec.F])
+        return int(flips[0]), int(flips[1])
+
+    za0, fz0 = syn_round("Z")
+    xa0, fx0 = syn_round("X")
+    round0_flip = (za0, fz0, xa0, fx0)
+
+    prep_res = twirl.twirl_circuit(spec.prep_segment(), rng, frame)
+    frame = prep_res.frame
+
+    trotter_layers: List[Circuit] = []
+    round_flip: Dict[int, Tuple[int, int, int, int]] = {}
+    for s in range(1, n_steps + 1):
+        tres = twirl.twirl_circuit(spec.trotter_segment(), rng, frame)
+        frame = tres.frame
+        trotter_layers.append(tres.circuit)
+        if s in sync:
+            za, fz = syn_round("Z")
+            xa, fx = syn_round("X")
+            round_flip[s] = (za, fz, xa, fx)
+
+    # Both readout bases, from the same final frame: a Z-basis data measurement is flipped by
+    # the frame's X-component, an X-basis one (H then measure) by its Z-component.
+    final_flip = twirl.frame_readout_flips(frame, spec.data, basis="Z")
+    final_flip_x = twirl.frame_readout_flips(frame, spec.data, basis="X")
+    return TwirledProgram(prep_res.circuit, trotter_layers, round0_flip, round_flip,
+                          final_flip, final_flip_x)
 
 
 def weight1_injection_all_detected(spec: IcebergTFIM, n_steps: int) -> Tuple[bool, List[str]]:

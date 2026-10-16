@@ -27,7 +27,8 @@ from typing import Dict, List, Optional
 import numpy as np
 from pytket import Circuit, OpType
 
-from src.encoded_tfim import IcebergTFIM, ShotRecord, check_physical_ceiling
+from src.encoded_tfim import (IcebergTFIM, ShotRecord, TwirledProgram, check_physical_ceiling,
+                              twirl_program)
 
 BACKENDS = ("local-sim", "selene", "nexus")
 NEXUS_MSG = ("Nexus backend: requires Quantinuum credentials/credits; flip toggle when access "
@@ -127,6 +128,16 @@ class LocalSim:
             if typ == OpType.H:
                 sv.apply1(_H, qs[0])
                 self._pauli_noise(sv, qs, self.noise.p1)
+            elif typ in (OpType.X, OpType.Y, OpType.Z):
+                # explicit twirl Pauli (src/twirl.py). Deliberately noiseless in THIS classical
+                # model [assumed, modeling choice]: Noise.p1 represents the SAME rate this
+                # project already uses for every other 1-qubit gate, and charging it here too
+                # would make a twirled run strictly noisier than an untwirled one even though
+                # both see the same stochastic Pauli channel -- breaking the no-op property this
+                # module exists to preserve (tests/test_twirl.py). On real/native hardware this
+                # gate is NOT free -- see scripts/twirl_gate_count.py's measured native 1q-gate
+                # cost (DECISIONS.md OPEN-3); that cost is accounted there, not as extra p1 here.
+                sv.apply1(_PAULI[typ.name], qs[0])
             elif typ == OpType.CX:
                 sv.apply2(_CX, qs[0], qs[1])
                 self._pauli_noise(sv, qs, self.noise.p2)
@@ -219,6 +230,65 @@ def _segments(spec: IcebergTFIM) -> Dict[str, Circuit]:
 
 
 # --------------------------------------------------------------------------- #
+# Randomized compiling (DECISIONS.md OPEN-3, D-RC; src/twirl.py). ADDITIVE, OFF by default
+# (EncodedConfig.rc): this swaps in a TwirledProgram's circuits in place of _segments()'
+# "prep"/"trotter", applying the classical frame corrections to the raw sz/fz/sx/fx and final
+# bits. "synZ"/"synX" are reused UNCHANGED from `segs` -- they have no ZZPhase gates, so
+# twirling never modifies them; only the Pauli frame passes through.
+# --------------------------------------------------------------------------- #
+def _local_shot_twirled(spec: IcebergTFIM, prog: TwirledProgram, sim: LocalSim,
+                        segs: Dict[str, Circuit], sync: set) -> ShotRecord:
+    sv = StateVector(spec.n_phys, sim.rng)
+    for q in range(spec.n_phys):
+        if sim.noise.p_init and sim.rng.random() < sim.noise.p_init:
+            sv.apply1(_PAULI["X"], q)
+    rounds = []
+
+    def syndrome_round(flip: tuple) -> None:
+        out = []
+        for kind in ("Z", "X"):
+            sim.run_segment(sv, segs["syn" + kind])
+            out += [sim.measure(sv, spec.A), sim.measure(sv, spec.F)]
+            sim.reset(sv, spec.A)
+            sim.reset(sv, spec.F)
+        sim.idle(sv, spec.data)
+        sz, fz, sx, fx = out
+        fza, ffz, fsx, ffx = flip
+        rounds.append((sz ^ fza, fz ^ ffz, sx ^ fsx, fx ^ ffx))
+
+    syndrome_round(prog.round0_flip)
+    sim.run_segment(sv, prog.prep)
+    for s in range(1, len(prog.trotter_layers) + 1):
+        sim.run_segment(sv, prog.trotter_layers[s - 1])
+        sim.idle(sv, spec.data)
+        if s in sync:
+            syndrome_round(prog.round_flip[s])
+    final = np.array([sim.measure(sv, q) for q in spec.data], dtype=np.int8)
+    final = final ^ prog.final_flip
+    return ShotRecord(rounds, final)
+
+
+def run_twirled(spec: IcebergTFIM, n_steps: int, shots: int, noise: Noise, noise_seed: int,
+                max_spins: int, rc_seed: int, n_instances: int) -> List[List[ShotRecord]]:
+    """local-sim execution of `n_instances` independent, reproducible randomized-compiling
+    instances (src.encoded_tfim.twirl_program, seeded from `rc_seed`), `shots` local-sim shots
+    each. At zero noise every instance reproduces the untwirled program's ShotRecords exactly
+    (tests/test_twirl.py); under this project's Pauli noise model the per-instance results
+    differ shot-by-shot but their ensemble average reproduces the untwirled prediction -- see
+    the module docstring of src/twirl.py. Returns one list of ShotRecords per instance."""
+    check_physical_ceiling(spec.n_phys, max_spins)
+    segs = _segments(spec)
+    sync = set(spec.syndrome_steps(n_steps))
+    children = np.random.SeedSequence(rc_seed).spawn(n_instances)
+    out: List[List[ShotRecord]] = []
+    for i, child in enumerate(children):
+        prog = twirl_program(spec, n_steps, child)
+        sim = LocalSim(noise, noise_seed + i)
+        out.append([_local_shot_twirled(spec, prog, sim, segs, sync) for _ in range(shots)])
+    return out
+
+
+# --------------------------------------------------------------------------- #
 # selene: Guppy program with mid-circuit measurement + feedforward discard
 # --------------------------------------------------------------------------- #
 _selene_counter = [0]
@@ -292,6 +362,105 @@ def build_guppy_program(spec: IcebergTFIM, n_steps: int):
         discard_array(q)
 
     return main
+
+
+_RC_REG: Dict[str, Dict] = {}
+
+
+def build_guppy_program_twirled(spec: IcebergTFIM, prog: TwirledProgram):
+    """Guppy program for ONE randomized-compiling instance (`prog`, from
+    src.encoded_tfim.twirl_program; DECISIONS.md OPEN-3). Same wire protocol as
+    build_guppy_program (sz/fz/sx/fx per round, d per final bit, then accepted), so
+    _parse_selene needs no change. Each Trotter layer gets its OWN loaded pytket function
+    (the layers generally differ, since the Pauli frame -- and so the sign of each gate's
+    angle -- evolves step to step), and every classical XOR correction from `prog` is baked in
+    as a Python-level `not` at SOURCE-GENERATION time (the frame is deterministic given the
+    instance's seed, so this is ordinary dead-code elimination, not a runtime branch); the
+    final per-qubit corrections differ qubit to qubit, so that loop is unrolled explicitly,
+    following the same code-generation pattern as src.encoded_codes.guppy_program."""
+    import importlib.util
+    import os
+    import tempfile
+
+    _selene_counter[0] += 1
+    tag = f"rc{_selene_counter[0]}"
+    n_steps = len(prog.trotter_layers)
+    ND = spec.k + 2
+    sync = set(spec.syndrome_steps(n_steps))
+    _RC_REG[tag] = {"prep": prog.prep, "synZ": spec.syndrome_segment("Z"),
+                    "synX": spec.syndrome_segment("X"), "trotter": prog.trotter_layers}
+    N, A, F = spec.n_phys, spec.A, spec.F
+
+    L = ["from guppylang import guppy",
+         "from guppylang.std.builtins import array, comptime, result",
+         "from guppylang.std.quantum import discard_array, project_z, qubit, reset",
+         "from src.backends_qc import _RC_REG",
+         f"_C = _RC_REG[{tag!r}]",
+         f"prep_fn = guppy.load_pytket('prep_{tag}', _C['prep'])",
+         f"synz_fn = guppy.load_pytket('synz_{tag}', _C['synZ'])",
+         f"synx_fn = guppy.load_pytket('synx_{tag}', _C['synX'])"]
+    for i in range(n_steps):
+        L.append(f"trot_fn_{i} = guppy.load_pytket('trot_{tag}_{i}', _C['trotter'][{i}])")
+
+    def maybe_not(var: str, flip: int) -> None:
+        if flip:
+            L.append(f"    {var} = not {var}")
+
+    L += ["", "@guppy", "def main() -> None:",
+          f"    q = array(qubit() for _ in range(comptime({N})))",
+          "    synz_fn(q)", f"    sz = project_z(q[comptime({A})]).read()"]
+    maybe_not("sz", prog.round0_flip[0])
+    L.append(f"    fz = project_z(q[comptime({F})]).read()")
+    maybe_not("fz", prog.round0_flip[1])
+    L += [f"    reset(q[comptime({A})])", f"    reset(q[comptime({F})])", "    synx_fn(q)",
+          f"    sx_ref = project_z(q[comptime({A})]).read()"]
+    maybe_not("sx_ref", prog.round0_flip[2])
+    L.append(f"    fx = project_z(q[comptime({F})]).read()")
+    maybe_not("fx", prog.round0_flip[3])
+    L += [f"    reset(q[comptime({A})])", f"    reset(q[comptime({F})])",
+          "    result('sz', sz)", "    result('fz', fz)",
+          "    result('sx', sx_ref)", "    result('fx', fx)",
+          "    ok = not (sz or fz or fx)", "    sz_prev = sz",
+          "    if ok:", "        prep_fn(q)"]
+    for s in range(1, n_steps + 1):
+        L += ["    if ok:", f"        trot_fn_{s - 1}(q)"]
+        if s in sync:
+            fza, ffz, fsx, ffx = prog.round_flip[s]
+            L += ["        synz_fn(q)", f"        sz2 = project_z(q[comptime({A})]).read()"]
+            if fza:
+                L.append("        sz2 = not sz2")
+            L.append(f"        fz2 = project_z(q[comptime({F})]).read()")
+            if ffz:
+                L.append("        fz2 = not fz2")
+            L += [f"        reset(q[comptime({A})])", f"        reset(q[comptime({F})])",
+                  "        synx_fn(q)", f"        sx2 = project_z(q[comptime({A})]).read()"]
+            if fsx:
+                L.append("        sx2 = not sx2")
+            L.append(f"        fx2 = project_z(q[comptime({F})]).read()")
+            if ffx:
+                L.append("        fx2 = not fx2")
+            L += [f"        reset(q[comptime({A})])", f"        reset(q[comptime({F})])",
+                  "        result('sz', sz2)", "        result('fz', fz2)",
+                  "        result('sx', sx2)", "        result('fx', fx2)",
+                  "        if fz2 or fx2 or sz2 != sz_prev or sx2 != sx_ref:",
+                  "            ok = False", "        sz_prev = sz2"]
+    L.append("    par = False")
+    for i in range(ND):
+        L.append(f"    bit{i} = project_z(q[{i}]).read()")
+        if prog.final_flip[i]:
+            L.append(f"    bit{i} = not bit{i}")
+        L.append(f"    result('d', bit{i})")
+        L.append(f"    par = par != bit{i}")
+    L += ["    result('accepted', ok and par == sz_prev)", "    discard_array(q)", ""]
+
+    d = tempfile.mkdtemp(prefix="guppy_rc_")
+    path = os.path.join(d, f"prog_{tag}.py")
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(L))
+    modspec = importlib.util.spec_from_file_location(f"prog_{tag}", path)
+    mod = importlib.util.module_from_spec(modspec)
+    modspec.loader.exec_module(mod)
+    return mod.main
 
 
 def _parse_selene(entries) -> ShotRecord:
