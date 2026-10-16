@@ -202,10 +202,15 @@ Everything else is cleanup that can follow: m1–m3 and m5–m19.
 
 ## 6. Where the evidence is
 
-- **Reports**, all in [`review/14-three-machine-peer-review/`](14-three-machine-peer-review/):
-  - `round{1,2,3}-R-{Oracle,Laptop,Main}.md` — the nine per-reviewer, per-round reports.
-  - `round3b-R-Oracle.md` — R-Oracle's cover for R-Laptop's Round 3 disputes, written while that machine was off the network and before its own Round 3 was recovered. The two agree.
-  - `round3-disputes.md` — the orchestrator's assignment of every disagreement to a reviewer, with the positions on each.
+- **This document is the report.** It carries every finding, its final severity, and which
+  reviewers confirmed or refuted it. The decisions it led to are in `DECISIONS.md`; the pass
+  itself is `handoff/plan.md` §24.
+- **The per-round working reports are in git history, not the working tree.** The nine
+  per-reviewer reports, the Round-3b cover (written while one machine was off the network, and
+  which its own recovered Round 3 later agreed with) and the dispute assignments were committed
+  at **88c8c2a** and removed afterwards to keep the repository lean. Recover any of them with
+  `git show 88c8c2a:review/14-three-machine-peer-review/<file>`. Nothing was lost; they are
+  process, and their conclusions are above.
 - **Scratch code and logs:** not committed. Each reviewer's re-derivations lived in a disposable review clone on its own machine (`~/KiroTest-review/peer-review/scratch/`). The numbers they produced are quoted in the reports above; `data/trotter_order_compare.txt` is the one result promoted into the repository, because it is the evidence for the ordering fix.
 - **What was fixed in response:** see `DECISIONS.md` and the pull request that applied these findings.
 - **Reviewer agreement:** every MAJOR finding was confirmed by all three reviewers. Every severity change and refutation above was made by at least two reviewers on independent evidence.
