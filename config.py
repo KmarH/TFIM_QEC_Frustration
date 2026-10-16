@@ -40,6 +40,11 @@ class HardwareConfig:
     allow_hardware: bool = False
     device: str = "H2-emulator"  # stubbed target; no effect while gated off
     max_shots: int = 0
+    # Hard HQC spending cap passed to the backend as `max_cost` on EVERY submission
+    # (pytket-quantinuum enforces it server-side and ignores it for local emulators). 0 means
+    # unset, and src/backends_qc.py REFUSES to submit while it is 0 -- there is deliberately no
+    # "unlimited" value. Raise it consciously, per run, together with the approval token.
+    max_cost_hqc: float = 0.0
 
 
 @dataclass
@@ -260,6 +265,18 @@ class EncodedConfig:
     clifford_J: float = math.pi
     clifford_h: float = 2 * math.pi
     clifford_theta: float = 0.0
+    # Randomized compiling (Pauli twirling, DECISIONS.md OPEN-3, D-RC; src/twirl.py). A
+    # HARDWARE-READINESS switch, OFF by default: this project's noise models are already Pauli
+    # channels, so twirling has NO effect on any Pauli-noise prediction in this repo (it is
+    # tested to be a no-op in tests/test_twirl.py) -- the point is to be able to emit
+    # randomized-compiled circuits once the H2 emulator is switched on, without further circuit
+    # work. rc_period documents the reference's cadence (2503.20870 applies RC every two
+    # Trotter layers, CLAUDE.md); src/twirl.py twirls every ZZPhase gate regardless of how the
+    # circuit is chunked into jobs, so rc_period is job-packaging granularity, not a change to
+    # the induced distribution over twirled circuits.
+    rc: bool = False
+    rc_period: int = 2
+    rc_instances: int = 20
 
 
 @dataclass
