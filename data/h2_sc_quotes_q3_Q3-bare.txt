@@ -1,0 +1,12 @@
+# H2-1SC quotes, group Q3-bare -- 2026-10-17 14:23 (500 shots per point, free tier; no job run)
+# quote = Nexus syntax-checker HQC [measured, server]; est = offline Rz-free formula (src/h2_circuits.hqc_estimate)
+item                               qubits  shots       est     quote
+Q3-bare t=1                            12    500    171.10    171.10
+Q3-bare t=2                            12    500    324.70    324.70
+Q3-bare t=3                            12    500    478.30    478.30
+Q3-bare t=4                            12    500    631.90    631.90
+Q3-bare t=5                            12    500    785.50    785.50
+Q3-bare t=6                            12    500    939.10    939.10
+Q3-bare t=7                            12    500   1092.70   1092.70
+Q3-bare t=8                            12    500   1246.30   1246.30
+TOTAL Q3-bare circuits=8 qubits=12 est=5669.6 quote=5669.6

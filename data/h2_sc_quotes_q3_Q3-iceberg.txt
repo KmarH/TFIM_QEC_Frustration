@@ -1,0 +1,8 @@
+# H2-1SC quotes, group Q3-iceberg -- 2026-10-17 14:29 (500 shots per point, free tier; no job run)
+# quote = Nexus syntax-checker HQC [measured, server]; est = offline Rz-free formula (src/h2_circuits.hqc_estimate)
+item                               qubits  shots       est     quote
+Q3-iceberg t=1                         16    500    629.60    629.60
+Q3-iceberg t=2                         16    500   1090.40   1090.40
+Q3-iceberg t=3                         16    500   1551.20   1551.20
+Q3-iceberg t=4                         16    500   2012.00   2012.00
+TOTAL Q3-iceberg circuits=4 qubits=16 est=5283.2 quote=5283.2

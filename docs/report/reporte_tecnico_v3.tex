@@ -1,0 +1,486 @@
+% ============================================================================
+%  Reporte tecnico (v3): simulacion del TFIM con qubits logicos vs fisicos
+%  Para el equipo. 17 de octubre de 2026. Todo lo que no gasta creditos esta terminado;
+%  falta solo correr en el emulador H2 (HQC), que es un cambio en config.py.
+%
+%  Compila con pdfLaTeX (motor por defecto). Autocontenido: solo paquetes estandar.
+%  Figuras: las genera `scripts/plot_q3.py` en figures/. Si falta una, se imprime un
+%  recuadro y el documento compila igual.
+% ============================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[spanish,es-noindentfirst,es-noshorthands,es-tabla]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xurl}
+\hypersetup{colorlinks=true, linkcolor=black, urlcolor=blue, citecolor=black}
+\setlength{\emergencystretch}{3em}
+
+\newcommand{\code}[1]{\nolinkurl{#1}}
+\newcommand{\pred}{\textsf{\small[predicci\'on cl\'asica, ruido asumido; no es H2]}}
+
+\newcommand{\figura}[2]{%
+  \IfFileExists{../../figures/#1}{\includegraphics[width=#2]{../../figures/#1}}{%
+  \IfFileExists{../figures/#1}{\includegraphics[width=#2]{../figures/#1}}{%
+  \IfFileExists{figures/#1}{\includegraphics[width=#2]{figures/#1}}{%
+  \fbox{\parbox{0.8\linewidth}{\centering\small Falta la figura \code{#1}.\\
+  Generarla con \code{python -I scripts/plot_q3.py}, o subirla a una carpeta \code{figures/}.}}}}}}
+
+\title{\textbf{Simulaci\'on del TFIM con qubits l\'ogicos vs f\'isicos}\\[0.3em]
+\large Reporte t\'ecnico para el equipo (v3)}
+\author{}
+\date{17 de octubre de 2026 \quad\textbullet\quad listo para el emulador del H2}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Simulaci\'on del TFIM que compara el c\'alculo de observables f\'isicos con qubits l\'ogicos
+(codificados) frente a qubits f\'isicos, y que estudia la frustraci\'on, dirigida al hardware
+Quantinuum H2. En esta versi\'on la \emph{ruta de env\'io a H2} qued\'o construida y probada con las
+capas gratuitas de Quantinuum; todo lo que no cuesta cr\'editos est\'a terminado. Lo \'unico que falta
+es correr en el emulador H2 (gasta cr\'editos HQC), y eso es cambiar un par de l\'ineas de
+\texttt{config.py} y dar una aprobaci\'on expl\'icita por corrida. Todas las curvas con ruido son
+predicciones cl\'asicas bajo un modelo de ruido asumido, nunca resultados del H2.
+\end{abstract}
+
+\tableofcontents
+
+% ============================================================================
+\section{Introducci\'on}
+
+Este reporte actualiza el v2 (9 de octubre). Entonces la parte cl\'asica estaba lista y el hardware
+pendiente. Ahora, adem\'as, el camino hacia el H2 est\'a construido y probado en las capas
+gratuitas de Quantinuum (el verificador de sintaxis y el emulador sin ruido alojado en Nexus), sin
+gastar un solo cr\'edito.
+
+\textbf{C\'omo se hizo.} Yo superviso las decisiones y trabajo con Claude Code. Al principio Kiro
+(otro agente) ayud\'o a planificar, investigar y revisar; desde el 8 de octubre Kiro est\'a fuera, as\'i
+que \textbf{hoy el trabajo lo hacemos solo Claude Code y yo}: Claude Code planifica, construye y, para
+revisar, lanza revisores independientes ``a ciegas'' (no ven el razonamiento del autor). El resto del
+equipo no ha participado en esta construcci\'on; este reporte es para que puedan entender y chequear lo
+que hay. Lo hice a consciencia, pero por favor rev\'isenlo.
+
+\subsection{Resumen del proyecto}
+El objetivo final es comparar, de frente, el c\'alculo de los mismos observables f\'isicos del TFIM
+usando qubits l\'ogicos (codificados, con detecci\'on de errores) frente a qubits f\'isicos, sobre el
+hardware Quantinuum H2. La idea cierra un hueco concreto en la literatura: existe un art\'iculo de
+Nature (arXiv:2503.20870) que calcula esos observables con qubits f\'isicos y publica sus datos
+crudos, y existen trabajos que simulan con qubits l\'ogicos pero no calculan esos observables. La
+comparaci\'on se hace contra los datos f\'isicos publicados de ese mismo experimento, con el encodeo
+como \'unico eje que var\'ia. En orden de prioridad: (1)~l\'ogico vs f\'isico sobre observables f\'isicos,
+(2)~frustraci\'on en la red triangular, (3)~termalizaci\'on, junto a hilos menores como la ley de
+Gauss emergente para post-selecci\'on por simetr\'ia.
+
+\subsection{Resumen en una p\'agina (lo nuevo desde el v2)}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{La ruta a H2 funciona en las capas gratuitas.} El verificador de sintaxis de Quantinuum
+    (H2-1SC) acept\'o y cotiz\'o \textbf{@@NSC@@ circuitos} sin errores. En el emulador sin ruido alojado en
+    Nexus (H2-1LE) corrieron circuitos reales de extremo a extremo (subir, ejecutar, bajar, decodificar)
+    con \textbf{costo reportado 0}, y los resultados coinciden con el valor exacto.
+  \item \textbf{El precio es predecible.} La f\'ormula de costos que escribimos reproduce las cotizaciones
+    del servidor \emph{al centavo}. Las compuertas $R_z$ (incluso condicionales) no se cobran.
+  \item \textbf{Presupuesto.} El plan completo cuesta \textbf{39\,853 HQC de los 50\,000}
+    (secci\'on~\ref{sec:presupuesto}); sobran unos 10\,100 para repeticiones.
+  \item \textbf{Cambio de plan por el tama\~no del emulador.} El emulador H2 llega a 32 qubits, as\'i que
+    el reticulado de Q1 pasa de $6{\times}8$ a $4{\times}5$ y el brazo $6{\times}6$ de escalado de ruido se
+    reduce a $3{\times}4$ y $3{\times}6$ (decisi\'on m\'ia, ver secci\'on~\ref{sec:decisiones}).
+  \item \textbf{Para encender el emulador} hay que editar \texttt{config.py} y pasar una aprobaci\'on
+    escrita en la l\'inea de comandos. Una edici\'on de la configuraci\'on sola nunca gasta cr\'editos.
+  \item \textbf{Revisi\'on independiente.} Dos revisores a ciegas encontraron 1 error mayor (ya
+    corregido, con prueba de regresi\'on) y varios menores; ver la secci\'on~\ref{sec:revision}.
+\end{itemize}
+
+\subsection{C\'omo leer este reporte}
+Las secciones 2 a 6 son cortas: qu\'e se construy\'o, qu\'e se logr\'o, el presupuesto, c\'omo encender el
+emulador y qu\'e queda. \textbf{Los resultados f\'isicos con sus tablas y figuras est\'an en el
+ap\'endice~\ref{ap:resultados}}; despu\'es vienen los problemas encontrados en el software de Quantinuum,
+las fuentes y un registro de los identificadores internos (Q, K, FLAG, T, HW). Entre corchetes se
+indica cu\'anto confiar en cada afirmaci\'on: \emph{establecido} (fuente verificada), \emph{derivado}
+(demostrado y testeado aqu\'i), \emph{medido} (salida de nuestro c\'odigo o del servidor),
+\emph{inferido} (razonado, no testeado). \textbf{No se corri\'o ning\'un experimento en el emulador con
+ruido ni en hardware del H2}; los \'unicos n\'umeros de H2 son los datos \emph{publicados} de 2503.20870
+y las \emph{cotizaciones} (precios) del servidor.
+
+% ============================================================================
+\section{Qu\'e se construy\'o}
+
+Todo el c\'odigo est\'a detr\'as de un \'unico \texttt{config.py}. Lo que ya estaba en el v2 (n\'ucleo del TFIM,
+cuatro c\'odigos de correcci\'on, TFIM codificado, frustraci\'on, termalizaci\'on, ley de Gauss, comparaci\'on
+con los datos de Zenodo) sigue igual. Lo nuevo:
+
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Circuitos para H2} (\code{src/h2_circuits.py}, \code{src/h2_q3.py}). Cada programa
+    (Iceberg, el circuito sin codificar, Steane, 5 qubits, Iceberg concatenado y ahora la red triangular
+    y la escalera de ruido) se escribe como \emph{un solo circuito} de pytket, con medici\'on y reinicio
+    a mitad de circuito. H2 y sus emuladores aceptan pytket, no Guppy; el descarte por s\'indrome se hace
+    despu\'es, en el procesamiento cl\'asico.
+  \item \textbf{Ruta de env\'io} (\code{src/h2_backend.py}, \code{src/h2_hosted.py}). Cuatro capas, de la m\'as
+    barata a la m\'as cara: emulador local sin conexi\'on (gratis), verificador de sintaxis H2-1SC (gratis, da
+    el precio), emulador sin ruido alojado en Nexus H2-1LE (gratis, $\le$20 qubits), y el emulador H2-1E
+    (gasta HQC). Tres de las cuatro est\'an probadas en vivo.
+  \item \textbf{Un ``driver'' de corridas} (\code{src/h2_driver.py}, \code{scripts/run_h2_nexus.py}).
+    Convierte un grupo de corridas (G1, Q1, Q4, Q3\ldots) en circuitos compilados con su costo estimado y los
+    ejecuta en la capa que diga \texttt{config.py}. Por defecto es un \emph{ensayo en seco}: no env\'ia nada.
+  \item \textbf{Circuitos de Q3 para H2}: red triangular sin codificar y con Iceberg, y la escalera de
+    escalado de ruido ($\lambda=1,2,3$ por inserci\'on de Paulis, m\'as un punto de plegado de compuertas),
+    todos compilados sin optimizaci\'on del servidor (si no, el plegado se cancelar\'ia en silencio).
+  \item \textbf{Endurecimiento de la ruta de gasto}: la estimaci\'on de HQC ahora no cobra $R_z$
+    (coincide con el servidor); las compuertas condicionales se cuentan por la compuerta que envuelven;
+    el emulador alojado se manda con \texttt{no\_opt}; y l\'imites duros (32 qubits, 10\,000 shots por
+    trabajo, 50 HQC por shot).
+  \item \textbf{Documentos}: \code{docs/nexus_toggle.md} (la ruta completa y c\'omo encender el emulador),
+    \code{docs/h2_budget.md} (presupuesto) y \code{docs/quantinuum_issues.md} (problemas del software de
+    Quantinuum).
+\end{itemize}
+
+Las pruebas: \textbf{@@MAIN@@} pasan en el entorno principal y \textbf{@@LE@@} en el entorno del emulador local
+(dos entornos porque el paquete del emulador local no convive con el de Selene). Los archivos de pruebas
+nuevos se escribieron \emph{antes} que el c\'odigo y por un agente que no ve la implementaci\'on; sus huellas
+(SHA-256) est\'an en \code{handoff/14-h2-finish.md}.
+
+% ============================================================================
+\section{Qu\'e se logr\'o}
+
+\subsection{Capas gratuitas probadas en vivo en Nexus}
+\begin{table}[h]\centering\small
+\caption{Qu\'e se prob\'o en las capas gratuitas (17 de octubre). Todo es \emph{plomer\'ia y precio}, no
+f\'isica con ruido. Fuentes: \code{data/h2\_sc\_quotes*.txt}, \code{data/h2\_hosted\_check.txt},
+\code{data/h2\_hosted\_q3.txt}.}
+\begin{tabular}{p{4.3cm}p{3.1cm}p{6.6cm}}
+\toprule
+prueba & resultado & qu\'e demuestra\\
+\midrule
+verificador de sintaxis H2-1SC & @@NSC@@ circuitos aceptados & el servidor acepta nuestros circuitos, incluida la medici\'on a mitad de circuito y las compuertas condicionales\\
+precio ``al centavo'' & estimaci\'on = cotizaci\'on & nuestra f\'ormula de HQC es correcta; $R_z$ no se cobra\\
+emulador alojado H2-1LE (primera tanda) & 8 circuitos, costo 0.0 & subir, ejecutar, bajar y decodificar funciona; $Z_2$ dentro de 1.5$\sigma$ de lo exacto\\
+emulador alojado H2-1LE (Q3) & 79 circuitos, costo 0.0 & los circuitos de Q3 (red triangular, Iceberg, escalera) dan lo mismo que una evoluci\'on independiente en NumPy: @@HOSTED@@\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Una correcci\'on de precio}
+Mi primera estimaci\'on cobraba las compuertas $R_z$ y daba un 15--20\,\% de m\'as. El servidor demostr\'o que no
+se cobran. Tambi\'en descubr\'i un error m\'io: las compuertas \emph{condicionales} se contaban mal, lo que
+dejaba una diferencia de hasta 0.5\,\% en Steane y Iceberg concatenado. Corregido, la estimaci\'on coincide
+con el servidor al centavo en los 9 circuitos de Q4 [medido].
+
+% ============================================================================
+\section{Presupuesto HQC}\label{sec:presupuesto}
+
+Los 50\,000 HQC de la p\'agina de uso son cr\'editos del \emph{emulador} H2-1E/2E; no hay cr\'editos de hardware
+real. Todos los precios de la tabla son \textbf{cotizaciones del servidor} (verificador gratuito), con 1000
+shots por punto en G1, Q1 y Q4 y 500 en Q3 [medido]. Aparte, la estimaci\'on sin conexi\'on coincide con cada
+cotizaci\'on al centavo.
+
+\begin{table}[h]\centering\small
+\caption{Costo del plan completo en HQC (cotizado). \emph{Nada de esto se ha corrido en el emulador.}}
+\begin{tabular}{llrrr}
+\toprule
+grupo & qu\'e es & qubits & circuitos & HQC\\
+\midrule
+G1 & Iceberg $2{\times}2$ (simple y RC) + sin codificar & 8 / 4 & @@G1N@@ & 1\,901\\
+Q1 & Iceberg $4{\times}5$ (RC) + sin codificar $4{\times}5$, pasos 1--6 & 24 / 20 & @@Q1N@@ & 11\,636\\
+Q4 & Steane, 5 qubits, concatenado, pasos 1--3 & 16 / 12 / 18 & 9 & 9\,817\\
+Q3-bare & triangular $3{\times}4$ sin codificar, $t=1$--8 & 12 & 8 & 5\,670\\
+Q3-iceberg & triangular $3{\times}4$ Iceberg, $t=1$--4 & 16 & 4 & 5\,283\\
+Q3-ladder & escalera de ruido $3{\times}4$ ($\lambda=1,2,3$ + plegado) & 12 & 64 & 4\,093\\
+Q3-bare-3x6 & triangular $3{\times}6$ sin codificar, $t=1$--3 & 18 & 3 & 1\,453\\
+\midrule
+\textbf{Total} & & & & \textbf{39\,853}\\
+\textbf{Reserva} & de los 50\,000 & & & \textbf{10\,147}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La estimaci\'on vieja de Q3 (unos 10\,000) era una conjetura por f\'ormula y qued\'o 6\,500 corta: la curva sin
+codificar llega a $t=8$ (32 pasos de Trotter) e Iceberg a $t=4$. Si hace falta recortar: sin codificar
+hasta $t\le6$ ahorra 2\,339, Iceberg hasta $t\le3$ ahorra 2\,012, o la mitad de los shots en Q3 ahorra casi la
+mitad. Es decisi\'on de ustedes (secci\'on~\ref{sec:decisiones}).
+
+La corrida m\'as barata de punta a punta es el circuito sin codificar $2{\times}2$ a un paso: \textbf{23.40 HQC}
+con 1000 shots. Ah\'i empezar\'ia.
+
+% ============================================================================
+\section{C\'omo encender el emulador}\label{sec:encender}
+
+Es lo \'unico que falta, y lo dej\'e a prop\'osito como un cambio de configuraci\'on (de \texttt{docs/nexus\_toggle.md}):
+\begin{enumerate}[leftmargin=1.6em]
+  \item En \texttt{config.py}, \texttt{HardwareConfig}: \texttt{nexus\_tier = "emulator"},
+    \texttt{allow\_hardware = True}, \texttt{max\_cost\_hqc = <tope en HQC>} y el nombre del proyecto de Nexus.
+  \item Iniciar sesi\'on en Nexus (c\'odigo de dispositivo que se aprueba en el navegador); es por
+    contenedor.
+  \item Correr el driver con la \textbf{aprobaci\'on por corrida}, que ninguna edici\'on de la configuraci\'on
+    reemplaza: \texttt{python -I scripts/run\_h2\_nexus.py --group bare-2x2-step1 --approval "<frase>"}.
+\end{enumerate}
+Antes de gastar, el driver construye los circuitos, \textbf{vuelve a cotizarlos en el verificador gratuito} y se
+niega a enviar si el precio supera el tope. Tambi\'en se niega con m\'as de 32 qubits, m\'as de 10\,000 shots,
+m\'as de 50 HQC por shot, o con cualquier dispositivo que no sea un emulador (el hardware real queda
+excluido). La l\'inea de comandos no puede elegir el emulador por s\'i sola. Orden sugerido, cada paso con mi
+visto bueno: sin codificar $2{\times}2$ a un paso $\to$ G1 $\to$ comparar con el emulador local, Selene y Stim
+$\to$ Q1 $\to$ Q4 $\to$ Q3.
+
+% ============================================================================
+\section{Qu\'e queda por hacer}\label{sec:queda}
+
+\paragraph{Depende de gastar cr\'editos (cada paso con aprobaci\'on expl\'icita).}
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{Calibraci\'on (HW-5).} Primero el circuito m\'as chico en el emulador H2-1E, comparado con las
+    predicciones locales antes de gastar m\'as.
+  \item \textbf{Medir el ruido} (fracci\'on ZZ y sobre-rotaci\'on del gate de dos qubits) y volver a correr la
+    tabla de sensibilidad con esos valores.
+  \item \textbf{La prueba decisiva (Q1).} Codificado vs desnudo con los mismos shots: ?`el encodeo ayuda?
+  \item \textbf{Escalado de ruido en Q3} ($3{\times}4$) y los dem\'as grupos del plan.
+\end{enumerate}
+
+\paragraph{Sin cr\'editos, pendiente de m\'aquinas que no alcanzo desde la nube.} Correr el conjunto de pruebas en
+mis otras dos m\'aquinas (OVM y OLP/OLS). Dej\'e \texttt{scripts/cross\_platform\_check.sh}, que construye los dos
+entornos, corre todo y escribe \texttt{data/xplat\_<m\'aquina>.txt}. @@XPLAT@@
+
+% ============================================================================
+\section{Decisiones}\label{sec:decisiones}
+
+\paragraph{Ya decididas.}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Reticulado de Q1: $4{\times}5$} (24 qubits codificado, 20 sin codificar), en lugar de $6{\times}8$
+    (52 qubits, no cabe en el emulador de 32). Tambi\'en se puede cruzar con el simulador local.
+  \item \textbf{El brazo $6{\times}6$ se reduce a $3{\times}4$ y $3{\times}6$}: la escalera de ruido en $3{\times}4$ y
+    el tama\~no en $3{\times}6$. El $6{\times}6$ queda como dise\~no solo en Stim; no se corre en ning\'un lado.
+  \item \textbf{La estimaci\'on de HQC no cobra $R_z$} por defecto (D-HQC); se cambi\'o una aserci\'on de las pruebas
+    congeladas y se registr\'o la nueva huella.
+\end{itemize}
+
+\paragraph{Abiertas (necesito su opini\'on).}
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{Asignaci\'on de los 50\,000 HQC y cu\'anto recortar Q3.} El plan completo usa 39\,853.
+  \item \textbf{Tope de costo por trabajo (D-MAXCOST).} Cuando un grupo se parte en varios trabajos (por
+    ejemplo G1 y la escalera), cada trabajo recibe como tope el tope \emph{total}, as\'i que el seguro del
+    servidor vale hasta $n\times$ el tope. El driver ya revisa antes que la suma de cotizaciones no pase el
+    tope, y el precio real coincide con la cotizaci\'on; cambiar a un tope por trabajo exige modificar una prueba
+    congelada, por eso lo dejo a su criterio.
+  \item \textbf{?`Iceberg en Q3 con compilaci\'on aleatoria (RC)?} La decisi\'on D-RC dice que las corridas
+    codificadas en H2 usan RC, pero el circuito Iceberg de Q3 se construy\'o \emph{sin} RC para coincidir con
+    la predicci\'on cl\'asica sin twirling. Recomiendo dejarlo as\'i para la primera pasada y agregar RC si la
+    calibraci\'on lo pide.
+  \item \textbf{La frase de aprobaci\'on es una constante del repositorio}, as\'i que evita gastos accidentales o
+    en bucle pero no a alguien que la copie a prop\'osito. Me parece aceptable; d\'iganme si prefieren algo m\'as
+    estricto.
+\end{enumerate}
+
+\paragraph{Pendientes estacionadas.} Protecci\'on de gauge activa (K1), orden de 3 subredes (K3), difusi\'on (K5) y
+Z2 vs U(1) (K6): ninguna construida, todas opcionales.
+
+% ============================================================================
+\section{Revisi\'on independiente}\label{sec:revision}
+Al final de la ronda hice una sola pasada con dos revisores a ciegas (modelo Opus, sin ver mi razonamiento):
+uno sobre la seguridad del gasto y otro sobre los circuitos, los n\'umeros y el precio. Resultado en
+\code{review/17-h2-finish.md}:
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{1 error mayor, corregido.} Un argumento expl\'icito \texttt{tier="emulator"} pod\'ia saltarse la
+    configuraci\'on (la l\'inea de comandos no, pero la funci\'on s\'i). Ahora la configuraci\'on tiene que decir
+    ``emulator''. Prueba de regresi\'on a\~nadida; fall\'o antes y pasa ahora.
+  \item \textbf{Menores corregidos}: cotizaciones incompletas, l\'imites NaN o infinitos que apagaban una
+    compuerta, tres huecos de pruebas (m\'ascara de bobinado, pasos de la escalera, semillas de inserci\'on) y un
+    mensaje de error confuso.
+  \item \textbf{Confirmado por los revisores}: la f\'isica de los circuitos (reconstruida por otro m\'etodo, con
+    solapamiento 1.0), los n\'umeros de los archivos de datos recalculados a mano, y el precio al centavo.
+\end{itemize}
+Ning\'un camino gasta cr\'editos sin la configuraci\'on correcta, la aprobaci\'on por corrida y un tope finito.
+
+% ============================================================================
+\appendix
+
+\section{Resultados f\'isicos (de v2, vigentes)}\label{ap:resultados}
+
+Esta parte no cambi\'o: son resultados cl\'asicos. La \'unica correcci\'on respecto al v2 es el tama\~no del
+brazo de escalado de ruido (ya no $6{\times}6$) y el n\'umero de pruebas.
+
+\subsection{Q1 --- L\'ogico vs f\'isico}
+
+\paragraph{Chequeo contra el art\'iculo.} Los 112 pares de dos qubits por paso coinciden exactamente con un toro
+cuadrado peri\'odico $7\times8$ con numeraci\'on por filas [medido], y reproducir los circuitos compuerta por
+compuerta da lo mismo que nuestra evoluci\'on con $(J,h)=(+1,+2)$, $dt=0.25$ [derivado, testeado].
+
+\begin{table}[h]\centering\small
+\caption{Quench 1 ($\theta=30^\circ$): correlaci\'on media entre pares. ``H2 publicado'' son los datos
+de 56 qubits \emph{del art\'iculo 2503.20870}, no nuestros. ``Nuestra sim'' es una simulaci\'on sin ruido
+en $4\times5$. Fuente: \code{data/q1\_compare.txt}.}
+\begin{tabular}{rccc}
+\toprule
+paso & nuestra sim ($4\times5$) & H2 publicado, mitigado & H2 publicado, crudo\\
+\midrule
+1 & 0.761 & $0.732\pm0.009$ & $0.726\pm0.007$\\
+4 & 0.695 & $0.623\pm0.017$ & $0.582\pm0.013$\\
+20 & 0.690 & $0.554\pm0.040$ & $0.379\pm0.016$\\
+\bottomrule
+\end{tabular}
+\end{table}
+\noindent Muestra que nuestro montaje reproduce los circuitos publicados. No dice nada de qubits
+l\'ogicos: nuestras redes chicas difieren de 56 qubits por efectos de tama\~no de hasta 0.06--0.33.
+
+\paragraph{?`El encodeo ayuda?} Un error de dos qubits de tipo $XX$, $YY$ o $ZZ$ sobre el par en
+que act\'ua una compuerta l\'ogica es invisible para Iceberg: 3 de los 15 errores posibles [derivado].
+Si una fracci\'on $\eta$ del error es $ZZ$ extra, la parte invisible crece.
+
+\begin{table}[h]\centering\small
+\caption{Error no detectado por paso relativo al circuito desnudo, en la red de prueba $2\times2$,
+con el prior del H2 ($p_2=6\times10^{-4}$) \pred. Menor que 1 significa que el encodeo ayuda. En
+redes m\'as grandes los cocientes son menores (Iceberg 0.44 en cuadradas grandes, 0.375 en la
+triangular, con $\eta=0.05$). Fuente: \code{data/noise\_sensitivity.txt}.}
+\begin{tabular}{lcccc}
+\toprule
+escenario & Iceberg & Steane & 5 qubits & concat.\ $d=4$\\
+\midrule
+prior H2, $\eta=0.05$ & $\mathbf{0.60}$ & 0.53 & 0.52 & 0.53\\
+$\eta$ entre 0.03 y 0.08 & 0.56--0.66 & 0.48--0.59 & 0.48--0.59 & 0.48--0.59\\
+m\'as sobre-rotaci\'on $\sin^2\epsilon=10^{-3}$ & 0.92 & 0.91 & 0.91 & 0.91\\
+prueba de estr\'es $\eta=0.5$ ($10\times$ el prior) & 1.50 & 1.50 & 1.50 & 1.50\\
+\midrule
+shots que sobreviven tras 3 pasos & 0.92 & 0.57 & 0.64 & 0.64\\
+\bottomrule
+\end{tabular}
+\end{table}
+\noindent El cruce en $\eta\approx0.25$ vale para la red de prueba $2\times2$ (peor caso); en redes m\'as grandes
+sube a $\eta\approx0.36$--$0.55$, y el prior de la literatura ($\eta\approx0.04$--$0.05$) queda a\'un m\'as lejos.
+El $\eta$ del prior sale de leer un gr\'afico publicado [inferido] y la sobre-rotaci\'on no est\'a publicada,
+as\'i que el \emph{go} es una predicci\'on; solo el emulador o la m\'aquina lo confirman.
+
+\subsection{Q4 --- Qu\'e c\'odigo y por qu\'e}
+\begin{itemize}[leftmargin=1.4em]
+  \item Los circuitos de medici\'on de s\'indrome de los cuatro c\'odigos son tolerantes a fallos: ning\'un
+    fallo \'unico ah\'i produce un error l\'ogico sin detectar [medido]. Todo el error indetectable viene
+    de las compuertas de rotaci\'on l\'ogicas, sin importar la distancia [derivado y medido].
+  \item Por eso los c\'odigos de distancia 3 y 4 solo ganan alrededor de $1.2\times$ en error no
+    detectado, a cambio de conservar 3--4 veces menos shots con $p_2=10^{-3}$ y de usar 3--7 veces m\'as
+    compuertas de dos qubits \pred.
+  \item \textbf{Iceberg es el c\'odigo recomendado.} Los otros est\'an construidos y funcionan, solo que
+    quedan dominados. Selene conserva menos shots que Stim porque cobra ruido en cada operaci\'on nativa de
+    un qubit; es una diferencia de definici\'on, no un bug.
+\end{itemize}
+
+\subsection{Q2 --- Frustraci\'on: triangular vs cuadrada}
+Estados base exactos, sin ruido ni error de muestreo [medido].
+
+\begin{table}[h]\centering\small
+\caption{Correlaciones en el par $4\times4$, $J=-1$. $C(1)$ = vecinos m\'as cercanos; ``lejos'' es la
+mayor distancia de cada toro. Fuente: \code{data/frustration\_correlations.txt}.}
+\begin{tabular}{ccc|cc}
+\toprule
+campo $h$ & cuadrada $C(1)$ & cuadrada, lejos & triangular $C(1)$ & triangular, lejos\\
+\midrule
+0.1 & $-0.999$ & $+0.999$ & $-0.332$ & $+0.442$\\
+0.3 & $-0.994$ & $+0.994$ & $-0.325$ & $+0.413$\\
+0.6 & $-0.977$ & $+0.977$ & $-0.268$ & $+0.196$\\
+1.0 & $-0.936$ & $+0.936$ & $-0.204$ & $+0.068$\\
+\bottomrule
+\end{tabular}
+\end{table}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{La firma de frustraci\'on:} la correlaci\'on entre vecinos en la triangular es 3 a 5 veces
+    m\'as d\'ebil, cercana a $-1/3$. Un toro cuadrado de largo impar est\'a frustrado ($3\times4$ no era
+    una referencia limpia); $4\times4$ es el \'unico toro cuadrado limpio al alcance de la diagonalizaci\'on exacta.
+  \item El patr\'on triangular a larga distancia cambia de signo seg\'un la forma del toro, as\'i que no
+    contamos una historia sobre eso, y no afirmamos orden de reloj (K3 no est\'a construido).
+\end{itemize}
+
+\subsection{Q3 --- Termalizaci\'on}
+\paragraph{La referencia.} La termalizaci\'on ocurre solo dentro de cada sector de bobinado, as\'i que la
+referencia es por sector (en $3\times4$: densidad de flipabilidad 0.267 en el sector vs 0.235 global) [medido].
+En $3\times6$ la densidad baja de 0.667 a unos 0.383, el valor de tiempo largo del c\'umulo finito (0.388), no el
+de temperatura infinita del sector (0.331); la diferencia se achica con el tama\~no [inferido].
+
+\begin{figure}[h]\centering
+\figura{q3_relaxation.png}{0.9\linewidth}
+\caption{Relajaci\'on ideal en $3\times6$ a dos campos. Simulaci\'on cl\'asica, sin ruido.}
+\end{figure}
+
+\paragraph{?`El paso de tiempo es suficientemente chico?} El paso de Trotter deja de ser fiel cerca de
+$dt\approx\pi/6=0.52$. Nuestro $dt=0.25$ queda 1.3 a 2 veces por debajo con campos $h\le0.3$ [medido].
+
+\begin{figure}[h]\centering
+\figura{trotter_threshold.png}{0.8\linewidth}
+\caption{Error de Trotter vs paso de tiempo. Cl\'asico, sin ruido.}
+\end{figure}
+
+\paragraph{Con ruido \pred.}
+\begin{itemize}[leftmargin=1.4em]
+  \item Sin mitigar, la curva desnuda se calienta. \textbf{Post-seleccionar con la ley de Gauss reduce el error
+    unas 30 veces temprano y 21 tarde, con 1.4 a 4.8 veces m\'as shots.} Iceberg solo da alrededor de
+    $2.7\times$ con 3.1 veces m\'as shots, y sobrevive hasta $t\approx12$.
+  \item El ruido empuja las curvas hacia el valor de temperatura infinita: en hardware \textbf{el ruido puede
+    imitar la termalizaci\'on}; por eso la escalera de ruido ($\lambda=1,2,3$).
+\end{itemize}
+\begin{figure}[h]\centering
+\figura{q3_noisy.png}{0.85\linewidth}
+\caption{$3\times4$: ideal vs desnudo, con Gauss, Iceberg e Iceberg con Gauss. Predicci\'on cl\'asica con ruido asumido; no es H2.}
+\end{figure}
+
+\subsection{Ley de Gauss emergente como mitigaci\'on}
+Veredicto con ruido de Pauli por qubit asumido, en $3\times3$ y $3\times4$: \textbf{no sirve para correcci\'on}
+(distancia 1); \textbf{sirve modestamente para detecci\'on solo contra ruido $X/Y$} (2 a 8 veces menos sesgo con 1.1 a
+1.8 veces m\'as shots, con un piso de orden $(h/J)^2$); no sirve contra defasaje; la automitigaci\'on no sirve como
+m\'etodo general.
+
+% ============================================================================
+\section{Problemas encontrados en el software de Quantinuum}
+Como tengo acceso a Nexus tambi\'en para ayudar a depurar su software, cada problema queda en
+\code{docs/quantinuum\_issues.md} con su reproducci\'on, listo para enviar. Ninguno se ha enviado todav\'ia.
+\begin{table}[h]\centering\small
+\begin{tabular}{lp{11cm}}
+\toprule
+id & resumen\\
+\midrule
+QI-1 & el emulador local (\texttt{pytket-quantinuum[pecos]}) no convive con la versi\'on de Selene que usamos: dos entornos\\
+QI-2 & el emulador local ignora \texttt{noisy\_simulation} y es siempre sin ruido\\
+QI-3 & el cliente HUGR de Nexus est\'a tipado para Helios; el soporte para H2 es ``limitado''\\
+QI-5 & \texttt{circuits.cost} arma el nombre ``H2-1ESC'' desde una configuraci\'on E (un \texttt{strip} descartado)\\
+QI-8 & la optimizaci\'on de TKET (niveles 1--2) cancela en silencio las compuertas plegadas\\
+QI-9, 11 & PECOS reescala los errores y no cobra la inicializaci\'on inicial\\
+QI-12 & las p\'aginas de emuladores se contradicen (26 vs 20 qubits)\\
+QI-13 & aviso de un endpoint ``que se borra el 30 nov 2025'', fecha ya pasada\\
+QI-14 & \texttt{start\_execute\_job} se cae con circuitos crudos pese a un decorador con ese nombre\\
+QI-15 & los l\'imites de HQC (50 por shot, 10\,000 shots) solo se documentan para ``hardware''; $R_z$ condicional no se cobra y no est\'a documentado\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ============================================================================
+\section{Fuentes}
+Las fuentes se mantienen con etiquetas de estado. Ning\'un identificador ni n\'umero fue inventado. Principales:
+Haghshenas et al., arXiv:2503.20870 (objetivo de reproducci\'on); Self, Benedetti, Amaro (Iceberg),
+arXiv:2211.06703; Chao y Reichardt, arXiv:1705.02329; Lan y Powell, arXiv:1706.02601 (termalizaci\'on por
+sector); Moessner y Sondhi, PRB \textbf{63}, 224401; Isakov y Moessner, PRB \textbf{68}, 104409; Begu\v{s}i\'c,
+Gray, Chan, Sci.\ Adv.\ \textbf{10}, eadk4321 (frontera cl\'asica); Froland et al., arXiv:2607.24947 y
+Quantinuum, arXiv:2602.22211 (arte previo); Moses et al., PRX \textbf{13}, 041052 (ruido del H2). Para la ruta
+de env\'io: la documentaci\'on de Quantinuum (docs.quantinuum.com, p\'aginas de emuladores y de operaci\'on del H2,
+le\'idas el 17 de octubre de 2026).
+
+% ============================================================================
+\section{Andamios del setup}
+Para que no cunda el p\'anico cuando vean el proyecto, especifico c\'omo us\'e la IA y qu\'e hay en cada carpeta:
+\begin{enumerate}
+  \item \texttt{SCOPE.md}: la ``constituci\'on'' del proyecto (las cuatro preguntas, los l\'imites de tama\~no, qu\'e se
+    puede hacer sin preguntarme). Si hay duda, manda este documento; c\'ambienlo a consciencia.
+  \item \texttt{CLAUDE.md}: las reglas de trabajo del agente (qu\'e est\'a prohibido sin mi aprobaci\'on, convenciones de
+    f\'isica, trampas de las herramientas). Actualizado: ahora Claude Code es el \'unico agente.
+  \item \texttt{DECISIONS.md}: decisiones abiertas y tomadas (esta ronda cerr\'o la OPEN-4 y a\~nadi\'o D-HQC).
+  \item \texttt{config.py}, \texttt{main.py}, \texttt{requirements*.txt}, \texttt{src/}: la configuraci\'on \'unica y el
+    c\'odigo. Dos archivos de requisitos: el principal y el del emulador local (\texttt{requirements-le.txt}).
+  \item \texttt{scripts/}: los scripts que generan cada resultado. Nuevos: \texttt{run\_h2\_nexus.py} (el driver),
+    \texttt{h2\_sc\_quotes*.py} (cotizaciones gratuitas), \texttt{h2\_hosted\_*.py} (emulador alojado) y
+    \texttt{cross\_platform\_check.sh} (revisi\'on en otras m\'aquinas).
+  \item \texttt{data/}: resultados en texto plano; cada uno dice qu\'e script lo gener\'o y si es una predicci\'on cl\'asica con ruido asumido.
+  \item \texttt{docs/}, \texttt{review/}, \texttt{research/}: la explicaci\'on de cada resultado, las revisiones
+    independientes numeradas (la 17 es la de esta ronda) y las notas de investigaci\'on.
+  \item \texttt{handoff/}: los encargos y reportes entre sesiones; \texttt{handoff/14-h2-finish.md} resume esta ronda.
+  \item \texttt{tests/}: las pruebas. Las ``congeladas'' se escribieron antes del c\'odigo y est\'an fijadas por huella (SHA-256).
+  \item Todo esto est\'a en la rama \texttt{claude/awesome-lamport-wun6jh} del repositorio.
+\end{enumerate}
+\end{document}

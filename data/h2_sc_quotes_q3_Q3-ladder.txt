@@ -1,0 +1,68 @@
+# H2-1SC quotes, group Q3-ladder -- 2026-10-17 14:40 (500 shots per point, free tier; no job run)
+# quote = Nexus syntax-checker HQC [measured, server]; est = offline Rz-free formula (src/h2_circuits.hqc_estimate)
+item                               qubits  shots       est     quote
+ladder lam=1 t=1                       12    500    171.10    171.10
+ladder lam=1 t=2                       12    500    324.70    324.70
+ladder lam=1 t=3                       12    500    478.30    478.30
+ladder fold lam=3 t=2.0                12    500    900.70    900.70
+ladder lam=2 t=1 i0                    12     50     21.61     21.61
+ladder lam=2 t=1 i1                    12     50     21.61     21.61
+ladder lam=2 t=1 i2                    12     50     21.61     21.61
+ladder lam=2 t=1 i3                    12     50     21.61     21.61
+ladder lam=2 t=1 i4                    12     50     21.61     21.61
+ladder lam=2 t=1 i5                    12     50     21.61     21.61
+ladder lam=2 t=1 i6                    12     50     21.61     21.61
+ladder lam=2 t=1 i7                    12     50     21.61     21.61
+ladder lam=2 t=1 i8                    12     50     21.61     21.61
+ladder lam=2 t=1 i9                    12     50     21.61     21.61
+ladder lam=3 t=1 i0                    12     50     21.61     21.61
+ladder lam=3 t=1 i1                    12     50     21.61     21.61
+ladder lam=3 t=1 i2                    12     50     21.61     21.61
+ladder lam=3 t=1 i3                    12     50     21.61     21.61
+ladder lam=3 t=1 i4                    12     50     21.61     21.61
+ladder lam=3 t=1 i5                    12     50     21.61     21.61
+ladder lam=3 t=1 i6                    12     50     21.61     21.61
+ladder lam=3 t=1 i7                    12     50     21.61     21.61
+ladder lam=3 t=1 i8                    12     50     21.61     21.61
+ladder lam=3 t=1 i9                    12     50     21.61     21.61
+ladder lam=2 t=2 i0                    12     50     36.97     36.97
+ladder lam=2 t=2 i1                    12     50     36.97     36.97
+ladder lam=2 t=2 i2                    12     50     36.97     36.97
+ladder lam=2 t=2 i3                    12     50     36.97     36.97
+ladder lam=2 t=2 i4                    12     50     36.97     36.97
+ladder lam=2 t=2 i5                    12     50     36.97     36.97
+ladder lam=2 t=2 i6                    12     50     36.97     36.97
+ladder lam=2 t=2 i7                    12     50     36.97     36.97
+ladder lam=2 t=2 i8                    12     50     36.97     36.97
+ladder lam=2 t=2 i9                    12     50     36.97     36.97
+ladder lam=3 t=2 i0                    12     50     36.97     36.97
+ladder lam=3 t=2 i1                    12     50     36.99     36.98
+ladder lam=3 t=2 i2                    12     50     36.97     36.97
+ladder lam=3 t=2 i3                    12     50     36.97     36.97
+ladder lam=3 t=2 i4                    12     50     36.98     36.98
+ladder lam=3 t=2 i5                    12     50     36.97     36.97
+ladder lam=3 t=2 i6                    12     50     36.97     36.97
+ladder lam=3 t=2 i7                    12     50     36.97     36.97
+ladder lam=3 t=2 i8                    12     50     36.97     36.97
+ladder lam=3 t=2 i9                    12     50     36.98     36.98
+ladder lam=2 t=3 i0                    12     50     52.33     52.33
+ladder lam=2 t=3 i1                    12     50     52.33     52.33
+ladder lam=2 t=3 i2                    12     50     52.33     52.33
+ladder lam=2 t=3 i3                    12     50     52.33     52.33
+ladder lam=2 t=3 i4                    12     50     52.35     52.35
+ladder lam=2 t=3 i5                    12     50     52.33     52.33
+ladder lam=2 t=3 i6                    12     50     52.33     52.33
+ladder lam=2 t=3 i7                    12     50     52.34     52.34
+ladder lam=2 t=3 i8                    12     50     52.35     52.35
+ladder lam=2 t=3 i9                    12     50     52.33     52.33
+ladder lam=3 t=3 i0                    12     50     52.35     52.35
+ladder lam=3 t=3 i1                    12     50     52.33     52.33
+ladder lam=3 t=3 i2                    12     50     52.35     52.35
+ladder lam=3 t=3 i3                    12     50     52.34     52.34
+ladder lam=3 t=3 i4                    12     50     52.33     52.33
+ladder lam=3 t=3 i5                    12     50     52.35     52.35
+ladder lam=3 t=3 i6                    12     50     52.33     52.33
+ladder lam=3 t=3 i7                    12     50     52.33     52.33
+ladder lam=3 t=3 i8                    12     50     52.33     52.33
+ladder lam=3 t=3 i9                    12     50     52.35     52.35
+TOTAL Q3-ladder circuits=64 qubits=12 est=4093.2 quote=4093.2

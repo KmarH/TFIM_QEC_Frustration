@@ -1,0 +1,46 @@
+# H2 local-emulator validation -- 2026-10-17 13:19  (shots 4000)
+# H2-1LE is an IDEAL state vector (QI-2). Noisy rows use the PECOS depolarizing model with src.backends_qc.Noise rates [ASSUMED]: classical predictions, NOT H2 results.
+
+## 1. Noiseless transparency: encoded Iceberg on the LE vs the exact logical Z2
+lattice steps   mode    accept     Z2 +- se        exact    (Z2-exact)/se
+2x2     1     plain   1.0000   0.6603 +- 0.0066   0.6683   -1.22
+2x2     1     RC      1.0000   0.6753 +- 0.0065   0.6683   +1.08
+2x2     2     plain   1.0000   0.5050 +- 0.0067   0.4925   +1.86
+2x2     2     RC      1.0000   0.4931 +- 0.0067   0.4925   +0.09
+2x2     3     plain   1.0000   0.5952 +- 0.0067   0.5888   +0.95
+2x2     3     RC      1.0000   0.5884 +- 0.0067   0.5888   -0.06
+2x3     1     plain   1.0000   0.7392 +- 0.0058   0.7396   -0.08
+2x3     1     RC      1.0000   0.7432 +- 0.0058   0.7396   +0.61
+2x3     2     plain   1.0000   0.5864 +- 0.0062   0.5970   -1.70
+2x3     2     RC      1.0000   0.6045 +- 0.0062   0.5970   +1.22
+2x3     3     plain   1.0000   0.5176 +- 0.0065   0.5220   -0.67
+2x3     3     RC      1.0000   0.5320 +- 0.0066   0.5220   +1.53
+
+## 2. Noiseless bare reference on the LE vs the same exact value (encoded == bare)
+bare 2x2 step 1: Z2 0.6691 +- 0.0065  exact 0.6683  (+0.12 se)
+bare 2x2 step 3: Z2 0.6029 +- 0.0067  exact 0.5888  (+2.09 se)
+bare 2x3 step 1: Z2 0.7418 +- 0.0057  exact 0.7396  (+0.37 se)
+bare 2x3 step 3: Z2 0.5168 +- 0.0065  exact 0.5220  (-0.80 se)
+
+## 3. Other codes on the LE (detection only; round-0 feedforward as conditional gates)
+five   1x2 step 1 generic : accept 1.000 Z2 0.7390 +- 0.0139 exact 0.7266 (+0.89 se) [12s, 1000 shots]
+five   1x2 step 1 Clifford: accept 1.000 Z2 0.4970 +- 0.0158 exact 0.5000 (-0.19 se) [12s, 1000 shots]
+five   1x2 step 2 generic : accept 1.000 Z2 0.7400 +- 0.0139 exact 0.7123 (+2.00 se) [19s, 1000 shots]
+five   1x2 step 2 Clifford: accept 1.000 Z2 0.5410 +- 0.0158 exact 0.5000 (+2.60 se) [19s, 1000 shots]
+five   1x2 step 3 generic : accept 1.000 Z2 0.8780 +- 0.0104 exact 0.8736 (+0.42 se) [27s, 1000 shots]
+five   1x2 step 3 Clifford: accept 1.000 Z2 0.4890 +- 0.0158 exact 0.5000 (-0.70 se) [27s, 1000 shots]
+steane 1x2 step 1 generic : accept 1.000 Z2 0.7200 +- 0.0260 exact 0.7266 (-0.25 se) [60s, 300 shots]
+steane 1x2 step 1 Clifford: accept 1.000 Z2 0.4800 +- 0.0289 exact 0.5000 (-0.69 se) [60s, 300 shots]
+steane 1x2 step 2 generic : accept 1.000 Z2 0.7400 +- 0.0254 exact 0.7123 (+1.09 se) [94s, 300 shots]
+steane 1x2 step 2 Clifford: accept 1.000 Z2 0.5133 +- 0.0289 exact 0.5000 (+0.46 se) [94s, 300 shots]
+concat 2x2 step 1 generic : accept 1.000 Z2 0.6700 +- 0.0331 exact 0.6683 (+0.05 se) [226s, 150 shots]
+concat 2x2 step 1 Clifford: accept 1.000 Z2 0.2833 +- 0.0266 exact 0.2500 (+1.25 se) [228s, 150 shots]
+
+## 4. Noisy emulator vs the repo's local-sim at the same ASSUMED rates (Iceberg 2x2, plain)
+Differences are expected, not errors: local-sim charges rates per authored gate, the LE per COMPILED native gate (CX -> ZZPhase + 1q gates), so its one-qubit exposure is larger.
+p2=0.001 step 1: LE accept 0.928 Z2 0.6707+-0.0067 | local-sim accept 0.947 Z2 0.6702+-0.0067 | exact 0.6683
+p2=0.001 step 3: LE accept 0.855 Z2 0.5882+-0.0073 | local-sim accept 0.894 Z2 0.5733+-0.0071 | exact 0.5888
+p2=0.003 step 1: LE accept 0.805 Z2 0.6589+-0.0073 | local-sim accept 0.849 Z2 0.6641+-0.0071 | exact 0.6683
+p2=0.003 step 3: LE accept 0.637 Z2 0.5760+-0.0085 | local-sim accept 0.703 Z2 0.5768+-0.0081 | exact 0.5888
+bare p2=0.001 step 3: LE Z2 0.5889+-0.0068 | local-sim Z2 0.5804+-0.0068
+bare p2=0.003 step 3: LE Z2 0.5844+-0.0068 | local-sim Z2 0.5981+-0.0067

@@ -1,0 +1,8 @@
+# H2-1SC quotes for the Q3 groups -- merged 2026-10-17 14:40 (per-item detail in data/h2_sc_quotes_q3_<group>.txt)
+# quote = server price, a quote not a measurement of any physics; est = offline Rz-free formula.
+group          circuits qubits   est HQC  quote HQC
+Q3-bare               8     12    5669.6     5669.6
+Q3-iceberg            4     16    5283.2     5283.2
+Q3-ladder            64     12    4093.2     4093.2
+Q3-bare-3x6           3     18    1453.2     1453.2
+total                            16499.2    16499.2
