@@ -24,7 +24,7 @@ mk .venv-le requirements-le.txt || { echo "building .venv-le failed"; exit 1; }
   echo "# --- main suite (.venv) ---"
   t0=$(date +%s); .venv/bin/python -m pytest tests/ -q -p no:cacheprovider 2>&1 | tail -3; echo "# seconds: $(( $(date +%s) - t0 ))"
   echo "# --- H2 tests in .venv-le ---"
-  t0=$(date +%s); .venv-le/bin/python -m pytest tests/test_h2_circuits.py tests/test_h2_backend.py tests/test_h2_hosted.py tests/test_h2_review_fixes.py tests/test_h2_driver.py tests/test_h2_hardening.py tests/test_h2_q3.py -q -p no:cacheprovider 2>&1 | tail -3; echo "# seconds: $(( $(date +%s) - t0 ))"
+  t0=$(date +%s); .venv-le/bin/python -m pytest tests/test_h2_circuits.py tests/test_h2_backend.py tests/test_h2_hosted.py tests/test_h2_review_fixes.py tests/test_h2_review_fixes2.py tests/test_h2_driver.py tests/test_h2_hardening.py tests/test_h2_q3.py -q -p no:cacheprovider 2>&1 | tail -3; echo "# seconds: $(( $(date +%s) - t0 ))"
   echo "# --- slow LE validation (Steane, concatenated) ---"
   t0=$(date +%s); .venv-le/bin/python -I scripts/run_h2_le.py --slow --out "data/xplat_${HOST}_le_slow.txt" 2>&1 | tail -5; echo "# seconds: $(( $(date +%s) - t0 ))"
 } 2>&1 | tee "$OUT"

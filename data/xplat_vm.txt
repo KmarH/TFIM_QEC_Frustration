@@ -1,0 +1,26 @@
+# cross-platform check -- 2026-10-17 14:16 -- scripts/cross_platform_check.sh
+# host: vm  platform: Linux x86_64  python: Python 3.12.3  cores: 4
+# commit: 82c7d6a   (classical/offline only; no Nexus, no HQC)
+# frozen test hashes (sha256):
+#   ab1eaf63632a51171e71abebf8997cbaf752766d9d55e81c74880744eb02b147  tests/test_h2_circuits.py
+#   6e38b8fea5ae0c5defd5d0e7c493b74e4ea38dde2a56598238e0d8903d33fb80  tests/test_h2_backend.py
+#   761e55b78ffdb7544bb2cd77a1d490747f4fba2d3c559b1b74859cf32d18a784  tests/test_h2_driver.py
+#   b6da6477984ff6e3866ca3f15e9680d7f0e46bf790b38c78d218a82ca91237d7  tests/test_h2_hardening.py
+#   d95a605ea2e7a3ebee4706c199f892cb6cf85ddd00db8c2c11385cd76898d9cc  tests/test_h2_q3.py
+# --- main suite (.venv) ---
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+632 passed, 23 skipped, 5 warnings in 311.59s (0:05:11)
+# seconds: 313
+# --- H2 tests in .venv-le ---
+........................................................................ [ 83%]
+..........................................                               [100%]
+258 passed in 212.69s (0:03:32)
+# seconds: 213
+# --- slow LE validation (Steane, concatenated) ---
+p2=0.003 step 1: LE accept 0.804 Z2 0.6601+-0.0073 | local-sim accept 0.849 Z2 0.6641+-0.0071 | exact 0.6683
+p2=0.003 step 3: LE accept 0.633 Z2 0.5772+-0.0085 | local-sim accept 0.703 Z2 0.5768+-0.0081 | exact 0.5888
+bare p2=0.001 step 3: LE Z2 0.5887+-0.0068 | local-sim Z2 0.5804+-0.0068
+bare p2=0.003 step 3: LE Z2 0.5833+-0.0068 | local-sim Z2 0.5981+-0.0067
+wrote data/xplat_vm_le_slow.txt
+# seconds: 1188

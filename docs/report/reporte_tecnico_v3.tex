@@ -82,7 +82,7 @@ Gauss emergente para post-selecci\'on por simetr\'ia.
 \subsection{Resumen en una p\'agina (lo nuevo desde el v2)}
 \begin{itemize}[leftmargin=1.4em]
   \item \textbf{La ruta a H2 funciona en las capas gratuitas.} El verificador de sintaxis de Quantinuum
-    (H2-1SC) acept\'o y cotiz\'o \textbf{@@NSC@@ circuitos} sin errores. En el emulador sin ruido alojado en
+    (H2-1SC) acept\'o y cotiz\'o \textbf{121 circuitos} sin errores. En el emulador sin ruido alojado en
     Nexus (H2-1LE) corrieron circuitos reales de extremo a extremo (subir, ejecutar, bajar, decodificar)
     con \textbf{costo reportado 0}, y los resultados coinciden con el valor exacto.
   \item \textbf{El precio es predecible.} La f\'ormula de costos que escribimos reproduce las cotizaciones
@@ -141,7 +141,7 @@ con los datos de Zenodo) sigue igual. Lo nuevo:
     Quantinuum).
 \end{itemize}
 
-Las pruebas: \textbf{@@MAIN@@} pasan en el entorno principal y \textbf{@@LE@@} en el entorno del emulador local
+Las pruebas: \textbf{662 pruebas (m\'as 23 omitidas a prop\'osito)} pasan en el entorno principal y \textbf{288} en el entorno del emulador local
 (dos entornos porque el paquete del emulador local no convive con el de Selene). Los archivos de pruebas
 nuevos se escribieron \emph{antes} que el c\'odigo y por un agente que no ve la implementaci\'on; sus huellas
 (SHA-256) est\'an en \code{handoff/14-h2-finish.md}.
@@ -150,7 +150,7 @@ nuevos se escribieron \emph{antes} que el c\'odigo y por un agente que no ve la 
 \section{Qu\'e se logr\'o}
 
 \subsection{Capas gratuitas probadas en vivo en Nexus}
-\begin{table}[h]\centering\small
+\begin{table}[!ht]\centering\small
 \caption{Qu\'e se prob\'o en las capas gratuitas (17 de octubre). Todo es \emph{plomer\'ia y precio}, no
 f\'isica con ruido. Fuentes: \code{data/h2\_sc\_quotes*.txt}, \code{data/h2\_hosted\_check.txt},
 \code{data/h2\_hosted\_q3.txt}.}
@@ -158,10 +158,10 @@ f\'isica con ruido. Fuentes: \code{data/h2\_sc\_quotes*.txt}, \code{data/h2\_hos
 \toprule
 prueba & resultado & qu\'e demuestra\\
 \midrule
-verificador de sintaxis H2-1SC & @@NSC@@ circuitos aceptados & el servidor acepta nuestros circuitos, incluida la medici\'on a mitad de circuito y las compuertas condicionales\\
+verificador de sintaxis H2-1SC & 121 circuitos aceptados & el servidor acepta nuestros circuitos, incluida la medici\'on a mitad de circuito y las compuertas condicionales\\
 precio ``al centavo'' & estimaci\'on = cotizaci\'on & nuestra f\'ormula de HQC es correcta; $R_z$ no se cobra\\
 emulador alojado H2-1LE (primera tanda) & 8 circuitos, costo 0.0 & subir, ejecutar, bajar y decodificar funciona; $Z_2$ dentro de 1.5$\sigma$ de lo exacto\\
-emulador alojado H2-1LE (Q3) & 79 circuitos, costo 0.0 & los circuitos de Q3 (red triangular, Iceberg, escalera) dan lo mismo que una evoluci\'on independiente en NumPy: @@HOSTED@@\\
+emulador alojado H2-1LE (Q3) & 79 circuitos, costo 0.0 & los circuitos de Q3 (red triangular, Iceberg, escalera) dan lo mismo que una evoluci\'on independiente en NumPy: 19 puntos $\times$ 3 observables, peor $|z|=2.52$; Iceberg con aceptaci\'on 1.000\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -186,8 +186,8 @@ cotizaci\'on al centavo.
 \toprule
 grupo & qu\'e es & qubits & circuitos & HQC\\
 \midrule
-G1 & Iceberg $2{\times}2$ (simple y RC) + sin codificar & 8 / 4 & @@G1N@@ & 1\,901\\
-Q1 & Iceberg $4{\times}5$ (RC) + sin codificar $4{\times}5$, pasos 1--6 & 24 / 20 & @@Q1N@@ & 11\,636\\
+G1 & Iceberg $2{\times}2$ (simple y RC) + sin codificar & 8 / 4 & 66 & 1\,901\\
+Q1 & Iceberg $4{\times}5$ (RC) + sin codificar $4{\times}5$, pasos 1--6 & 24 / 20 & 126 & 11\,636\\
 Q4 & Steane, 5 qubits, concatenado, pasos 1--3 & 16 / 12 / 18 & 9 & 9\,817\\
 Q3-bare & triangular $3{\times}4$ sin codificar, $t=1$--8 & 12 & 8 & 5\,670\\
 Q3-iceberg & triangular $3{\times}4$ Iceberg, $t=1$--4 & 16 & 4 & 5\,283\\
@@ -242,7 +242,7 @@ $\to$ Q1 $\to$ Q4 $\to$ Q3.
 
 \paragraph{Sin cr\'editos, pendiente de m\'aquinas que no alcanzo desde la nube.} Correr el conjunto de pruebas en
 mis otras dos m\'aquinas (OVM y OLP/OLS). Dej\'e \texttt{scripts/cross\_platform\_check.sh}, que construye los dos
-entornos, corre todo y escribe \texttt{data/xplat\_<m\'aquina>.txt}. @@XPLAT@@
+entornos, corre todo y escribe \texttt{data/xplat\_<m\'aquina>.txt}. Ya lo corr\'i en el contenedor de la nube (Linux x86\_64, Python 3.12.3): las pruebas pasaron (632 y 258 antes de las correcciones de la revisi\'on, 662 y 288 despu\'es) y la validaci\'on lenta de Steane y del concatenado qued\'o a menos de $1.25\sigma$ del valor exacto. Falta correrlo en OVM y OLP; no se pueden alcanzar desde la nube, pero basta con \texttt{bash scripts/cross\_platform\_check.sh} en cada una (o abrir all\'i \texttt{claude remote-control}).
 
 % ============================================================================
 \section{Decisiones}\label{sec:decisiones}

@@ -1,0 +1,15 @@
+# H2-1SC quotes vs offline estimates -- 2026-10-17 14:40  (1000 shots, free tier)
+# quote = Nexus syntax-checker HQC cost; est(Rz) / est(no Rz) = scripts/h2_hqc_budget.py formula.
+group    run                                                step qubits   est(Rz)  est(noRz)     quote  status
+Q4       Steane 1x2                                            1     16    761.60     641.80    641.79  accepted
+Q4       Steane 1x2                                            2     16   1161.40     978.20    978.20  accepted
+Q4       Steane 1x2                                            3     16   1561.20    1314.60   1314.60  accepted
+Q4       5-qubit 1x2                                           1     12    572.80     481.80    481.80  accepted
+Q4       5-qubit 1x2                                           2     12    887.80     741.40    741.40  accepted
+Q4       5-qubit 1x2                                           3     12   1202.80    1001.00   1001.00  accepted
+Q4       concatenated Iceberg 2x2                              1     18   1204.60    1008.60   1008.60  accepted
+Q4       concatenated Iceberg 2x2                              2     18   1855.00    1552.60   1552.60  accepted
+Q4       concatenated Iceberg 2x2                              3     18   2505.40    2096.60   2096.60  accepted
+
+Totals incl. the +5 per extra RC circuit (est Rz | est no Rz | quoted):
+  Q4            11713 |     9817 |     9817
