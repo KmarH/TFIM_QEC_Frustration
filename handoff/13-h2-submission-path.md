@@ -41,3 +41,22 @@
 - My first HQC table assumed 52-qubit runs on the emulator; it caps at 32 qubits. Corrected before any spend.
 - My first `offline_compile_backend` caught the wrong place (device lookup is lazy); found by running the budget script.
 - A draft said 6×8 needs "7×10⁷ TB"; it is ≈ 72 PB.
+
+## UPDATE 2026-10-17 (late): free tiers proven live on Nexus; H2-1E test deliberately NOT run, kept in the plan
+
+**What now holds [measured, live]**
+- Login works via `qnx.auth.login()` (device code you approve in a browser; per container, so a new cloud session must log in again). The environment's network access was opened, so `nexus.quantinuum.com` and `docs.quantinuum.com` are reachable.
+- **Free SC (H2-1SC):** 42 circuits quoted and accepted (`data/h2_sc_quotes.txt`, `data/h2_sc_quotes_q1.txt`), including mid-circuit measure+reset and conditional gates. **Rz is not charged**; the Rz-free estimate equals the quote to the cent for Iceberg and bare, within 0.5% for Steane/concatenated.
+- **Hosted noiseless H2-1LE (no HQC, cost verified 0.0):** `src/h2_hosted.py` + `scripts/h2_hosted_check.py` ran 8 real circuits through upload → execute → fetch → decode: acceptance 1.000, Z2 within 1.5σ of exact, RC and conditional gates included, 12-register ordering exact (`data/h2_hosted_check.txt`).
+- Bug found and fixed: `submit_nexus` passed raw circuits; qnexus needs uploaded refs (QI-14, review finding C1). The emulator docs were read in full; `docs/h2_budget.md` now uses the server quotes: **G1 1,901 + Q1 (4×5) 11,636 + Q4 9,817 = 23,354 HQC**.
+- Tests: `.venv` 102 H2-related pass; `.venv-le` 125 pass (frozen hashes unchanged: circuits `dceab7c3…`, backend `6e38b8fe…`).
+
+**Still untested without HQC:** `submit_nexus` on H2-1E (live), the server-side `max_cost` cap, the noisy emulator's behaviour, anything above 20 qubits on a hosted target.
+
+**The H2-1E test stays in the plan (project lead: not now).** Order when you say go: re-login → SC re-quote the exact circuits → **bare 2×2 step 1** (≈ 23 HQC per 1000 shots, cheapest end-to-end test) → G1 (1,901) → compare with the local emulator, Selene and Stim before anything larger → Q1 4×5 → Q4 → Q3. Each step needs the per-run approval token and your explicit go.
+
+**Next (no HQC), in this order**
+1. A short hardening pass on the spend path (see the new session's brief): a run driver `scripts/run_h2_nexus.py` with a dry-run mode, `hqc_estimate` default to Rz-free (needs a frozen-test change: decision card), count conditional gates correctly, read the HQC per-shot / per-job limits page, add `no_opt` to `submit_hosted_le`, then an independent blind review of the driver.
+2. Phase 2 (Q3): triangular bare / Gauss circuits and the noise-scaling ladder via `h2_circuits`, compiled at level 0, quoted on the SC; ≤ 20 qubits fully checkable on the hosted LE, ≤ 24 on the offline LE.
+3. Decisions waiting on the project lead: OPEN-4 (4×5 for Q1; what to do with 6×6), the 50k allocation.
+4. OVM/OLS cross-platform runs and the slow Steane / concatenated LE validations (`scripts/run_h2_le.py --slow`).
