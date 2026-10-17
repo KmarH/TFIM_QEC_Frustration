@@ -4,8 +4,8 @@ TFIM simulation with logical (encoded) vs physical qubits, aimed at Quantinuum H
 
 ## Read first, every session
 1. `SCOPE.md`: the contract. §5 backends/ceilings, §10 what Claude Code does, §12 hard rules, §14 autonomy.
-2. `Conversation history/project-journal.md`: start with the **★ ARTICLE THESIS box** (the governing framing), then the status board and the latest entries.
-3. `Conversation history/open-questions.md`: pending decisions and questions.
+2. `Conversation history/project-journal.md` (kept outside the repository, on the project lead's machine; skip it if absent): start with the **★ ARTICLE THESIS box** (the governing framing), then the status board and the latest entries.
+3. `Conversation history/open-questions.md` (same note): pending decisions and questions.
 4. `handoff/plan.md` (the registry) and the brief you were given.
 
 ## Hard rules (non-negotiable)
@@ -25,7 +25,7 @@ TFIM simulation with logical (encoded) vs physical qubits, aimed at Quantinuum H
 ## Environment
 - `.venv`, **Python 3.12.14** (SCOPE pins 3.11, unavailable; FLAG A open). Host: aarch64, **2 cores**, ~6–7 GB free.
 - Pinned: numpy 2.5.3, scipy 1.18.1, pytest 9.1.1, stim 1.16.0, pytket 2.18.4, guppylang 1.1.2, selene-sim 0.3.4, hugr 0.18.8.
-- Tests: `. .venv/bin/activate && python -m pytest tests/ -q` (currently 231/231; about 125 s on this host, 125–240 s across the three platforms measured). Run the full suite before reporting.
+- Tests: `bash scripts/setup_env.sh` builds both environments; `.venv/bin/python -m pytest tests/ -q` (about 660 passed + 23 skipped, about 7 min on 4 cores; many are parametrized cases). Run the full suite before reporting.
 - **H2 local emulator needs its own environment** (`requirements-le.txt` → `.venv-le`; `pytket-quantinuum[pecos]` conflicts with the pinned selene-sim, `docs/quantinuum_issues.md` QI-1). LE tests: `.venv-le/bin/python -m pytest tests/test_h2_*.py -q` (about 3 min); in `.venv` they skip. Nexus client `qnexus==0.51.1` is in `requirements.txt` and imported only inside `src/h2_backend.py`'s SC/E functions.
 - Run scripts as `.venv/bin/python -I scripts/<name>.py`. Scripts insert the repo root into `sys.path`.
 - Zenodo dataset for 2503.20870: `/home/opc/zenodo_18487089/zenodo_data` (outside the repo, MD5-verified; never copy it in).
