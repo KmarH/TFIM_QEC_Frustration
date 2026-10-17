@@ -109,8 +109,11 @@ GROUPS: dict[str, list[tuple]] = {
 }
 
 
+Q3_GROUPS = ("Q3-bare", "Q3-iceberg", "Q3-ladder", "Q3-bare-3x6")  # src/h2_q3.py, config noise_scaling.h2_*
+
+
 def group_names() -> list[str]:
-    return list(GROUPS)
+    return list(GROUPS) + list(Q3_GROUPS)
 
 
 def _hw(hw):
@@ -149,10 +152,12 @@ def build_plan(group: str, shots: int, *, hw=None) -> Plan:
     compiling points split `shots` over CONFIG.encoded.rc_instances twirled circuits (shots // k
     each); everything else gets all `shots`."""
     hw = _hw(hw)
-    if group not in GROUPS:
+    if group not in GROUPS and group not in Q3_GROUPS:
         raise DriverRefused(f"unknown group {group!r}; known: {group_names()}")
     _check_shots(shots, hw)
     backend = offline_compile_backend(hw.le_device)
+    if group in Q3_GROUPS:
+        return Plan(group, _q3_items(group, shots, backend))
     k = CONFIG.encoded.rc_instances
     items: list[PlannedCircuit] = []
     for label, kind, lat, steps, rc in GROUPS[group]:
@@ -170,6 +175,67 @@ def build_plan(group: str, shots: int, *, hw=None) -> Plan:
                     )
                 )
     return Plan(group, items)
+
+
+def _planned(group, label, circ, shots, backend, meta) -> PlannedCircuit:
+    c = compile_for_h2(circ, backend)
+    cnt = native_counts(c)
+    return PlannedCircuit(label=label, group=group, shots=shots, circuit=c, n_qubits=cnt["nqubits"],
+                          estimate_hqc=hqc_estimate(cnt, shots), meta=meta)
+
+
+def _q3_items(group: str, shots: int, backend) -> list[PlannedCircuit]:
+    """The Q3 groups (config noise_scaling.h2_*): triangular TFIM at the working point
+    (q3.J, q3.noisy_h, q3.dt); a time t is round(t / dt) Trotter steps."""
+    from src.dimers import TriangularDimers
+    from src.h2_q3 import noise_scaled_circuits, triangular_bare_h2_circuit, triangular_iceberg_h2_circuit
+    from src.mcmc_baseline import initial_spins
+
+    Q, NS = CONFIG.q3, CONFIG.noise_scaling
+    J, h, dt = Q.J, Q.noisy_h, Q.dt
+    steps = lambda t: int(round(t / dt))  # noqa: E731
+    cases = {
+        "Q3-bare": ((3, 4, "flippable"), NS.h2_bare_times, "bare"),
+        "Q3-iceberg": ((3, 4, "flippable"), NS.h2_iceberg_times, "ice"),
+        "Q3-ladder": ((3, 4, "flippable"), NS.h2_ladder_times, "ladder"),
+        "Q3-bare-3x6": ((3, 6, "3-sublattice"), NS.h2_bare36_times, "bare"),
+    }
+    (Lx, Ly, kind), times, arm = cases[group]
+    spins0 = initial_spins(TriangularDimers(Lx, Ly), kind, CONFIG.ceilings.ed_max_spins)
+    case = (Lx, Ly, kind)
+    items: list[PlannedCircuit] = []
+
+    def bare(t):
+        return triangular_bare_h2_circuit(Lx, Ly, spins0, steps(t), J, h, dt)
+
+    for t in times:
+        n = steps(t)
+        meta = {"step": n, "time": t, "case": case}
+        if arm == "bare":
+            c, cb = bare(t)
+            items.append(_planned(group, f"{group} t={t}", c, shots, backend, {**meta, "cbits": cb}))
+        elif arm == "ice":
+            c, layout = triangular_iceberg_h2_circuit(Lx, Ly, spins0, n, J, h, dt)
+            items.append(_planned(group, f"{group} t={t}", c, shots, backend, {**meta, "layout": layout}))
+        else:  # lambda ladder: plain, then Pauli insertion at lam = 2, 3 (instances split the shots)
+            c, cb = bare(t)
+            meta["cbits"] = cb
+            items.append(_planned(group, f"ladder lam=1 t={t}", c, shots, backend,
+                                  {**meta, "lam": 1, "method": "none", "instance": 0}))
+            k = NS.insert_instances
+            for lam in (2, 3):
+                for sc in noise_scaled_circuits(c, lam, "insert", instances=k, seed=1000 * lam + n):
+                    items.append(_planned(group, f"ladder lam={lam} t={t} i{sc.instance}", sc.circuit,
+                                          max(shots // k, 1), backend,
+                                          {**meta, "lam": lam, "method": "insert", "instance": sc.instance}))
+    if arm == "ladder":
+        t = NS.fold_plan_time
+        c, cb = bare(t)
+        sc = noise_scaled_circuits(c, NS.fold_lam, "fold")[0]
+        items.append(_planned(group, f"ladder fold lam={NS.fold_lam} t={t}", sc.circuit, shots, backend,
+                              {"step": steps(t), "time": t, "case": case, "cbits": cb, "lam": NS.fold_lam,
+                               "method": "fold", "instance": 0}))
+    return items
 
 
 def _by_shots(items: list[PlannedCircuit]) -> list[tuple[int, list[PlannedCircuit]]]:
