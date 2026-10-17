@@ -46,6 +46,10 @@ python-dateutil==2.9.0.post0
 # pytket-qir and pyqir, and does NOT move pytket 2.18.4, numpy, scipy, stim, selene-sim or
 # guppylang. Its own declared requirement is pytket~=2.17, which 2.18.4 satisfies.
 pytket-quantinuum==0.59.3
+# Nexus client (login, jobs, costing). Imported only inside src/h2_backend.py's SC/E functions; a
+# dry-run install moves no other pin (verified 2026-10-17). The H2 LOCAL emulator needs a separate
+# environment, requirements-le.txt (docs/quantinuum_issues.md QI-1).
+qnexus==0.51.1
 pytket-qir==2.0.2
 pyqir==0.12.6
 

@@ -39,3 +39,8 @@ Conversation history/
 
 # Local review/scratch dirs (never project content)
 review-rc/
+
+# Second environment for the H2 local emulator (requirements-le.txt)
+.venv-le/
+# Nexus submission ledger holds job ids/costs from real runs
+runs/

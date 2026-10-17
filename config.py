@@ -45,6 +45,19 @@ class HardwareConfig:
     # unset, and src/backends_qc.py REFUSES to submit while it is 0 -- there is deliberately no
     # "unlimited" value. Raise it consciously, per run, together with the approval token.
     max_cost_hqc: float = 0.0
+    # H2 submission path (src/h2_backend.py, docs/nexus_toggle.md). Three tiers, by what they cost:
+    #   LE  local emulator, offline, free        -> le_device
+    #   SC  Nexus syntax checker, free, no HQC   -> syntax_checker (pre-approved by the project lead)
+    #   E   Nexus H2 emulator, spends HQC        -> emulator_device (double-gated, per run)
+    # Real H2 hardware is a fourth tier, refused unless allow_real_hardware is set as well.
+    le_device: str = "H2-1LE"
+    syntax_checker: str = "H2-1SC"
+    emulator_device: str = "H2-1E"
+    nexus_project: str = ""          # Nexus project name; credentials never live in this repo
+    # Server-side optimisation OFF: the folded noise-scaling circuits are silently cancelled by
+    # TKET at levels 1-2 (D-NS6), so every submission is compiled at level 0 and sent no_opt.
+    no_opt: bool = True
+    allow_real_hardware: bool = False
 
 
 @dataclass

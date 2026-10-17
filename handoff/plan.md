@@ -928,3 +928,27 @@ bitstrings and matching circuits are absent.
 
 **Review:** `review/15`. Both minor; no open major.
 **Handoff:** `handoff/12`. **Still open:** OPEN-2, the OPEN-3 submission path, G2. O-NS1 is a tighter T14 (needs approval).
+
+## 28. H2 submission path built and validated on the local emulator; no HQC spent, 2026-10-17
+
+**Pass type:** research-flow (spec → blind frozen tests → implement → verify). Kiro did not brief this pass; the project lead asked for it directly. **Classical predictions and H2-*local*-emulator runs; nothing ran on Nexus.**
+
+**Built (all additive; verified cores untouched).**
+- `src/h2_circuits.py`: the Iceberg program, bare reference and the Steane / 5-qubit / concatenated programs as one pytket circuit each (mid-circuit syndrome measure+reset into registers, round-0 feedforward as real conditional gates, RC frame corrections applied in `shot_records`), O0 compile with a 2-qubit-count guard, native counts, HQC estimate.
+- `src/h2_backend.py`: `run_le` (offline H2-1LE; noisy through PECOS directly), `syntax_check` (free SC tier, refuses every non-SC device), `submit_nexus` (HQC tier, gated; **never called**), `fetch_nexus`, a ledger, `offline_compile_backend`.
+- `config.py` `HardwareConfig` fields; `requirements-le.txt` (+ `qnexus` pin in `requirements.txt`); `.gitignore` (`.venv-le/`, `runs/`).
+- `scripts/run_h2_le.py` → `data/h2_le_validation.txt`; `scripts/h2_hqc_budget.py` → `data/h2_hqc_budget.txt`.
+- Docs: `docs/nexus_toggle.md` rewritten, `docs/h2_budget.md`, **`docs/quantinuum_issues.md` (new, ongoing: Quantinuum software issues, 10 entries)**, `DECISIONS.md` OPEN-4, `CLAUDE.md` rules.
+
+**Findings that change the plan.**
+- [established, source] qnexus 0.51.1's Guppy/HUGR route is **Helios-only**; H2 takes pytket/QIR. The Guppy feedforward-discard program cannot be the H2 submission (HW-3, answered "no" pending the SC). The discard is applied classically instead; HQC is on static gate counts, so cost is unaffected. (QI-3)
+- [established, docs excerpt] the Nexus **H2 emulator is ≤ 32 qubits state-vector (56 stabilizer, Clifford only)**. The 6×8 Q1 lattice (52 q) and the 6×6 noise-scaling arm (36/40 q) cannot run on it. Recommended Q1 headline lattice moves to **4×5** (24 qubits; also runs locally). DECISIONS.md OPEN-4 holds the options. [unverified: page itself was blocked in this container]
+- [measured] the LE ignores `noisy_simulation` and is always an ideal state vector (QI-2); PECOS rescales p1/p2 by 3/2 and 5/4 (QI-9); `pytket-quantinuum[pecos]` cannot co-install with selene-sim 0.3.4 (QI-1); a qnexus cost-device bug (QI-5, from source).
+
+**Results** (`data/h2_le_validation.txt`, 4000 shots, [measured]): noiseless Iceberg 2×2 and 2×3, steps 1–3, plain and randomized-compiled, acceptance 1.000 and Z2 within 2.1σ of the exact value in every row; bare likewise; five-qubit 1×2 Clifford and generic cases agree within 2.6σ (one point at +2.6σ, rechecked below). Noisy LE accepts fewer shots than local-sim at the same rates (e.g. 0.639 vs 0.703 at p2 = 0.003, step 3) as expected from native-gate charging.
+
+**HQC plan** (`docs/h2_budget.md`): G1 2.1k, Q1 4×5 13.2k, Q4 11.7k = 27.0k of 50k (54%); Q3 3×4 rows are formula estimates. All offline; the free SC quotes will replace them.
+
+**Tests.** New frozen files, written blind to the implementation (it was moved aside while they were written; they errored on import): `tests/test_h2_circuits.py`, `tests/test_h2_backend.py`. **Deviation from test-first: the implementation was written before the tests, then hidden from the test writer.** After the first run, two assertions were wrong in the *tests* (measurement order compared in `get_commands()` order; and my spec's "Clifford Z2 is 1/k or 1", which is false at 2×2); the project lead approved correcting them and re-freezing. Old `test_h2_circuits.py` SHA-256 `7155f2c8…7155`, new `dceab7c3…ed80`; `test_h2_backend.py` unchanged `6e38b8fe…fb80`. Counts: `.venv` 69 pass + 22 skip (emulator); `.venv-le` 91 pass.
+
+**Not done / open.** The free SC check (this container's network policy blocks Nexus; needs `nexus.quantinuum.com` allowed and a `NEXUS_REFRESH_TOKEN`). Q3 circuits (Phase 2). OVM/OLS cross-platform runs and the slow Steane/concatenated LE validations (no session reachable from here). The 4×5 Q1 lattice and the 50k allocation are the project lead's decisions.

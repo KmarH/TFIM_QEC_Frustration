@@ -18,12 +18,15 @@ TFIM simulation with logical (encoded) vs physical qubits, aimed at Quantinuum H
 - **Don't modify verified cores** (`src/operators.py`, `src/trotter.py`, `src/observables.py`, `src/qec/*`, `src/compare.py`) except by additive functions. New work goes in new modules.
 - **Stim proves fault-tolerance facts; pytket / Guppy / Selene / local-sim execute.** Never conflate the two.
 - `data/` is written only by reproducible scripts from trusted inputs. Synthetic fixtures must never write there.
+- **H2 tiers (`src/h2_backend.py`, `docs/nexus_toggle.md`):** LE (local emulator) and SC (Nexus syntax checker, H2-1SC/2SC) are free and **pre-approved by the project lead**; anything that spends HQC (H2-1E/2E emulators, hardware) is **never** run without the project lead's per-run go. The 50k HQC are emulator credits. The Nexus emulator is ≤ 32 qubits state-vector (DECISIONS.md OPEN-4).
+- **Log every Quantinuum-stack problem** (pytket-quantinuum, qnexus, pecos/LE, Guppy/Selene, TKET) in `docs/quantinuum_issues.md` the moment it is found, with a reproduction, even if we work around it. The project lead has Nexus access partly to help troubleshoot Quantinuum's software.
 - **Ask the project lead** for decisions that are theirs to make: scope, physics direction, FT standard, which budget, anything outward-facing. Give a recommendation with the question, and explain jargon briefly, for a non-specialist reader on mobile.
 
 ## Environment
 - `.venv`, **Python 3.12.14** (SCOPE pins 3.11, unavailable; FLAG A open). Host: aarch64, **2 cores**, ~6–7 GB free.
 - Pinned: numpy 2.5.3, scipy 1.18.1, pytest 9.1.1, stim 1.16.0, pytket 2.18.4, guppylang 1.1.2, selene-sim 0.3.4, hugr 0.18.8.
 - Tests: `. .venv/bin/activate && python -m pytest tests/ -q` (currently 231/231; about 125 s on this host, 125–240 s across the three platforms measured). Run the full suite before reporting.
+- **H2 local emulator needs its own environment** (`requirements-le.txt` → `.venv-le`; `pytket-quantinuum[pecos]` conflicts with the pinned selene-sim, `docs/quantinuum_issues.md` QI-1). LE tests: `.venv-le/bin/python -m pytest tests/test_h2_*.py -q` (about 3 min); in `.venv` they skip. Nexus client `qnexus==0.51.1` is in `requirements.txt` and imported only inside `src/h2_backend.py`'s SC/E functions.
 - Run scripts as `.venv/bin/python -I scripts/<name>.py`. Scripts insert the repo root into `sys.path`.
 - Zenodo dataset for 2503.20870: `/home/opc/zenodo_18487089/zenodo_data` (outside the repo, MD5-verified; never copy it in).
 

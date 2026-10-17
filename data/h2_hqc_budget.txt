@@ -1,0 +1,29 @@
+# H2 HQC budget (OFFLINE estimate) -- 2026-10-17 10:27
+# CLASSICAL ESTIMATE from compiled gate counts + the standard formula; no job was submitted.
+# 1000 shots per point [assumed]; RC = 20 twirled instances share the shots.
+# Budget: 50000 HQC on H2-1E/H2-2E (Nexus usage page). Rz counted (conservative).
+
+group    run                                                        qubits         fits E?       HQC  HQC Rz-free
+G1       Iceberg 2x2, plain                                              8    yes (+local)       859          746
+G1       Iceberg 2x2, RC                                                 8    yes (+local)      1178         1056
+G1       bare 2x2                                                        4    yes (+local)        99           99
+Q1       Iceberg 4x5, RC   (recommended headline lattice)               24    yes (+local)     11017         9494
+Q1       bare 4x5                                                       20    yes (+local)      2142         2142
+Q1-alt   Iceberg 4x6, RC                                                28             yes     12920        11115
+Q1-alt   bare 4x6                                                       24    yes (+local)      2564         2564
+Q1-draft Iceberg 6x8, RC  (first draft; does NOT fit the emulator)      52        no (>32)     24320        20839
+Q1-draft bare 6x8                                                       48        no (>32)      5099         5099
+Q4       Steane 1x2                                                     16    yes (+local)      3484         2944
+Q4       5-qubit 1x2                                                    12    yes (+local)      2663         2224
+Q4       concatenated Iceberg 2x2                                       18    yes (+local)      5565         4675
+
+Totals by group (HQC, Rz counted | Rz free):
+  G1             2135 |     1901
+  Q1            13159 |    11636
+  Q1-alt        15485 |    13679
+  Q1-draft      29419 |    25937
+  Q4            11713 |     9843
+
+G1 + Q1 (4x5) + Q4 = 27007 HQC of 50000 (54%).
+Q3 rows are not here: their circuits land in the next pass (Phase 2); the 6x6 arm does not fit the emulator at all (DECISIONS.md OPEN-4).
+[unverified] until the free syntax checker quotes them: whether Rz is charged, and whether the emulator charge equals this formula.

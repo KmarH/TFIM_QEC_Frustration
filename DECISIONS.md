@@ -411,6 +411,75 @@ Consequence: **no late-time (t > 3) 6×6 value may be called thermalization.** R
 
 ---
 
+## OPEN-4 — Where the 6×6 physics runs (opened 2026-10-17)
+
+**Status: OPEN, the project lead's call. Nothing is blocked today; the Q1 and small-lattice work
+proceeds without it.**
+
+**The question.** The Q3 noise-scaling arm (DECIDED-5) lives on 6×6 = 36 spins (bare / Gauss
+post-selection) and 40 physical qubits (Iceberg). H2 *hardware* has 56 qubits, so the circuits fit
+there (the emulators are narrower; see below). The classical machines this project owns cannot
+*simulate* them as exact state vectors [derived]:
+
+| arm | qubits | amplitudes × 16 B | this host |
+|---|---|---|---|
+| 3×4 bare / Iceberg | 12 / 16 | 64 kB / 1 MB | fine |
+| 6×6 bare | 36 | ≈ 1.1 TB | ~6 GB RAM |
+| 6×6 Iceberg | 40 | ≈ 17.6 TB | ~6 GB RAM |
+| 6×8 Iceberg (G3, Q1 headline) | 52 | ≈ 72 PB (7×10^4 TB) | impossible |
+
+**Why batching does not help.** A state vector must hold every amplitude at once, because each
+gate mixes amplitudes across the whole vector. Splitting a run into batches splits the *shots*, and
+every shot still needs the full state. Out-of-core simulation would need 1–18 TB of disk and is
+orders of magnitude too slow.
+
+**What does run locally at 6×6 (and is already used):** Stim at Clifford angles (exact, unbounded;
+checks circuit logic, post-selection, wiring), plus gate counts, the O0 fold-survival check and the
+HQC cost. **What does not:** a noiseless or noisy 6×6 *physics* curve.
+
+**The Nexus emulator has its own width limit, and it is below 6×6.** Quantinuum's emulator
+documentation (docs.quantinuum.com, "System Model H2 Emulators", read as search-result excerpts on
+2026-10-17; the page itself was blocked by this container's network policy, so re-read it
+directly) lists for **H2-1E / H2-2E: 32 qubits in state-vector mode, 56 in stabilizer mode**, and
+advises state-vector runs below 28 qubits. Stabilizer mode is Clifford-only. [unverified: confirm on
+the page; confirm with a free H2-1SC acceptance test.] So, for non-Clifford circuits:
+
+| run | qubits | H2-1E state vector (≤ 32)? |
+|---|---|---|
+| Q1 headline at 6×8 (G3 as first drafted) | 52 | **no** |
+| 6×6 noise-scaling arm, bare / Iceberg | 36 / 40 | **no / no** |
+| Q1 at 4×5 (k = 20, Iceberg 24, bare 20) | 24 | yes; also within this host's SCOPE §5 ceiling |
+| Q1 at 4×6 (k = 24, Iceberg 28, bare 24) | 28 | yes (at the recommended limit) |
+| Q3 at 3×4 (bare 12, Iceberg 16), 3×6 | ≤ 22 | yes |
+
+So the 6×6 target (T-18) and the 52-qubit Q1 lattice can run only on **real H2 hardware**, for
+which the usage page shows no allowance, or in a classical simulator this project does not have.
+
+**Options for 6×6 physics.**
+1. **Shrink the target to what the emulator can run** (≤ 28–32 qubits): e.g. Iceberg-encoded
+   triangular 4×6 (28 physical) and bare 5×6 (30). Loses the 6×6 / 9×6 size story; keeps the
+   noise-scaling method, which is the point of T-17.
+2. **Real hardware (H2-1 / H2-2)** for the full 6×6 arm: needs a hardware allowance that is not on
+   the usage page, and a separate budget decision (≈ 8.3×10⁴ HQC under D-NS7, more than the whole
+   50k emulator allowance even if it applied).
+3. **A tensor-network (MPS) classical simulator** as the independent anchor. PECOS ships an `MPS`
+   simulator class [measured: present in the pinned LE environment]; whether it is accurate at the
+   entanglement these quenches generate is untested [unverified], and PROC-2 froze new classical
+   depth, so this needs approval.
+4. Drop the 6×6 arm and keep 3×4 as the largest lattice with a classical cross-check.
+
+**Recommendation:** 1 for Q1 (move the headline lattice from 6×8 to 4×5, which also runs on this
+host's local emulator, so the same circuits are cross-checked locally and on H2-1E), and for Q3
+run 3×4 first, then decide between 1 and 3 for the noise-scaling arm once the free SC has confirmed
+the width the emulator accepts.
+
+**Also recorded (2026-10-17):** the 50,000 HQC shown on the Nexus usage page are for **H2-1E / H2-2E
+(emulators)**; the syntax checkers are unlimited and free. No real-hardware allowance is shown, so
+every HQC estimate here is for the emulator [inferred from the usage page]. The SC tier is
+pre-approved by the project lead; every HQC-spending run still needs a per-run go.
+
+---
+
 ## Applied corrections (no decision needed)
 
 These were wrong independently of the decisions above and have been fixed:

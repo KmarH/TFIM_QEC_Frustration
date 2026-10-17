@@ -1,0 +1,26 @@
+# H2 local emulator environment (H2-1LE / H2-2LE) -- build as .venv-le, NOT into .venv.
+#
+# WHY SEPARATE (docs/quantinuum_issues.md QI-1): pytket-quantinuum[pecos] pulls quantum-pecos
+# 0.8.0.dev8, which requires selene-sim~=0.2.0, while the main environment pins selene-sim==0.3.4
+# (requirements.txt). pip cannot resolve both; separate environments can. The main .venv keeps
+# the Selene results reproducible; this one runs only the local H2 emulator and its tests.
+#
+#   python3.12 -m venv .venv-le && .venv-le/bin/pip install -r requirements-le.txt
+#
+numpy==2.5.3
+scipy==1.18.1
+stim==1.16.0
+pytest==9.1.1
+pytket==2.18.4
+pytket-quantinuum[pecos]==0.59.3
+# resolved transitive pins that matter for reproducing the emulator (pip freeze, 2026-10-17):
+pecos-rslib==0.8.0.dev8
+phir==0.3.3
+pyqir==0.12.6
+pytket-phir==0.10.2
+pytket-qir==2.0.2
+pytket-pecos==0.3.3
+quantum-pecos==0.8.0.dev8
+selene-core==0.2.11
+selene-hugr-qis-compiler==0.2.11
+selene-sim==0.2.18
