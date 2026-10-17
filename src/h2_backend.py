@@ -315,8 +315,11 @@ def submit_nexus(
 
     proj = qnx.projects.get_or_create(name=project)
     cfg = QuantinuumConfig(device_name=device, no_opt=True, max_cost=max_cost_hqc)
+    # start_execute_job takes uploaded program REFERENCES: qnexus's `accept_circuits_for_programs`
+    # only renames the keyword, it does not upload (read in qnexus 0.51.1; found in review).
+    refs = _upload_circuits(qnx, circuits, proj, f"{project}-{device}")
     job = qnx.start_execute_job(
-        programs=list(circuits),
+        programs=refs,
         n_shots=[shots] * len(circuits),
         backend_config=cfg,
         project=proj,
@@ -340,6 +343,14 @@ def submit_nexus(
         print(f"LEDGER WRITE FAILED for a SUBMITTED job: {entry}", file=sys.stderr)
         raise
     return job
+
+
+def _upload_circuits(qnx, circuits, proj, prefix):
+    stamp = int(time.time())
+    return [
+        qnx.circuits.upload(circuit=c, name=f"{prefix}-{stamp}-{i}", project=proj)
+        for i, c in enumerate(circuits)
+    ]
 
 
 def fetch_nexus(

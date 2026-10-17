@@ -1,8 +1,11 @@
 # Running on Quantinuum H2 — the submission path (rewritten 2026-10-17, handoff/13)
 
-**Status: built and tested against the H2 *local* emulator; the Nexus tiers are written and unit-tested
-with a mocked client but have never been called against the live server.** Nothing in this repo calls
-a spending function; that needs the project lead's go, per run.
+**Status (2026-10-17): built and tested on the H2 local emulator; the free tiers have run on the live
+Nexus platform.** Free SC: 18+ circuits accepted and quoted (`data/h2_sc_quotes*.txt`). Hosted noiseless
+H2-1LE: upload → execute → fetch → decode proven on 8 real circuits, cost reported 0.0
+(`data/h2_hosted_check.txt`). **Only the HQC tier (`submit_nexus` on H2-1E, with `max_cost` and the
+noisy emulator) is untested live.** Nothing in this repo calls a spending function; that needs the
+project lead's go, per run.
 
 Every noisy number from the local emulator or Selene is a classical prediction under an ASSUMED noise
 model. A number from Nexus H2-1E is an *H2 emulator* result and must be labelled so; real hardware, if
@@ -14,6 +17,7 @@ ever used, is a third label. Never mix them.
 |---|---|---|---|---|
 | LE | H2-1LE, H2-2LE | free, offline, no login | `src.h2_backend.run_le` | none; ≤ 30 qubits (host memory) |
 | SC | H2-1SC, H2-2SC | free, unlimited | `src.h2_backend.syntax_check` | **pre-approved by the project lead**; refuses any other device name |
+| hosted LE | H2-1LE on Nexus | no HQC (Simulation quota, seconds) | `src.h2_hosted.submit_hosted_le` + `check_hosted_cost` | refuses any non-LE device; ≤ 20 qubits; aborts if the server reports a cost. Proves the submit / fetch path on the real platform |
 | E | H2-1E, H2-2E | **HQC** | `src.h2_backend.submit_nexus` | `allow_hardware=True` **and** the per-run approval token **and** `max_cost_hqc > 0` **and** estimate ≤ cap |
 | HW | H2-1, H2-2 | **HQC** | same | all of the above **and** `allow_real_hardware=True` |
 

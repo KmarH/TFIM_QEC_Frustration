@@ -28,6 +28,7 @@ guppylang 1.1.2, hugr 0.18.8.
 | QI-10 | known upstream | pytket→PHIR drops classical bits no command touches | yes (cited in source) | worked around by them |
 | QI-11 | behaviour | PECOS charges `p_init` only on explicit Init ops, not on the initial state | no | worked around |
 | QI-13 | deprecation | latest qnexus warns an endpoint "will be deleted on 30 Nov 2025", a date already past; it still works | no | note |
+| QI-14 | API/naming | `start_execute_job` takes uploaded refs; raw pytket circuits crash with `AttributeError: ... 'id'` despite the `accept_circuits_for_programs` decorator | no | worked around |
 | QI-12 | docs | emulator pages disagree on the Nexus-hosted H2-Emulator width (26 vs 20); "LE" names two different things | no | note |
 
 ---
@@ -168,6 +169,20 @@ guppylang 1.1.2, hugr 0.18.8.
   qnexus version`. Today is after that date, no newer qnexus exists on PyPI, and the call still works.
 - **Impact:** none seen; the warning is misleading for the latest release. **Ask upstream:** update the
   endpoint or the warning text.
+
+## QI-14 — `start_execute_job(programs=[Circuit])` crashes; the "accept circuits" decorator only renames a keyword
+- **Component:** qnexus 0.51.1, `client/jobs/_execute.py::start_execute_job`, `client/utils.py::accept_circuits_for_programs`.
+- **Observation [measured, 2026-10-17, free hosted H2-1LE]:** passing a raw pytket `Circuit` as `programs` raises
+  `AttributeError: 'pytket._tket.circuit.Circuit' object has no attribute 'id'` (the function reads `p.id`
+  for each program) before any job is created. The decorator `accept_circuits_for_programs`, despite its
+  name, only maps the deprecated keyword `circuits=` to `programs=`; it does not upload.
+- **Reproduce:** `qnx.start_execute_job(programs=[Circuit(1)...], n_shots=[5],
+  backend_config=QuantinuumConfig(device_name="H2-1LE"), project=proj, name="x")`.
+- **Impact:** the first version of `submit_nexus` passed raw circuits and would have failed at its first
+  live call (found in review, reproduced here). **Workaround:** upload each circuit with
+  `qnx.circuits.upload` and pass the returned `CircuitRef`s (`src/h2_backend._upload_circuits`).
+- **Ask upstream:** upload raw circuits inside `start_execute_job` as the decorator's name suggests, or
+  raise a clear `TypeError`; the signature type hint (`ExecutionProgram`) is right but the error is not.
 
 ---
 

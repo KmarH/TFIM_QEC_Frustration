@@ -1,0 +1,13 @@
+# Hosted noiseless emulator H2-1LE on Nexus -- 2026-10-17 11:46  (1000 shots/circuit)
+# NOISELESS: proves plumbing on the real platform, not noisy physics. No HQC (cost checked below).
+job 3157b58d-5ff6-4dbb-babc-3dfd3f39dcf1: submitted 8 circuits
+server-reported cost: 0.0 HQC
+circuit                                                     accept            Z2 +- se    exact      z
+Iceberg 2x2 step 1 plain                                     1.000      0.6785 +- 0.0130   0.6683  +0.78
+Iceberg 2x2 step 1 RC                                        1.000      0.6707 +- 0.0129   0.6683  +0.19
+Iceberg 2x2 step 3 plain                                     1.000      0.5797 +- 0.0134   0.5888  -0.68
+Iceberg 2x2 step 3 RC                                        1.000      0.6090 +- 0.0134   0.5888  +1.50
+bare 2x2 step 1                                              1.000      0.6560 +- 0.0130   0.6683  -0.95
+bare 2x2 step 3                                              1.000      0.6020 +- 0.0134   0.5888  +0.98
+five-qubit 1x2 step 2 generic (conditional gates)            1.000      0.7000 +- 0.0145   0.7123  -0.85
+five-qubit 1x2 step 2 Clifford (conditional gates)           1.000      0.4820 +- 0.0158   0.5000  -1.14
