@@ -1,6 +1,6 @@
 % ============================================================================
-%  Reporte tecnico (v3): simulacion del TFIM con qubits logicos vs fisicos
-%  Para el equipo. 17 de octubre de 2026. Todo lo que no gasta creditos esta terminado;
+%  Reporte tecnico: simulacion del TFIM con qubits logicos vs fisicos
+%  17 de octubre de 2026. Todo lo que no gasta creditos esta terminado;
 %  falta solo correr en el emulador H2 (HQC), que es un cambio en config.py.
 %
 %  Compila con pdfLaTeX (motor por defecto). Autocontenido: solo paquetes estandar.
@@ -34,7 +34,7 @@
   Generarla con \code{python -I scripts/plot_q3.py}, o subirla a una carpeta \code{figures/}.}}}}}}
 
 \title{\textbf{Simulaci\'on del TFIM con qubits l\'ogicos vs f\'isicos}\\[0.3em]
-\large Reporte t\'ecnico para el equipo (v3)}
+\large Reporte t\'ecnico para el equipo}
 \author{}
 \date{17 de octubre de 2026 \quad\textbullet\quad listo para el emulador del H2}
 
@@ -44,7 +44,7 @@
 \begin{abstract}
 \noindent Simulaci\'on del TFIM que compara el c\'alculo de observables f\'isicos con qubits l\'ogicos
 (codificados) frente a qubits f\'isicos, y que estudia la frustraci\'on, dirigida al hardware
-Quantinuum H2. En esta versi\'on la \emph{ruta de env\'io a H2} qued\'o construida y probada con las
+Quantinuum H2. La \emph{ruta de env\'io a H2} est\'a construida y probada con las
 capas gratuitas de Quantinuum; todo lo que no cuesta cr\'editos est\'a terminado. Lo \'unico que falta
 es correr en el emulador H2 (gasta cr\'editos HQC), y eso es cambiar un par de l\'ineas de
 \texttt{config.py} y dar una aprobaci\'on expl\'icita por corrida. Todas las curvas con ruido son
@@ -56,17 +56,16 @@ predicciones cl\'asicas bajo un modelo de ruido asumido, nunca resultados del H2
 % ============================================================================
 \section{Introducci\'on}
 
-Este reporte actualiza el v2 (9 de octubre). Entonces la parte cl\'asica estaba lista y el hardware
-pendiente. Ahora, adem\'as, el camino hacia el H2 est\'a construido y probado en las capas
-gratuitas de Quantinuum (el verificador de sintaxis y el emulador sin ruido alojado en Nexus), sin
+La parte cl\'asica del proyecto est\'a terminada y el camino hacia el H2 est\'a construido y probado en las
+capas gratuitas de Quantinuum (el verificador de sintaxis y el emulador sin ruido alojado en Nexus), sin
 gastar un solo cr\'edito.
 
 \textbf{C\'omo se hizo.} Yo superviso las decisiones y trabajo con Claude Code. Al principio Kiro
 (otro agente) ayud\'o a planificar, investigar y revisar; desde el 8 de octubre Kiro est\'a fuera, as\'i
 que \textbf{hoy el trabajo lo hacemos solo Claude Code y yo}: Claude Code planifica, construye y, para
-revisar, lanza revisores independientes ``a ciegas'' (no ven el razonamiento del autor). El resto del
-equipo no ha participado en esta construcci\'on; este reporte es para que puedan entender y chequear lo
-que hay. Lo hice a consciencia, pero por favor rev\'isenlo.
+revisar, lanza revisores independientes ``a ciegas'' (no ven el razonamiento del autor). Tambi\'en corr\'i
+esto en una m\'aquina virtual y en un servidor m\'io para hacer cosas paralelas, pero ustedes pueden
+correrlo sin eso. Lo hice a consciencia, pero por favor rev\'isenlo.
 
 \subsection{Resumen del proyecto}
 El objetivo final es comparar, de frente, el c\'alculo de los mismos observables f\'isicos del TFIM
@@ -79,7 +78,7 @@ como \'unico eje que var\'ia. En orden de prioridad: (1)~l\'ogico vs f\'isico so
 (2)~frustraci\'on en la red triangular, (3)~termalizaci\'on, junto a hilos menores como la ley de
 Gauss emergente para post-selecci\'on por simetr\'ia.
 
-\subsection{Resumen en una p\'agina (lo nuevo desde el v2)}
+\subsection{Resumen en una p\'agina}
 \begin{itemize}[leftmargin=1.4em]
   \item \textbf{La ruta a H2 funciona en las capas gratuitas.} El verificador de sintaxis de Quantinuum
     (H2-1SC) acept\'o y cotiz\'o \textbf{121 circuitos} sin errores. En el emulador sin ruido alojado en
@@ -112,9 +111,9 @@ y las \emph{cotizaciones} (precios) del servidor.
 % ============================================================================
 \section{Qu\'e se construy\'o}
 
-Todo el c\'odigo est\'a detr\'as de un \'unico \texttt{config.py}. Lo que ya estaba en el v2 (n\'ucleo del TFIM,
-cuatro c\'odigos de correcci\'on, TFIM codificado, frustraci\'on, termalizaci\'on, ley de Gauss, comparaci\'on
-con los datos de Zenodo) sigue igual. Lo nuevo:
+Todo el c\'odigo est\'a detr\'as de un \'unico \texttt{config.py}. La base del proyecto es el n\'ucleo del TFIM,
+los cuatro c\'odigos de correcci\'on, el TFIM codificado, la frustraci\'on, la termalizaci\'on, la ley de Gauss y la
+comparaci\'on con los datos de Zenodo. Componentes para H2:
 
 \begin{itemize}[leftmargin=1.4em]
   \item \textbf{Circuitos para H2} (\code{src/h2_circuits.py}, \code{src/h2_q3.py}). Cada programa
@@ -143,7 +142,7 @@ con los datos de Zenodo) sigue igual. Lo nuevo:
 
 Las pruebas: \textbf{662 pruebas (m\'as 23 omitidas a prop\'osito)} pasan en el entorno principal y \textbf{288} en el entorno del emulador local
 (dos entornos porque el paquete del emulador local no convive con el de Selene). Los archivos de pruebas
-nuevos se escribieron \emph{antes} que el c\'odigo y por un agente que no ve la implementaci\'on; sus huellas
+de la ruta a H2 se escribieron \emph{antes} que el c\'odigo y por un agente que no ve la implementaci\'on; sus huellas
 (SHA-256) est\'an en \code{handoff/14-h2-finish.md}.
 
 % ============================================================================
@@ -240,9 +239,6 @@ $\to$ Q1 $\to$ Q4 $\to$ Q3.
   \item \textbf{Escalado de ruido en Q3} ($3{\times}4$) y los dem\'as grupos del plan.
 \end{enumerate}
 
-\paragraph{Sin cr\'editos, pendiente de m\'aquinas que no alcanzo desde la nube.} Correr el conjunto de pruebas en
-mis otras dos m\'aquinas (OVM y OLP/OLS). Dej\'e \texttt{scripts/cross\_platform\_check.sh}, que construye los dos
-entornos, corre todo y escribe \texttt{data/xplat\_<m\'aquina>.txt}. Ya lo corr\'i en el contenedor de la nube (Linux x86\_64, Python 3.12.3): las pruebas pasaron (632 y 258 antes de las correcciones de la revisi\'on, 662 y 288 despu\'es) y la validaci\'on lenta de Steane y del concatenado qued\'o a menos de $1.25\sigma$ del valor exacto. Falta correrlo en OVM y OLP; no se pueden alcanzar desde la nube, pero basta con \texttt{bash scripts/cross\_platform\_check.sh} en cada una (o abrir all\'i \texttt{claude remote-control}).
 
 % ============================================================================
 \section{Decisiones}\label{sec:decisiones}
@@ -297,10 +293,9 @@ Ning\'un camino gasta cr\'editos sin la configuraci\'on correcta, la aprobaci\'o
 % ============================================================================
 \appendix
 
-\section{Resultados f\'isicos (de v2, vigentes)}\label{ap:resultados}
+\section{Resultados f\'isicos}\label{ap:resultados}
 
-Esta parte no cambi\'o: son resultados cl\'asicos. La \'unica correcci\'on respecto al v2 es el tama\~no del
-brazo de escalado de ruido (ya no $6{\times}6$) y el n\'umero de pruebas.
+Son resultados cl\'asicos, sin ruido de hardware. El brazo de escalado de ruido ya no es $6{\times}6$ (secci\'on~\ref{sec:decisiones}).
 
 \subsection{Q1 --- L\'ogico vs f\'isico}
 
@@ -469,17 +464,16 @@ Para que no cunda el p\'anico cuando vean el proyecto, especifico c\'omo us\'e l
   \item \texttt{SCOPE.md}: la ``constituci\'on'' del proyecto (las cuatro preguntas, los l\'imites de tama\~no, qu\'e se
     puede hacer sin preguntarme). Si hay duda, manda este documento; c\'ambienlo a consciencia.
   \item \texttt{CLAUDE.md}: las reglas de trabajo del agente (qu\'e est\'a prohibido sin mi aprobaci\'on, convenciones de
-    f\'isica, trampas de las herramientas). Actualizado: ahora Claude Code es el \'unico agente.
-  \item \texttt{DECISIONS.md}: decisiones abiertas y tomadas (esta ronda cerr\'o la OPEN-4 y a\~nadi\'o D-HQC).
+    f\'isica, trampas de las herramientas).
+  \item \texttt{DECISIONS.md}: decisiones abiertas y tomadas (incluye la decisi\'on del reticulado de Q1 y del brazo de escalado de ruido, y D-HQC).
   \item \texttt{config.py}, \texttt{main.py}, \texttt{requirements*.txt}, \texttt{src/}: la configuraci\'on \'unica y el
     c\'odigo. Dos archivos de requisitos: el principal y el del emulador local (\texttt{requirements-le.txt}).
-  \item \texttt{scripts/}: los scripts que generan cada resultado. Nuevos: \texttt{run\_h2\_nexus.py} (el driver),
-    \texttt{h2\_sc\_quotes*.py} (cotizaciones gratuitas), \texttt{h2\_hosted\_*.py} (emulador alojado) y
-    \texttt{cross\_platform\_check.sh} (revisi\'on en otras m\'aquinas).
+  \item \texttt{scripts/}: los scripts que generan cada resultado. Para H2: \texttt{run\_h2\_nexus.py} (el driver),
+    \texttt{h2\_sc\_quotes*.py} (cotizaciones gratuitas), \texttt{h2\_hosted\_*.py} (emulador alojado).
   \item \texttt{data/}: resultados en texto plano; cada uno dice qu\'e script lo gener\'o y si es una predicci\'on cl\'asica con ruido asumido.
   \item \texttt{docs/}, \texttt{review/}, \texttt{research/}: la explicaci\'on de cada resultado, las revisiones
-    independientes numeradas (la 17 es la de esta ronda) y las notas de investigaci\'on.
-  \item \texttt{handoff/}: los encargos y reportes entre sesiones; \texttt{handoff/14-h2-finish.md} resume esta ronda.
+    independientes numeradas (la 17 cubre la ruta a H2) y las notas de investigaci\'on.
+  \item \texttt{handoff/}: los encargos y reportes entre sesiones; \texttt{handoff/14-h2-finish.md} resume el trabajo de la ruta a H2.
   \item \texttt{tests/}: las pruebas. Las ``congeladas'' se escribieron antes del c\'odigo y est\'an fijadas por huella (SHA-256).
   \item Todo esto est\'a en la rama \texttt{claude/awesome-lamport-wun6jh} del repositorio.
 \end{enumerate}
