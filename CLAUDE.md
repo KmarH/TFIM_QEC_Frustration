@@ -1,6 +1,6 @@
 # CLAUDE.md — working rules for Claude Code in this project
 
-TFIM simulation with logical (encoded) vs physical qubits, aimed at Quantinuum H2 (a team project). Claude Code is one agent in a multi-agent workflow. **Kiro** (qc-overseer, qc-researcher, qc-reviewer, qc-annotator, qc-scout) scopes, researches and reviews, and writes briefs for Claude Code in `handoff/NN-*.md`. The project lead runs Claude Code on those briefs and relays messages between the two.
+TFIM simulation with logical (encoded) vs physical qubits, aimed at Quantinuum H2. The project lead supervises and decides; **Claude Code is now the only agent** (Kiro, which scoped, researched and reviewed through 2026-10-08, is out). Claude Code therefore also plans, researches and reviews: blind reviewer sub-agents are the independent check (`peer-review`), and briefs are written as `handoff/NN-*.md`. Only the project lead works on this with Claude Code; the rest of the team reads the reports.
 
 ## Read first, every session
 1. `SCOPE.md`: the contract. §5 backends/ceilings, §10 what Claude Code does, §12 hard rules, §14 autonomy.
@@ -61,7 +61,7 @@ TFIM simulation with logical (encoded) vs physical qubits, aimed at Quantinuum H
 - For larger builds, an independent read-only reviewer sub-agent is worth it. Fix its majors with regression tests.
 - **After every pass:**
   - update `handoff/plan.md` (new numbered section);
-  - add a journal entry (`## Entry N`, plus the status board, timeline and key-decisions table). Kiro also appends entries, so check the last number first;
+  - add a journal entry (`## Entry N`, plus the status board, timeline and key-decisions table); check the last journal entry number first;
   - update `open-questions.md` (add, resolve, move);
-  - give the project lead a short paste-ready message for Kiro: what changed, files, results, what to run next (reviewer → researcher → annotator), and open items and FLAGs.
+  - give the project lead a short summary: what changed, files, results, what to run next, open items and FLAGs (no relay to Kiro any more).
 - Keep writing plain: for the project lead, lead with the answer; for files, put status tags on every claim.

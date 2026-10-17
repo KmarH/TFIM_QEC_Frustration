@@ -130,10 +130,14 @@ def _split_measures(base: Circuit) -> tuple[Circuit, list[tuple[int, Bit]]]:
     anonymous bits and raise on named registers, so they act on the body only."""
     body = Circuit(base.n_qubits)
     meas = []
+    measured: set[int] = set()
     for cmd in base.get_commands():
         if cmd.op.type == OpType.Measure:
             meas.append((cmd.qubits[0].index[0], cmd.bits[0]))
+            measured.add(cmd.qubits[0].index[0])
         else:
+            if measured & {q.index[0] for q in cmd.qubits}:
+                raise ValueError("noise scaling carries over only FINAL measurements; found a mid-circuit one")
             body.add_gate(cmd.op, [a.index[0] for a in cmd.args])
     return body, meas
 

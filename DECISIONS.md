@@ -411,10 +411,13 @@ Consequence: **no late-time (t > 3) 6×6 value may be called thermalization.** R
 
 ---
 
-## OPEN-4 — Where the 6×6 physics runs (opened 2026-10-17)
+## DECIDED-6, formerly OPEN-4 — Where the 6×6 physics runs (opened and decided 2026-10-17)
 
-**Status: OPEN, the project lead's call. Nothing is blocked today; the Q1 and small-lattice work
-proceeds without it.**
+**DECIDED 2026-10-17 (the project lead):** (1) the Q1 headline lattice is **4×5** (24 physical qubits encoded, 20 bare; server-quoted 11,636 HQC); (2) the 6×6 noise-scaling arm is **shrunk to 3×4 / 3×6** (the λ ladder at 3×4, the bare size story at 3×6); the 6×6 circuits stay a Stim-only design, run nowhere. Built as the `Q3-*` groups of `src/h2_driver.py` (handoff/14). The analysis below is the record that led to it.
+
+**D-HQC (decided 2026-10-17, the project lead):** `src.h2_circuits.hqc_estimate` is Rz-free by default, because the free H2-1SC quoted Rz (plain and conditional) as free [measured]. One frozen assertion changed (`tests/test_h2_circuits.py`, 5.74 → 5.72); new SHA-256 `ab1eaf63632a51171e71abebf8997cbaf752766d9d55e81c74880744eb02b147` (old `dceab7c37f6c110463c1f0f3e07e87f7f7c29af350294444ac2308cdc5e2ed80`).
+
+**Original status line (before the decision): OPEN, the project lead's call.**
 
 **The question.** The Q3 noise-scaling arm (DECIDED-5) lives on 6×6 = 36 spins (bare / Gauss
 post-selection) and 40 physical qubits (Iceberg). H2 *hardware* has 56 qubits, so the circuits fit

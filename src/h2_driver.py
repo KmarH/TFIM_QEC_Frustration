@@ -49,6 +49,11 @@ from src.h2_circuits import (
 
 TIERS = ("dry-run", "sc", "hosted-le", "emulator")
 FREE_TIERS = ("dry-run", "sc", "hosted-le")
+# Documented hard limits [established: docs.quantinuum.com "System Model H2 Emulators" and "H2 Operation",
+# read 2026-10-17]. A config may tighten them, never loosen them (review/17).
+HARD_MAX_QUBITS = 32  # H2-1E/2E state vector
+HARD_MAX_SHOTS = 10_000  # per job
+HARD_MAX_HQC_PER_SHOT = 50.0
 HOSTED_LE_MAX_QUBITS = 20  # Nexus-hosted emulators [docs, QI-12]; same value as src.h2_hosted
 
 
@@ -120,7 +125,16 @@ def _hw(hw):
     return CONFIG.hardware if hw is None else hw
 
 
+def _limit(hw, field: str, hard) -> None:
+    """A configured limit must be finite, positive and no looser than the documented hard limit:
+    NaN/inf would silently disable a gate (x > nan is False)."""
+    v = getattr(hw, field)
+    if not _finite_pos(v) or v > hard:
+        raise DriverRefused(f"hardware.{field} must be finite, > 0 and <= {hard}, got {v!r}")
+
+
 def _check_shots(shots, hw) -> None:
+    _limit(hw, "max_shots_per_job", HARD_MAX_SHOTS)
     if isinstance(shots, bool) or not isinstance(shots, int) or shots < 1:
         raise DriverRefused(f"shots must be an int >= 1, got {shots!r}")
     if shots > hw.max_shots_per_job:
@@ -161,7 +175,7 @@ def build_plan(group: str, shots: int, *, hw=None) -> Plan:
     k = CONFIG.encoded.rc_instances
     items: list[PlannedCircuit] = []
     for label, kind, lat, steps, rc in GROUPS[group]:
-        per = max(shots // k, 1) if rc else shots
+        per = shots // k if rc else shots
         for n in steps:
             for seed in range(k) if rc else (None,):
                 c, meta = _author(kind, lat, n, seed)
@@ -201,6 +215,10 @@ def _q3_items(group: str, shots: int, backend) -> list[PlannedCircuit]:
         "Q3-bare-3x6": ((3, 6, "3-sublattice"), NS.h2_bare36_times, "bare"),
     }
     (Lx, Ly, kind), times, arm = cases[group]
+    if arm == "ladder" and shots < NS.insert_instances:
+        raise DriverRefused(
+            f"{group}: {shots} shots cannot be split over {NS.insert_instances} insertion instances"
+        )
     spins0 = initial_spins(TriangularDimers(Lx, Ly), kind, CONFIG.ceilings.ed_max_spins)
     case = (Lx, Ly, kind)
     items: list[PlannedCircuit] = []
@@ -226,7 +244,7 @@ def _q3_items(group: str, shots: int, backend) -> list[PlannedCircuit]:
             for lam in (2, 3):
                 for sc in noise_scaled_circuits(c, lam, "insert", instances=k, seed=1000 * lam + n):
                     items.append(_planned(group, f"ladder lam={lam} t={t} i{sc.instance}", sc.circuit,
-                                          max(shots // k, 1), backend,
+                                          shots // k, backend,
                                           {**meta, "lam": lam, "method": "insert", "instance": sc.instance}))
     if arm == "ladder":
         t = NS.fold_plan_time
@@ -261,12 +279,22 @@ def _quote_all(plan: Plan, hw, quote_fn) -> tuple[float, list[tuple[list[Planned
                 [i.circuit for i in items], shots, project=hw.nexus_project, device=hw.syntax_checker
             )
         )
+        if len(rows) != len(items):
+            raise DriverRefused(f"SC returned {len(rows)} quotes for {len(items)} circuits")
         calls.append((items, rows))
         total += sum(float(r["quoted_hqc"]) for r in rows if _finite_pos(r.get("quoted_hqc")))
     return total, calls
 
 
 def _emulator_gates(plan: Plan, hw, approval) -> None:
+    if hw.nexus_tier != "emulator":
+        raise DriverRefused(
+            f"hardware.nexus_tier is {hw.nexus_tier!r}: the emulator tier is selected in config only "
+            "(an explicit tier argument may step down, never up)"
+        )
+    _limit(hw, "emulator_max_qubits", HARD_MAX_QUBITS)
+    _limit(hw, "max_shots_per_job", HARD_MAX_SHOTS)
+    _limit(hw, "max_hqc_per_shot", HARD_MAX_HQC_PER_SHOT)
     if hw.allow_hardware is not True:
         raise DriverRefused("allow_hardware is not True: set it consciously in config (SCOPE §5)")
     if approval != NEXUS_APPROVAL:

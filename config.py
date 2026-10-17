@@ -53,7 +53,7 @@ class HardwareConfig:
     le_device: str = "H2-1LE"
     syntax_checker: str = "H2-1SC"
     emulator_device: str = "H2-1E"
-    nexus_project: str = ""          # Nexus project name; credentials never live in this repo
+    nexus_project: str = "tfim-qec-h2"  # Nexus project name (not a credential); the tier stays dry-run
     # Server-side optimisation OFF: the folded noise-scaling circuits are silently cancelled by
     # TKET at levels 1-2 (D-NS6), so every submission is compiled at level 0 and sent no_opt.
     no_opt: bool = True
