@@ -18,7 +18,7 @@ guppylang 1.1.2, hugr 0.18.8.
 |---|---|---|---|---|
 | QI-1 | install conflict | `pytket-quantinuum[pecos]` cannot co-install with selene-sim 0.3.x | no | worked around (2 venvs) |
 | QI-2 | behaviour vs docs | the local emulator ignores `noisy_simulation` and is always noiseless | no | worked around |
-| QI-3 | scope | Nexus HUGR/Guppy is Helios-only in qnexus 0.51.1; H2 takes pytket/QIR | no | design consequence |
+| QI-3 | scope | qnexus HUGR client is Helios-typed; docs say H2 support is "limited" | no | design consequence, untested on H2 |
 | QI-4 | deprecation | `hugr.cost()` deprecated for `cost_confidence()` | no | note |
 | QI-5 | bug (source) | `circuits.cost` builds `"H2-1ESC"` from an E config (`strip` result discarded) | no | worked around |
 | QI-6 | limitation | Selene's HUGR-QIS compiler rejects pytket `XXPhase` | no | worked around |
@@ -27,6 +27,7 @@ guppylang 1.1.2, hugr 0.18.8.
 | QI-9 | convention | PECOS depolarizing parameters are *average* error, scaled ×3/2 (1q) and ×5/4 (2q), and charged per compiled *native* op | no | accounted |
 | QI-10 | known upstream | pytket→PHIR drops classical bits no command touches | yes (cited in source) | worked around by them |
 | QI-11 | behaviour | PECOS charges `p_init` only on explicit Init ops, not on the initial state | no | worked around |
+| QI-12 | docs | emulator pages disagree on the Nexus-hosted H2-Emulator width (26 vs 20); "LE" names two different things | no | note |
 
 ---
 
@@ -61,19 +62,22 @@ guppylang 1.1.2, hugr 0.18.8.
 - **Also seen:** `quantum-pecos 0.8.0.dev8 does not provide the extra 'wasmtime'` warning on install of
   the `[pecos]` extra (cosmetic).
 
-## QI-3 — Guppy/HUGR programs run on Helios, not H2, in qnexus 0.51.1
-- **Component:** qnexus 0.51.1 (`qnexus.hugr`, `qnexus.models.HeliosConfig`).
-- **Observation [established, source]:** `hugr.cost()` / `cost_confidence()` take
-  `system_name: Literal["Helios-1", "Helios-2"]` and submit with `HeliosConfig`; the HUGR upload docstring
+## QI-3 — Guppy/HUGR is typed for Helios in qnexus 0.51.1; the docs call H2 support "limited"
+- **Component:** qnexus 0.51.1 (`qnexus.hugr`, `qnexus.models.HeliosConfig`); Quantinuum workflow page.
+- **Observation [established, source and docs]:** `hugr.cost()` / `cost_confidence()` take
+  `system_name: Literal["Helios-1", "Helios-2"]` and submit with `HeliosConfig`; the upload docstring
   says "HUGR support in Nexus is subject to change. Until full support is achieved any programs uploaded
-  may not work in the future." H2 devices are reached through `QuantinuumConfig(device_name="H2-…")`,
-  which takes pytket circuits / QIR.
-- **Impact:** answers open item HW-3 in the direction "no": our Guppy program (mid-circuit measure,
-  reset, *feedforward discard*) cannot be the H2 submission. The H2 path is one pytket circuit with
-  mid-circuit measure/reset and the discard applied classically afterwards (`src/h2_circuits.py`). HQC is
-  charged on gate counts, so nothing is lost on cost. The in-program feedforward is not tested on H2.
-- **[unverified]:** that Nexus really rejects HUGR for an H2 target; only the client source was read.
-  The free syntax checker can confirm.
+  may not work in the future." The docs' workflow page says Guppy "is primarily designed for execution
+  on Quantinuum Helios, but also has limited backwards compatibility on System Model H2", that pytket is
+  "primarily used to program System Model H2", and that "Nexus does not support server-side tket
+  compilation of hugr programs". H2 devices are reached through `QuantinuumConfig(device_name="H2-…")`.
+- **Impact:** open item HW-3 is *not* a clean "no": the client is Helios-typed and the docs promise only
+  limited H2 compatibility. The H2 path here is one pytket circuit with mid-circuit measure/reset and
+  the discard applied afterwards (`src/h2_circuits.py`); for H2 the HQC is charged on all conditional
+  branches regardless, so in-program discard saves no credits anyway. The in-program feedforward is not
+  tested on H2.
+- **[unverified]:** whether Nexus accepts our hugr for an H2 target. The free syntax checker can test it.
+- **Ask upstream:** what "limited backwards compatibility" covers, and a typed H2 route in qnexus.
 
 ## QI-4 — `qnexus.hugr.cost()` is deprecated
 - `hugr.cost()` emits a `DeprecationWarning` pointing to `cost_confidence()` [established, source].
@@ -142,6 +146,18 @@ guppylang 1.1.2, hugr 0.18.8.
 - **Workaround:** `src/h2_backend.run_le` prepends an explicit Reset on every qubit when
   `noise.p_init > 0` (`tests/test_h2_review_fixes.py`).
 - **Ask upstream:** document it, or charge the initial allocation.
+
+## QI-12 — Emulator documentation inconsistencies
+- **Component:** docs.quantinuum.com, "Quantinuum Emulators" (H2 training page), read 2026-10-17.
+- **Observation [established, docs]:** its table lists the Nexus-hosted `H2-Emulator` at **26** qubits
+  (state-vector and stabilizer) in seconds, while the same page's text says "Nexus-hosted emulators are
+  capped at 20-qubits" and "The Emulator targets with suffix Emulator or LE are hosted on nexus, but
+  with the total number of qubits capped at 20-qubits". The same page also states the noise-free `…LE`
+  targets are *hosted in Nexus*, whereas the `H2-1LE` that `pytket-quantinuum[pecos]` runs is a
+  separate **offline** emulator on the user's machine (QI-2); both are called "LE".
+- **Impact:** none on the plan (we use the cloud E emulators, 32 qubits, and the offline LE); it could
+  mislead anyone choosing a target by width. **Ask upstream:** reconcile 26 vs 20, and name the offline
+  and hosted noiseless emulators differently.
 
 ---
 

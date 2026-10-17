@@ -5,16 +5,17 @@ HQC on the Nexus usage page are for **H2-1E / H2-2E (emulators)**; the syntax ch
 H2-2SC) are free and unlimited, and no real-hardware allowance is shown [established, usage page].
 
 How the numbers are made: `scripts/h2_hqc_budget.py` compiles each planned circuit offline to H2's
-native gates at TKET level 0 and applies HQC = 5 + C·(N1q + 10·N2q + 5·Nm)/5000 [established,
-research/07] with Nm = qubit preparations + measurements + resets; output `data/h2_hqc_budget.txt`.
-Rz is charged as a one-qubit gate (conservative). Shots per point are [assumed] 1000 (Q1, Q4) and
+native gates at TKET level 0 and applies HQC = 5 + C·(N1q + 10·N2q + 5·Nm)/5000 [established: Quantinuum
+workflow page, read 2026-10-17, "all execute jobs submitted to Quantinuum Systems consume HQCs"]
+with Nm = the initial implicit state preparation + measurements + resets [established, same page];
+output `data/h2_hqc_budget.txt`. Rz is charged as a one-qubit gate (conservative). Shots per point are [assumed] 1000 (Q1, Q4) and
 500 (Q3); cost is linear in shots plus 5 HQC per circuit. Randomized compiling (D-RC) splits the
 shots over 20 twirled circuits, each paying the 5-HQC overhead. **[unverified] until the free SC
-quotes them:** whether H2 charges Rz, and whether the emulator charge equals this formula.
+quotes them:** whether H2 charges Rz (the page does not say). A job's quote is returned with its result.
 
 ## What fits the emulator (the constraint that reshaped the plan)
 H2-1E / H2-2E: **32 qubits state-vector, 56 stabilizer (Clifford only)**; state-vector below 28
-recommended [Quantinuum docs, via search excerpts; re-read the page; see DECISIONS.md OPEN-4]. So the
+recommended [established: Quantinuum emulator pages, read 2026-10-17; see DECISIONS.md OPEN-4]. So the
 first draft's 6×8 Q1 lattice (52 qubits) and the 6×6 Q3 arm (36/40) **cannot run on the emulator**.
 
 ## Runs and costs (compiled, 1000 shots per point, Rz counted)

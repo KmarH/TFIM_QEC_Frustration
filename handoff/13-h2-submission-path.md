@@ -15,8 +15,8 @@
   - Test-first deviation: implementation first, then hidden from the blind test writer (the tests errored on import). Two *test* assertions were wrong and the project lead approved fixing them (old circuits hash `7155f2c8…7155`).
 
 **What was found [established/measured; details in `docs/quantinuum_issues.md`]**
-- Guppy/HUGR on Nexus is Helios-only in qnexus 0.51.1, so H2 gets one pytket circuit with mid-circuit measure/reset and a classical discard (HW-3: answered "no" pending the SC).
-- The Nexus H2 emulator is ≤ 32 qubits state-vector (56 stabilizer, Clifford only) [docs excerpt; page blocked here, re-read it]. The 6×6 arm and the 6×8 Q1 lattice cannot run on it (OPEN-4); Q1 headline recommended at 4×5.
+- The qnexus 0.51.1 HUGR client is Helios-typed and Quantinuum's docs call Guppy-on-H2 "limited backwards compatibility", so H2 gets one pytket circuit with mid-circuit measure/reset and a classical discard (HW-3: not a clean "no"; the free SC can test it).
+- The Nexus H2 emulator is ≤ 32 qubits state-vector, 56 stabilizer for Clifford-only circuits [established: Quantinuum emulator pages, read in full 2026-10-17]. The 6×6 arm and the 6×8 Q1 lattice cannot run on it (OPEN-4); Q1 headline recommended at 4×5.
 - The local emulator is always ideal (QI-2); `pytket-quantinuum[pecos]` conflicts with selene-sim 0.3.4 (QI-1, hence `.venv-le`); a qnexus cost-device bug (QI-5).
 
 **Results (`data/h2_le_validation.txt`)**
@@ -32,7 +32,7 @@
 4. Sonnet runs on OVM/OLS: no session was reachable from here. Still to run there: `.venv-le` build, the full and LE suites (cross-platform check), `scripts/run_h2_le.py --slow` (Steane, concatenated).
 
 **Next**
-1. Kiro: qc-reviewer on `review/16` + this brief → qc-researcher: read the H2-1E emulator page (limits, default noise p2 = 0.00128 / p1 = 2.9e-5 [unverified], charge) → qc-annotator.
+1. Kiro: qc-reviewer on `review/16` + this brief → qc-researcher: the emulator pages are now read (limits; default noise p2 = 1.05e-3 H2-1E, 1.29e-3 H2-2E; HQC formula): check whether the emulator's p2 and its angle-dependent ZZ error feed G2 (HW-1) and the η/ε prior in `research/06` → qc-annotator.
 2. Phase 2 (Q3): translate the triangular bare/Gauss circuits and the noise-scaling ladder with `h2_circuits`; compile at level 0, `no_opt`.
 3. Report new Quantinuum-stack problems in `docs/quantinuum_issues.md` as found.
 

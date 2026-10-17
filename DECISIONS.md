@@ -438,11 +438,11 @@ checks circuit logic, post-selection, wiring), plus gate counts, the O0 fold-sur
 HQC cost. **What does not:** a noiseless or noisy 6×6 *physics* curve.
 
 **The Nexus emulator has its own width limit, and it is below 6×6.** Quantinuum's emulator
-documentation (docs.quantinuum.com, "System Model H2 Emulators", read as search-result excerpts on
-2026-10-17; the page itself was blocked by this container's network policy, so re-read it
-directly) lists for **H2-1E / H2-2E: 32 qubits in state-vector mode, 56 in stabilizer mode**, and
-advises state-vector runs below 28 qubits. Stabilizer mode is Clifford-only. [unverified: confirm on
-the page; confirm with a free H2-1SC acceptance test.] So, for non-Clifford circuits:
+documentation (docs.quantinuum.com, "System Model H2 Emulators" and "Quantinuum Emulators", read in
+full on 2026-10-17 [established]) lists for **H2-1E / H2-2E: 32 qubits in state-vector mode, 56 in
+stabilizer mode**, advises state-vector runs below 28 qubits, and says the stabilizer emulator is for
+circuits "involving only Clifford operations". [The free H2-1SC acceptance test is still worth running
+to confirm the width the server accepts.] So, for non-Clifford circuits:
 
 | run | qubits | H2-1E state vector (≤ 32)? |
 |---|---|---|

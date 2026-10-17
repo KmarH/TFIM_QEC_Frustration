@@ -20,19 +20,36 @@ ever used, is a third label. Never mix them.
 The Nexus usage page (2026-10-17) shows SC unlimited and **50,000 HQC on H2-1E/H2-2E**; it shows no
 real-hardware allowance [established from the screenshot].
 
-## What the emulators can run [from Quantinuum's docs, via search excerpts; re-read the page]
-- **H2-1E / H2-2E: 32 qubits state-vector, 56 stabilizer (Clifford only)**; state-vector runs below 28
-  qubits are recommended. So **non-Clifford circuits above 32 qubits cannot run on the emulator at
-  all**. See DECISIONS.md OPEN-4 for what that does to the 6×6 arm and the 6×8 Q1 lattice.
+## What the emulators can run [established: docs.quantinuum.com, "System Model H2 Emulators" and "Quantinuum Emulators", read in full 2026-10-17]
+- **H2-1E / H2-2E: 32 qubits state-vector, 56 stabilizer.** The stabilizer emulator is "for circuits
+  involving only Clifford operations" (`QuantinuumConfig(simulator="stabilizer")`; cloud E emulators
+  only). State vector is the default; Quantinuum recommends **fewer than 28 qubits** (slowdown from 25).
+  So **non-Clifford circuits above 32 qubits cannot run on the emulator at all**. See DECISIONS.md
+  OPEN-4 for what that does to the 6×6 arm and the 6×8 Q1 lattice.
+- The Nexus-*hosted* emulators (H2-Emulator, and the noiseless `…LE` targets) are capped at 20 qubits
+  per the text (26 per the table: QI-12), bill in seconds, not HQC, and are a different thing from the
+  offline pecos "LE" this repo runs locally (QI-12).
+- **The emulator's noise is not this repo's Pauli model.** H2-1E defaults (2025-07-16 table): p1 =
+  1.89×10⁻⁵, p2 = 1.05×10⁻³, p_meas = 6×10⁻⁴ / 1.39×10⁻³ (0 / 1 outcome), p_init = 4×10⁻⁵, plus
+  crosstalk, spontaneous emission / leakage, linear and (in state-vector mode) **coherent quadratic
+  dephasing**, and a two-qubit error that is *asymmetric depolarizing* with an **angle-dependent**
+  probability for arbitrary-angle ZZ gates (the `przz` scaling). H2-2E: p1 = 7.3×10⁻⁵,
+  p2 = 1.29×10⁻³. These are Quantinuum's emulator model, not measurements of ours; the noise can be
+  overridden with `error_params` or turned off with `noisy_simulation=False`. This is why randomized
+  compiling matters on the emulator and why a Pauli-channel prediction from this repo is a different
+  model, not a forecast [derived].
 - The local emulator (H2-1LE) is an ideal state vector here (QI-2), limited by this host's memory.
 
 ## Why one pytket circuit, not the Guppy program
-H2 is reached through `QuantinuumConfig` with pytket circuits / QIR. Nexus's Guppy/HUGR route is
-**Helios-only** in qnexus 0.51.1 (`docs/quantinuum_issues.md` QI-3), so the Guppy program's in-program
-feedforward discard does not run on H2. `src/h2_circuits.py` authors the same programs as a single
+H2 is reached through `QuantinuumConfig` with pytket circuits / QIR, and pytket is "primarily used to
+program System Model H2". The qnexus 0.51.1 HUGR client is typed for Helios only, and Quantinuum's
+workflow page says Guppy has "limited backwards compatibility on System Model H2" and that Nexus does
+not server-side-compile hugr (QI-3). So the Guppy program's in-program feedforward discard is not the
+H2 route here [unverified whether H2 would accept it; the free SC can test]. `src/h2_circuits.py` authors the same programs as a single
 circuit: syndrome bits measured **mid-circuit** into registers (measure + reset on ancilla and flag),
 every shot run to the end, the discard applied afterwards by the same `accepted()` predicate. HQC is
-charged on static gate counts, so nothing is lost on cost. Randomized compiling (D-RC) is a classical
+charged on gate counts across ALL conditional branches regardless of which run [established: Quantinuum
+workflow page], so skipping work after a detection would not have saved credits either. Randomized compiling (D-RC) is a classical
 frame correction applied in `shot_records`, exactly as `backends_qc._local_shot_twirled`. The other
 codes' round-0 feedforward is emitted as real conditional gates.
 
@@ -54,7 +71,6 @@ once interactively on your own machine. The container's network policy must allo
 
 ## What is still [unverified] (to be settled by the first SC run, then logged in quantinuum_issues.md)
 - That Nexus accepts the circuits as authored (mid-circuit reset, conditional gates, `no_opt`).
-- Whether Rz counts toward HQC on H2 (the estimate counts it, conservatively), and the exact emulator
-  charge (the estimate is the standard formula, not an emulator-specific one).
-- The H2-1E width limits above, and its default noise model (the docs excerpt lists p2 = 0.00128,
-  p1 = 2.9×10⁻⁵ [unverified]).
+- Whether Rz counts toward HQC on H2. The page defines N1q as "the number of 1-qubit gates" and
+  N2q as the number of *native* 2-qubit gates without saying; the estimate counts Rz, conservatively.
+  (The HQC formula itself, and Nm including the initial implicit preparation, are now [established].)
