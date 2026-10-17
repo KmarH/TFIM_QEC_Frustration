@@ -38,7 +38,7 @@ Why two environments: the H2 local emulator (`pytket-quantinuum[pecos]`) cannot 
 ([`docs/quantinuum_issues.md`](docs/quantinuum_issues.md), QI-1). The main suite skips the emulator tests;
 `.venv-le` runs them.
 
-The suites take about 7 minutes (main) and 4 minutes (emulator) on 4 cores. The counts are large because many
+The suites take about 5-7 minutes (main) and 4 minutes (emulator) on 4 cores. The counts are large because many
 tests are parametrized cases of one check (for example one test runs 21 times over a table of ways to break a
 spending gate).
 
