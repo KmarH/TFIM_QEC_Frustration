@@ -95,7 +95,7 @@ def test_hosted_uploads_circuits_and_passes_references(fake, tmp_path):
     kw = fake.calls[0]
     assert [p.circuit for p in kw["programs"]] == cs  # references, not raw circuits
     assert kw["n_shots"] == [25, 25]
-    assert kw["backend_config"].kwargs == {"device_name": "H2-1LE"}
+    assert kw["backend_config"].kwargs == {"device_name": "H2-1LE", "no_opt": True}
     assert "max_cost" not in kw
     assert "LE-hosted" in (tmp_path / "l.jsonl").read_text()
 
