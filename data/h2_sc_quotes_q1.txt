@@ -1,0 +1,31 @@
+# H2-1SC quotes vs offline estimates -- 2026-10-17 11:29  (1000 shots, free tier)
+# quote = Nexus syntax-checker HQC cost; est(Rz) / est(no Rz) = scripts/h2_hqc_budget.py formula.
+group    run                                                step qubits   est(Rz)  est(noRz)     quote  status
+Q1       Iceberg 4x5, RC   (recommended headline lattice)      1     24    758.60     656.80    656.80  accepted
+Q1       Iceberg 4x5, RC   (recommended headline lattice)      2     24   1152.00     989.00    989.00  accepted
+Q1       Iceberg 4x5, RC   (recommended headline lattice)      3     24   1544.60    1320.20   1320.20  accepted
+Q1       Iceberg 4x5, RC   (recommended headline lattice)      4     24   1938.20    1653.60   1653.60  accepted
+Q1       Iceberg 4x5, RC   (recommended headline lattice)      5     24   2330.20    1985.80   1985.80  accepted
+Q1       Iceberg 4x5, RC   (recommended headline lattice)      6     24   2723.80    2318.80   2318.80  accepted
+Q1       bare 4x5                                              1     20    137.00     137.00    137.00  accepted
+Q1       bare 4x5                                              2     20    225.00     225.00    225.00  accepted
+Q1       bare 4x5                                              3     20    313.00     313.00    313.00  accepted
+Q1       bare 4x5                                              4     20    401.00     401.00    401.00  accepted
+Q1       bare 4x5                                              5     20    489.00     489.00    489.00  accepted
+Q1       bare 4x5                                              6     20    577.00     577.00    577.00  accepted
+Q1-alt   Iceberg 4x6, RC                                       1     28    895.40     774.60    774.60  accepted
+Q1-alt   Iceberg 4x6, RC                                       2     28   1360.80    1166.60   1166.59  accepted
+Q1-alt   Iceberg 4x6, RC                                       3     28   1825.60    1560.00   1560.00  accepted
+Q1-alt   Iceberg 4x6, RC                                       4     28   2290.40    1953.20   1953.20  accepted
+Q1-alt   Iceberg 4x6, RC                                       5     28   2755.60    2347.20   2347.19  accepted
+Q1-alt   Iceberg 4x6, RC                                       6     28   3222.40    2743.20   2743.20  accepted
+Q1-alt   bare 4x6                                              1     24    163.40     163.40    163.40  accepted
+Q1-alt   bare 4x6                                              2     24    269.00     269.00    269.00  accepted
+Q1-alt   bare 4x6                                              3     24    374.60     374.60    374.60  accepted
+Q1-alt   bare 4x6                                              4     24    480.20     480.20    480.20  accepted
+Q1-alt   bare 4x6                                              5     24    585.80     585.80    585.79  accepted
+Q1-alt   bare 4x6                                              6     24    691.40     691.40    691.40  accepted
+
+Totals incl. the +5 per extra RC circuit (est Rz | est no Rz | quoted):
+  Q1            13159 |    11636 |    11636
+  Q1-alt        15485 |    13679 |    13679
