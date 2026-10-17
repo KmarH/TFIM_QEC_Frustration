@@ -70,6 +70,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--slow", action="store_true")
     ap.add_argument("--shots", type=int, default=4000)
+    ap.add_argument("--out", default=None, help="output file (default data/h2_le_validation.txt)")
     a = ap.parse_args()
     backend = offline_compile_backend(CONFIG.hardware.le_device)
     lines = []
@@ -175,7 +176,7 @@ def main():
         z2, se = z2_from_logical(bare_z(run_le(compile_for_h2(c, backend), cb, a.shots, SEED, nz)))
         z2l, sel = z2_from_logical(run_bare_local(spec, 3, a.shots, nz, SEED, 24).astype(float))
         log(f"bare p2={p2:g} step 3: LE Z2 {z2:.4f}+-{se:.4f} | local-sim Z2 {z2l:.4f}+-{sel:.4f}")
-    out = os.path.join(REPO, CONFIG.data_dir, "h2_le_validation.txt")
+    out = a.out or os.path.join(REPO, CONFIG.data_dir, "h2_le_validation.txt")
     with open(out, "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines) + "\n")
     print(f"wrote {out}")

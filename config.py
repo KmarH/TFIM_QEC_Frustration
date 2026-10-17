@@ -468,6 +468,16 @@ class NoiseScalingConfig:
     fold_plan_time: float = 2.0       # [assumed] D2: the ONE folded lam=3 check sits at this t
     plan_shots: int = 500              # [assumed] per circuit per lam point, pre post-selection
     plan_slope: float = 0.005          # [assumed] smallest conditioned slope dO/dlam_eff to resolve
+
+    # --- Phase 2 (handoff/14): the Q3 circuits for H2, shrunk to what the emulator can run (OPEN-4,
+    # decided 2026-10-17: 6x6 stays a Stim-only design; the ladder is built at 3x4, the bare size
+    # story at 3x6). Times are in units of 1/|J|; a time t is round(t / q3.dt) Trotter steps, at the
+    # working point q3.noisy_h, q3.J, q3.dt. src/h2_q3.py, src/h2_driver.py groups "Q3-*".
+    h2_bare_times: tuple = (1, 2, 3, 4, 5, 6, 7, 8)     # 3x4 flippable, bare (Gauss post-selection is classical)
+    h2_iceberg_times: tuple = (1, 2, 3, 4)               # 3x4 flippable Iceberg, t <= 4 only (survival)
+    h2_ladder_times: tuple = (1, 2, 3)                   # 3x4 lambda ladder (bare), = plan_times
+    h2_bare36_times: tuple = (1, 2, 3)                   # 3x6 3-sublattice, bare
+    insert_instances: int = 10                           # independent Pauli-insertion draws per (lambda>1, t) point; shots split over them
                                        # at z_min (3x4 cond drift ~0.008 at the prior; 6x6 rates 3x)
 
 

@@ -29,6 +29,7 @@ guppylang 1.1.2, hugr 0.18.8.
 | QI-11 | behaviour | PECOS charges `p_init` only on explicit Init ops, not on the initial state | no | worked around |
 | QI-13 | deprecation | latest qnexus warns an endpoint "will be deleted on 30 Nov 2025", a date already past; it still works | no | note |
 | QI-14 | API/naming | `start_execute_job` takes uploaded refs; raw pytket circuits crash with `AttributeError: ... 'id'` despite the `accept_circuits_for_programs` decorator | no | worked around |
+| QI-15 | docs | the H2 "Hardware Credit Limitations" text (50 HQC/shot, 10,000 shots/job) does not say whether emulators share it, and gives no cost formula | no | note |
 | QI-12 | docs | emulator pages disagree on the Nexus-hosted H2-Emulator width (26 vs 20); "LE" names two different things | no | note |
 
 ---
@@ -183,6 +184,20 @@ guppylang 1.1.2, hugr 0.18.8.
   `qnx.circuits.upload` and pass the returned `CircuitRef`s (`src/h2_backend._upload_circuits`).
 - **Ask upstream:** upload raw circuits inside `start_execute_job` as the decorator's name suggests, or
   raise a clear `TypeError`; the signature type hint (`ExecutionProgram`) is right but the error is not.
+
+## QI-15 — HQC limits are documented for "hardware" only; the emulator case and the cost formula are not on that page
+- **Component:** docs.quantinuum.com, "H2 Operation" (`systems/user_guide/hardware_user_guide/h2.html`), read 2026-10-17.
+- **Observation [established, docs]:** "Each shot submitted to hardware has a 50 HQC hard limit." and "Each job
+  submitted to hardware is limited to 10,000 shots (500,000 HQC hard limit)." The page does not say whether the
+  Nexus emulators (H2-1E/2E) share these limits, does not mention `max_cost`, and gives no HQC formula (the formula
+  is on the workflow page, `HQC = 5 + C(N1q + 10 N2q + 5 Nm)/5000`).
+- **Impact:** `src/h2_driver.py` applies both limits to the emulator conservatively (`HardwareConfig.max_shots_per_job`,
+  `max_hqc_per_shot`); our circuits are about 0.02 HQC per shot, far below 50. **Ask upstream:** state whether the
+  limits apply to emulators.
+- **Also [measured, 2026-10-17, via the SC quotes]:** conditional Rz gates are not charged either: after counting
+  conditional gates by the gate they wrap, the offline Rz-free estimate equals the server quote to the cent for all 9
+  Steane / five-qubit / concatenated circuits (previously up to 0.5% off). Undocumented; the docs do not say Rz is free.
+- **Upstream:** no   **Status:** note
 
 ---
 

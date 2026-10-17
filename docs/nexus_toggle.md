@@ -11,6 +11,29 @@ Every noisy number from the local emulator or Selene is a classical prediction u
 model. A number from Nexus H2-1E is an *H2 emulator* result and must be labelled so; real hardware, if
 ever used, is a third label. Never mix them.
 
+## How to switch the emulator on (the only step left once everything else is validated)
+
+The run driver (`scripts/run_h2_nexus.py`, `src/h2_driver.py`) reads its tier from `config.py`
+(`CONFIG.hardware.nexus_tier`: `"dry-run"` default, `"sc"`, `"hosted-le"`, `"emulator"`). To run a group
+on **H2-1E** (this spends HQC, so only on the project lead's per-run go):
+
+1. In `config.py`, `HardwareConfig`: `nexus_tier = "emulator"`, `allow_hardware = True`,
+   `max_cost_hqc = <cap in HQC>` (the free SC quote of the group must fit under it), `nexus_project = "<name>"`.
+2. Log in on this container: `qnx.auth.login()` (device code approved in the browser).
+3. Run it with the per-run token, which a config edit alone can never replace:
+   `.venv/bin/python -I scripts/run_h2_nexus.py --group bare-2x2-step1 --approval "I approve spending HQC on this run"`.
+4. The driver builds and compiles the circuits, **re-quotes them on the free SC**, refuses if the quote is
+   above the cap, and only then submits with `estimated_hqc` = the server quote. It also refuses a width
+   above `emulator_max_qubits` (32), shots above `max_shots_per_job` (10,000) and a per-shot cost above
+   `max_hqc_per_shot` (50) [established: docs.quantinuum.com "H2 Operation", 2026-10-17; the page does not
+   say whether emulators share these limits, so they are applied to them]. Every job is recorded in
+   `runs/nexus_ledger.jsonl`.
+5. The CLI cannot select the emulator tier itself (`--tier` takes only `dry-run`, `sc`, `hosted-le`), and
+   real hardware (H2-1/H2-2) is refused by this driver outright.
+
+Recommended order, each step its own go: bare 2x2 step 1 (about 23 HQC) → G1 → compare with the local
+emulator, Selene and Stim → Q1 (4x5) → Q4 → Q3.
+
 ## The tiers (what each costs, what gates it)
 
 | tier | devices | cost | how | gate |
