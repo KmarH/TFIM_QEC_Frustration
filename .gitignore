@@ -44,3 +44,6 @@ review-rc/
 .venv-le/
 # Nexus submission ledger holds job ids/costs from real runs
 runs/
+
+# Team report (Spanish): shared as a PDF, not kept in the repository
+docs/report/reporte_tecnico.*

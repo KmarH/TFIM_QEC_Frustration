@@ -16,7 +16,7 @@ Decisions taken this session (the project lead): **OPEN-4 → DECIDED-6** (Q1 la
   `no_opt=True` (server accepted it live); `HardwareConfig` fields `nexus_tier`, `emulator_max_qubits`, `max_shots_per_job`, `max_hqc_per_shot`.
 - `scripts/h2_sc_quotes_q3.py`, `scripts/h2_hosted_q3.py`, `scripts/cross_platform_check.sh`, `run_h2_le.py --out`.
 - Docs: `docs/h2_budget.md` (Q3 quoted, limits), `docs/nexus_toggle.md`, `docs/quantinuum_issues.md` (QI-15), `DECISIONS.md` (DECIDED-6),
-  `CLAUDE.md` (Claude Code is the only agent), `review/17-h2-finish.md`, report `docs/report/reporte_tecnico.tex` (Spanish, for the team).
+  `CLAUDE.md` (Claude Code is the only agent), `review/17-h2-finish.md`, and the Spanish team report (shared separately as a PDF; not in the repository).
 
 ## Results [measured, all free tier]
 - **Q3 SC quotes** (`data/h2_sc_quotes_q3.txt`, 500 shots/point): Q3-bare 5,669.6 · Q3-iceberg 5,283.2 · Q3-ladder 4,093.2 · Q3-bare-3x6 1,453.2 =
