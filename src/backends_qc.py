@@ -21,6 +21,7 @@ model, never an H2 result.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
@@ -519,7 +520,7 @@ def _nexus_preflight(spec: IcebergTFIM, n_steps: int, shots: int, *, allow_hardw
             "nexus backend refused: missing the per-run approval token. Pass "
             f"approval={NEXUS_APPROVAL!r} for THIS run. allow_hardware alone is not enough: "
             "SCOPE §5 requires both, so that no loop or retry can spend credits unattended.")
-    if not max_cost_hqc or max_cost_hqc <= 0:
+    if not max_cost_hqc or not math.isfinite(max_cost_hqc) or max_cost_hqc <= 0:
         raise ValueError(
             "nexus backend refused: HardwareConfig.max_cost_hqc must be a positive HQC ceiling. "
             "It is passed to pytket-quantinuum as `max_cost`, which the backend enforces "

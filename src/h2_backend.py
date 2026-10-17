@@ -20,12 +20,22 @@ always noiseless -- hence `run_le(noise=...)` drives the same Emulator with a PE
 DepolarizingErrorModel instead; and PECOS scales its p1/p2 by 3/2 and 5/4 (average -> total error),
 so our rates (total Pauli-error probability, src.backends_qc.Noise) are pre-divided to match.
 Every noisy LE number is a classical prediction under an ASSUMED model, not an H2 result.
+
+Two differences from src.backends_qc's local-sim, found in review (review/16), that the user of a
+noisy LE number must know:
+  p1      is charged by PECOS on every COMPILED native one-qubit op, R1XY and Rz alike (a twirled
+          2-site circuit: 272 native ops against 52 authored H gates [measured]); local-sim charges
+          only the authored H and leaves twirl Paulis free. So at p1 > 0 the LE is much noisier
+          than local-sim, and randomized compiling is NOT a no-op on it (QI-9). p2 and pm agree.
+  p_init  is charged on the initial state here too (explicit Resets added, QI-11), as in local-sim.
 """
 
 from __future__ import annotations
 
 import json
+import math
 import os
+import sys
 import time
 from collections.abc import Sequence
 from pathlib import Path
@@ -34,6 +44,8 @@ from types import SimpleNamespace
 import numpy as np
 from pytket import Bit, Circuit
 
+from config import CONFIG
+from src.backends import MemoryCeilingError
 from src.backends_qc import NEXUS_APPROVAL, Noise, _nexus_preflight
 
 LE_DEVICES = frozenset({"H2-1LE", "H2-2LE"})
@@ -41,12 +53,17 @@ SC_DEVICES = frozenset({"H2-1SC", "H2-2SC"})
 E_DEVICES = frozenset({"H2-1E", "H2-2E"})
 HW_DEVICES = frozenset({"H2-1", "H2-2"})
 
-LEDGER = Path("runs") / "nexus_ledger.jsonl"
+# anchored to the repo root, not the working directory, so a record is never lost to a cwd change
+LEDGER = Path(__file__).resolve().parent.parent / "runs" / "nexus_ledger.jsonl"
 TOKEN_ENV = "NEXUS_REFRESH_TOKEN"  # a refresh token in the environment, never in the repo
 
 
 class DeviceRefused(PermissionError):
     """A device name outside the tier the called function is allowed to touch."""
+
+
+class LEWidthError(MemoryCeilingError, MemoryError):
+    """The local emulator is an exact state vector: refused above SCOPE §5's ceiling."""
 
 
 def _ledger(entry: dict, path: Path | None = None) -> None:
@@ -55,6 +72,13 @@ def _ledger(entry: dict, path: Path | None = None) -> None:
     p.parent.mkdir(parents=True, exist_ok=True)
     with open(p, "a", encoding="utf-8") as fh:
         fh.write(json.dumps({"time": time.strftime("%Y-%m-%dT%H:%M:%S%z"), **entry}) + "\n")
+
+
+def _ledger_check_writable(path: Path | None = None) -> None:
+    p = Path(path) if path is not None else LEDGER
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with open(p, "a", encoding="utf-8"):
+        pass
 
 
 # --------------------------------------------------------------------------- #
@@ -81,13 +105,30 @@ def offline_compile_backend(device: str = "H2-1LE"):
     H1-1, H2-1 and H2-2, so it falls back to offline H2-1, which has the same native gate set and is
     used here only to compile and count [measured: DeviceNotAvailable for H2-1LE without pecos]."""
     from pytket.extensions.quantinuum import QuantinuumAPIOffline, QuantinuumBackend
+    from pytket.extensions.quantinuum.backends.quantinuum import DeviceNotAvailable
 
     try:
         b = QuantinuumBackend(device, api_handler=QuantinuumAPIOffline())
         _ = b.backend_info  # device lookup is lazy: touch it so the failure is HERE
         return b
-    except Exception:
+    except DeviceNotAvailable:
         return QuantinuumBackend("H2-1", api_handler=QuantinuumAPIOffline())
+
+
+def _with_initial_resets(c: Circuit) -> Circuit:
+    """PECOS applies p_init only to explicit Init ops (mid-circuit resets), never to the initial
+    allocation, whereas src.backends_qc.Noise (and Selene) charge the initial |0...0> too
+    [established, source; measured with a one-qubit test: docs/quantinuum_issues.md QI-11]. A Reset
+    on every qubit first makes the noisy run charge it. Used only when noise.p_init > 0."""
+    out = Circuit()
+    for q in c.qubits:
+        out.add_qubit(q)
+    for b in c.bits:
+        out.add_bit(b)
+    for q in c.qubits:
+        out.Reset(q)
+    out.append(c)
+    return out
 
 
 def _unused_bit_workaround(c: Circuit) -> Circuit:
@@ -116,15 +157,16 @@ def run_le(
     noise None / zero: through QuantinuumBackend's own LE (the real device-shaped path).
     noise given: the same PECOS state-vector Emulator with a DepolarizingErrorModel attached --
     the backend's LE cannot do this (QI-2). Both are exact state vectors, so the practical limit
-    is this machine's memory (about 30 qubits); wider circuits are refused before running."""
+    is SCOPE §5's state-vector ceiling (24 qubits); wider circuits are refused before running."""
     if device not in LE_DEVICES:
         raise DeviceRefused(
             f"run_le only runs local emulators {sorted(LE_DEVICES)}, got {device!r}"
         )
-    if circuit.n_qubits > 30:
-        raise MemoryError(
-            f"{circuit.n_qubits}-qubit state vector is beyond this host's memory "
-            "(SCOPE §5 ceiling is 24); run it on Nexus H2-1E or reduce the lattice"
+    ceiling = CONFIG.ceilings.statevector_max_spins
+    if circuit.n_qubits > ceiling:
+        raise LEWidthError(
+            f"{circuit.n_qubits}-qubit state vector is beyond the SCOPE §5 ceiling of {ceiling}; "
+            "run it on Nexus H2-1E (<= 32 qubits) or reduce the lattice"
         )
     cbits = list(cbits)
     if noise is None or noise.zero:
@@ -137,7 +179,7 @@ def run_le(
     from pytket.backends.backendresult import BackendResult
     from pytket_pecos import Emulator
 
-    circ = _unused_bit_workaround(circuit)
+    circ = _unused_bit_workaround(_with_initial_resets(circuit) if noise.p_init else circuit)
     emu = Emulator(
         circ,
         error_model=DepolarizingErrorModel(pecos_error_params(noise)),
@@ -247,16 +289,27 @@ def submit_nexus(
         SimpleNamespace(n_phys=width),
         0,
         shots,
-        allow_hardware=allow_hardware,
+        allow_hardware=allow_hardware is True,  # a truthy "no" or 1 must not open the gate
         approval=approval,
         max_cost_hqc=max_cost_hqc,
         device=device,
     )
-    if estimated_hqc > max_cost_hqc:
+    # NaN compares False with everything, so every numeric gate is written as a positive test.
+    if isinstance(shots, bool) or not isinstance(shots, int) or shots < 1:
+        raise ValueError(f"nexus submission refused: shots must be an int >= 1, got {shots!r}")
+    if not (math.isfinite(estimated_hqc) and estimated_hqc > 0):
+        raise ValueError(
+            f"nexus submission refused: estimated_hqc must be finite and positive, got "
+            f"{estimated_hqc!r}"
+        )
+    if not estimated_hqc <= max_cost_hqc:
         raise ValueError(
             f"nexus submission refused: estimated {estimated_hqc:.1f} HQC exceeds "
             f"max_cost_hqc {max_cost_hqc:.1f}"
         )
+    # The record must be writable BEFORE anything is spent: a spent job with no record is worse
+    # than a refused one.
+    _ledger_check_writable(ledger)
     qnx = _nexus_login()
     from qnexus.models import QuantinuumConfig
 
@@ -270,19 +323,22 @@ def submit_nexus(
         name=f"{project}-{device}-{int(time.time())}",
         max_cost=max_cost_hqc,
     )
-    _ledger(
-        {
-            "tier": "E" if device in E_DEVICES else "HW",
-            "device": device,
-            "shots": shots,
-            "n_circuits": len(circuits),
-            "estimated_hqc": estimated_hqc,
-            "max_cost_hqc": max_cost_hqc,
-            "approval": NEXUS_APPROVAL,
-            "job_id": str(getattr(job, "id", "")),
-        },
-        ledger,
-    )
+    entry = {
+        "tier": "E" if device in E_DEVICES else "HW",
+        "device": device,
+        "shots": shots,
+        "n_circuits": len(circuits),
+        "estimated_hqc": estimated_hqc,
+        "max_cost_hqc": max_cost_hqc,
+        "approval": NEXUS_APPROVAL,
+        "job_id": str(getattr(job, "id", "")),
+    }
+    try:
+        _ledger(entry, ledger)
+    except OSError:
+        # the job exists and is spending; never let a write error hide its id
+        print(f"LEDGER WRITE FAILED for a SUBMITTED job: {entry}", file=sys.stderr)
+        raise
     return job
 
 

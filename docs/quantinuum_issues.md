@@ -24,8 +24,9 @@ guppylang 1.1.2, hugr 0.18.8.
 | QI-6 | limitation | Selene's HUGR-QIS compiler rejects pytket `XXPhase` | no | worked around |
 | QI-7 | behaviour | Selene's depolarizing model charges `p_1q` on every native rxy and rz | no | accounted |
 | QI-8 | trap | TKET optimisation levels 1–2 cancel folded `ZZ(a)ZZ(-a)ZZ(a)` | no | worked around |
-| QI-9 | convention | PECOS depolarizing parameters are *average* error, scaled ×3/2 (1q) and ×5/4 (2q) | no | accounted |
+| QI-9 | convention | PECOS depolarizing parameters are *average* error, scaled ×3/2 (1q) and ×5/4 (2q), and charged per compiled *native* op | no | accounted |
 | QI-10 | known upstream | pytket→PHIR drops classical bits no command touches | yes (cited in source) | worked around by them |
+| QI-11 | behaviour | PECOS charges `p_init` only on explicit Init ops, not on the initial state | no | worked around |
 
 ---
 
@@ -116,11 +117,31 @@ guppylang 1.1.2, hugr 0.18.8.
   A user passing "the probability of a Pauli error after each gate" gets 1.5× / 1.25× more error.
 - **Handling:** `src/h2_backend.pecos_error_params` pre-divides (p1·2/3, p2·4/5) so the per-gate
   error probability equals this project's `Noise`; checked numerically in `tests/test_h2_backend.py`.
+- **Native-gate charging [measured, review A, 2026-10-17]:** the model charges `p1` on every
+  *compiled native* one-qubit op, R1XY (PhasedX) and **Rz** alike. A twirled 2-site Iceberg circuit
+  compiles to 272 native one-qubit ops (141 PhasedX + 131 Rz) against 52 authored H gates; at
+  p1 = 0.002 the noisy LE accepted 0.381 vs local-sim's 0.804. So `Noise.p1` means "per native op"
+  on the LE and "per authored H" in local-sim, and **randomized compiling is not a no-op on the noisy
+  LE** (twirl Paulis are real native ops). p2 agrees because each CX compiles to exactly one ZZPhase
+  [measured: acceptance 0.391 vs 0.377 at p2 = 0.01]. Whether real H2 charges its virtual Rz is open
+  item HW-4 [unverified].
 
 ## QI-10 — pytket→PHIR drops unused classical bits
 - Cited in pytket-quantinuum's own source as `Quantinuum/pytket-quantinuum#473` [established, source
   comment]; they add redundant `SetBits` as a workaround on their LE path. `run_le`'s noisy path
   (which builds the Emulator itself) repeats that workaround.
+
+## QI-11 — PECOS does not charge `p_init` on the initial state
+- **Component:** quantum-pecos 0.8.0.dev8, `DepolarizingErrorModel.process`.
+- **[established, source; measured, review A]:** the bit-flip after initialisation is applied only to
+  explicit `Init` ops (`op.name in {"init |0>", "Init", "Init +Z"}`), i.e. mid-circuit `Reset`s. A
+  one-qubit test with `p_init = 0.5` gave a flip rate of 0.00 on the initial state and 0.49 after a
+  Reset. The initial allocation of a circuit is therefore noiseless.
+- **Impact:** local-sim and Selene charge initialisation, so at p_init = 0.02 the LE accepted 0.749 vs
+  local-sim's 0.626 (ratio 0.851 = 0.98^8, the 8 initial qubits).
+- **Workaround:** `src/h2_backend.run_le` prepends an explicit Reset on every qubit when
+  `noise.p_init > 0` (`tests/test_h2_review_fixes.py`).
+- **Ask upstream:** document it, or charge the initial allocation.
 
 ---
 

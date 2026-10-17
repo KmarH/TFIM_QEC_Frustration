@@ -59,7 +59,9 @@ def iceberg_z2(spec, backend, n, shots, noise, rc, seed):
         bits = run_le(compile_for_h2(c, backend), lay.cbits, shots // inst, seed + 1000 * i, noise)
         recs += shot_records(bits, lay, prog)
     acc = [accepted(r) for r in recs]
-    zb = np.array([spec.logical_from_bits(r.final[None, :])[0] for r, a in zip(recs, acc, strict=True) if a])
+    zb = np.array(
+        [spec.logical_from_bits(r.final[None, :])[0] for r, a in zip(recs, acc, strict=True) if a]
+    )
     z2, se = z2_from_logical(zb)
     return float(np.mean(acc)), z2, se
 
@@ -156,7 +158,11 @@ def main():
             recs = run(spec, n, a.shots, nz, "local-sim", seed=SEED, max_spins=24)
             ac = [accepted(r) for r in recs]
             zl = np.array(
-                [spec.logical_from_bits(r.final[None, :])[0] for r, k in zip(recs, ac, strict=True) if k]
+                [
+                    spec.logical_from_bits(r.final[None, :])[0]
+                    for r, k in zip(recs, ac, strict=True)
+                    if k
+                ]
             )
             z2l, sel = z2_from_logical(zl)
             log(
