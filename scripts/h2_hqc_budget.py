@@ -115,7 +115,7 @@ def main():
             cnt = native_counts(c)
             width = max(width, cnt["nqubits"])
             k = E.rc_instances if rc else 1
-            tot += k * hqc_estimate(cnt, SHOTS // k)
+            tot += k * hqc_estimate(cnt, SHOTS // k, count_rz=True)
             free += k * hqc_estimate(cnt, SHOTS // k, count_rz=False)
         fits = (
             "no (>32)"

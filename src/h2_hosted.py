@@ -60,7 +60,8 @@ def submit_hosted_le(
     from qnexus.models import QuantinuumConfig
 
     proj = qnx.projects.get_or_create(name=project)
-    cfg = QuantinuumConfig(device_name=device)
+    # no_opt: server-side optimisation cancels folded ZZ(a)ZZ(-a)ZZ(a) (QI-8); the circuits are already compiled at level 0
+    cfg = QuantinuumConfig(device_name=device, no_opt=True)
     refs = _upload_circuits(qnx, circuits, proj, f"{project}-{device}")
     job = qnx.start_execute_job(
         programs=refs,

@@ -58,6 +58,21 @@ class HardwareConfig:
     # TKET at levels 1-2 (D-NS6), so every submission is compiled at level 0 and sent no_opt.
     no_opt: bool = True
     allow_real_hardware: bool = False
+    # Run driver (src/h2_driver.py, scripts/run_h2_nexus.py). nexus_tier picks what the driver does:
+    #   "dry-run"   build + compile + estimate offline; nothing leaves the machine (default)
+    #   "sc"        free H2-1SC quote;  "hosted-le"  free Nexus-hosted noiseless H2-1LE
+    #   "emulator"  H2-1E/2E, SPENDS HQC: needs allow_hardware=True, max_cost_hqc > 0, a nexus_project
+    #               AND the per-run approval token on the command line (a config edit alone never spends).
+    # To switch the emulator on: set nexus_tier="emulator", allow_hardware=True, max_cost_hqc=<cap>,
+    # nexus_project="<name>" here, then pass --approval at run time (docs/nexus_toggle.md).
+    nexus_tier: str = "dry-run"
+    # Limits the driver enforces before any spend. [established, docs.quantinuum.com "H2 Operation",
+    # Hardware Credit Limitations, read 2026-10-17] 50 HQC per shot and 10,000 shots per job on hardware;
+    # the page does not say whether emulators share them, so they are applied conservatively.
+    # [established, emulator pages] H2-1E/2E state vector is <= 32 qubits.
+    emulator_max_qubits: int = 32
+    max_shots_per_job: int = 10_000
+    max_hqc_per_shot: float = 50.0
 
 
 @dataclass

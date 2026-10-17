@@ -55,7 +55,7 @@ def main():
         for n in steps:
             c = compile_for_h2(build(kind, lat, n, rc), backend)
             cnt = native_counts(c)
-            e1 = hqc_estimate(cnt, a.shots)
+            e1 = hqc_estimate(cnt, a.shots, count_rz=True)
             e2 = hqc_estimate(cnt, a.shots, count_rz=False)
             try:
                 q = syntax_check([c], a.shots, project="tfim-qec-h2", device=CONFIG.hardware.syntax_checker)[0]["quoted_hqc"]

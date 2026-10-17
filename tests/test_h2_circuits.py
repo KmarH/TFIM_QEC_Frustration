@@ -426,7 +426,7 @@ def test_native_counts_and_hqc_hand():
     assert nc["nmeas"] == 2 and nc["nreset"] == 1 and nc["nqubits"] == 2
     # HQC = 5 + C (N1q + 10 N2q + 5 Nm)/5000, Nm = nqubits + nmeas + nreset = 2 + 2 + 1 = 5
     # count_rz: N1q = 2 -> 5 + 100*(2 + 10 + 25)/5000 = 5.74 ; without Rz: N1q = 1 -> 5.72
-    assert hqc_estimate(nc, 100) == pytest.approx(5.74, abs=1e-12)
+    assert hqc_estimate(nc, 100) == pytest.approx(5.72, abs=1e-12)  # D-HQC (a): Rz-free default
     assert hqc_estimate(nc, 100, count_rz=True) == pytest.approx(5.74, abs=1e-12)
     assert hqc_estimate(nc, 100, count_rz=False) == pytest.approx(5.72, abs=1e-12)
     assert hqc_estimate(nc, 0) == pytest.approx(5.0, abs=1e-12)

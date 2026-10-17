@@ -235,6 +235,8 @@ def native_counts(c: Circuit) -> dict[str, int]:
     n1 = nrz = n2 = nm = nr = 0
     for cmd in c.get_commands():
         t = cmd.op.type
+        if t == OpType.Conditional:  # a conditional gate is the gate it wraps (cmd.qubits excludes the bits)
+            t = cmd.op.op.type
         if t == OpType.Measure:
             nm += 1
         elif t == OpType.Reset:
@@ -249,11 +251,13 @@ def native_counts(c: Circuit) -> dict[str, int]:
     return {"n1q": n1, "nrz": nrz, "n2q": n2, "nmeas": nm, "nreset": nr, "nqubits": c.n_qubits}
 
 
-def hqc_estimate(counts: dict[str, int], shots: int, count_rz: bool = True) -> float:
+def hqc_estimate(counts: dict[str, int], shots: int, count_rz: bool = False) -> float:
     """Offline HQC estimate, HQC = 5 + C (N1q + 10 N2q + 5 Nm)/5000 [established, research/07],
     with Nm = state preparations (one per qubit) + mid-circuit and final measurements + resets.
-    `count_rz` charges the virtual Rz gates as one-qubit gates (conservative); whether H2 does is
-    [unverified] until a Nexus quote says (docs/h2_budget.md)."""
+    Rz is NOT charged by default: the free H2-1SC quoted 42 circuits and the Rz-free estimate equals
+    the quote to the cent for Iceberg and bare circuits [measured, data/h2_sc_quotes*.txt; DECISIONS
+    D-HQC]. `count_rz=True` charges the virtual Rz gates as one-qubit gates (the older, conservative
+    upper bound, 15-20% too high)."""
     n1 = counts["n1q"] - (0 if count_rz else counts["nrz"])
     nm = counts["nqubits"] + counts["nmeas"] + counts["nreset"]
     return hqc_cost(n1, counts["n2q"], nm, shots)
