@@ -6,7 +6,7 @@ runs/nexus_ledger.jsonl; a circuit the server rejects is reported, not hidden.
 Randomized-compiling runs quote ONE twirled instance at the full shot count; the k-instance cost is
 then quote + 5 (k - 1), because the cost is affine in shots with a 5-HQC per-circuit overhead.
 
-Usage: .venv/bin/python -I scripts/h2_sc_quotes.py [--shots 1000]  ->  data/h2_sc_quotes.txt
+Usage: .venv/bin/python -I scripts/h2_sc_quotes.py [--shots 1000]  ->  data/h2_sc_quotes[TAG].txt
 """
 
 # ruff: noqa: E501  (long report-text lines in log strings)
@@ -34,6 +34,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--shots", type=int, default=1000)
     ap.add_argument("--only", default="", help="comma list of groups to quote (default: all)")
+    ap.add_argument("--tag", default="", help="suffix for the output file, e.g. _q1")
     a = ap.parse_args()
     groups = set(filter(None, a.only.split(",")))
     backend = offline_compile_backend(CONFIG.hardware.le_device)
@@ -71,7 +72,7 @@ def main():
     log("Totals incl. the +5 per extra RC circuit (est Rz | est no Rz | quoted):")
     for g, (x, y, z) in tot.items():
         log(f"  {g:9}{x:>10.0f} | {y:>8.0f} | {z:>8.0f}")
-    out = os.path.join(REPO, CONFIG.data_dir, "h2_sc_quotes.txt")
+    out = os.path.join(REPO, CONFIG.data_dir, f"h2_sc_quotes{a.tag}.txt")
     with open(out, "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines) + "\n")
     print(f"wrote {out}")

@@ -27,6 +27,7 @@ guppylang 1.1.2, hugr 0.18.8.
 | QI-9 | convention | PECOS depolarizing parameters are *average* error, scaled ×3/2 (1q) and ×5/4 (2q), and charged per compiled *native* op | no | accounted |
 | QI-10 | known upstream | pytket→PHIR drops classical bits no command touches | yes (cited in source) | worked around by them |
 | QI-11 | behaviour | PECOS charges `p_init` only on explicit Init ops, not on the initial state | no | worked around |
+| QI-13 | deprecation | latest qnexus warns an endpoint "will be deleted on 30 Nov 2025", a date already past; it still works | no | note |
 | QI-12 | docs | emulator pages disagree on the Nexus-hosted H2-Emulator width (26 vs 20); "LE" names two different things | no | note |
 
 ---
@@ -158,6 +159,15 @@ guppylang 1.1.2, hugr 0.18.8.
 - **Impact:** none on the plan (we use the cloud E emulators, 32 qubits, and the offline LE); it could
   mislead anyone choosing a target by width. **Ask upstream:** reconcile 26 vs 20, and name the offline
   and hosted noiseless emulators differently.
+
+## QI-13 — qnexus 0.51.1 warns about an endpoint deletion date that has already passed
+- **Component:** qnexus 0.51.1 (the latest on PyPI on 2026-10-17), `qnexus.quotas`.
+- **Observation [measured, 2026-10-17]:** `qnx.quotas.get_all()` emits `DeprecationWarning: Your version
+  of qnexus is using a deprecated API endpoint (/api/quotas/v1beta) that will be deleted on Sun, 30 Nov
+  2025 ... After this date your current qnexus version may stop functioning. Please update to a later
+  qnexus version`. Today is after that date, no newer qnexus exists on PyPI, and the call still works.
+- **Impact:** none seen; the warning is misleading for the latest release. **Ask upstream:** update the
+  endpoint or the warning text.
 
 ---
 

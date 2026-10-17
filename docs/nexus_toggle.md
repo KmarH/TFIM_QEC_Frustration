@@ -69,8 +69,11 @@ Nexus needs a login. In a cloud session set a **refresh token** as the environme
 once interactively on your own machine. The container's network policy must allow
 `nexus.quantinuum.com` (and `docs.quantinuum.com` to read the docs).
 
-## What is still [unverified] (to be settled by the first SC run, then logged in quantinuum_issues.md)
+## What was [unverified] and what the first free SC runs settled
 - That Nexus accepts the circuits as authored (mid-circuit reset, conditional gates, `no_opt`).
-- Whether Rz counts toward HQC on H2. The page defines N1q as "the number of 1-qubit gates" and
-  N2q as the number of *native* 2-qubit gates without saying; the estimate counts Rz, conservatively.
-  (The HQC formula itself, and Nm including the initial implicit preparation, are now [established].)
+- (Settled by the first free SC runs, 2026-10-17, `data/h2_sc_quotes.txt`: **Rz is not charged**. The
+  Rz-free estimate equals the server quote exactly for 15 of 18 circuits and is within 0.5% for the
+  3 with conditional gates, while counting Rz would be 15–20% high [measured]. The page itself does not
+  say. The HQC formula and Nm convention are [established] from the docs.)
+- The SC accepted every circuit as authored, including mid-circuit measure + reset and classically
+  conditioned X/Y/Z gates [measured, 18 circuits]. That is a syntax check, not a run.

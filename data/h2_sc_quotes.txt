@@ -1,0 +1,25 @@
+# H2-1SC quotes vs offline estimates -- 2026-10-17 11:14  (1000 shots, free tier)
+# quote = Nexus syntax-checker HQC cost; est(Rz) / est(no Rz) = scripts/h2_hqc_budget.py formula.
+group    run                                                step qubits   est(Rz)  est(noRz)     quote  status
+G1       Iceberg 2x2, plain                                    1      8    195.00     171.00    171.00  accepted
+G1       Iceberg 2x2, plain                                    2      8    286.20     248.60    248.60  accepted
+G1       Iceberg 2x2, plain                                    3      8    377.40     326.20    326.20  accepted
+G1       Iceberg 2x2, RC                                       1      8    202.60     176.40    176.40  accepted
+G1       Iceberg 2x2, RC                                       2      8    297.80     257.60    257.60  accepted
+G1       Iceberg 2x2, RC                                       3      8    392.40     337.00    337.00  accepted
+G1       bare 2x2                                              1      4     23.40      23.40     23.40  accepted
+G1       bare 2x2                                              2      4     33.00      33.00     33.00  accepted
+G1       bare 2x2                                              3      4     42.60      42.60     42.60  accepted
+Q4       Steane 1x2                                            1     16    761.60     645.00    641.79  accepted
+Q4       Steane 1x2                                            2     16   1161.40     981.40    978.20  accepted
+Q4       Steane 1x2                                            3     16   1561.20    1317.80   1314.60  accepted
+Q4       5-qubit 1x2                                           1     12    572.80     481.80    481.80  accepted
+Q4       5-qubit 1x2                                           2     12    887.80     741.40    741.40  accepted
+Q4       5-qubit 1x2                                           3     12   1202.80    1001.00   1001.00  accepted
+Q4       concatenated Iceberg 2x2                              1     18   1204.60    1014.20   1008.60  accepted
+Q4       concatenated Iceberg 2x2                              2     18   1855.00    1558.20   1552.60  accepted
+Q4       concatenated Iceberg 2x2                              3     18   2505.40    2102.20   2096.60  accepted
+
+Totals incl. the +5 per extra RC circuit (est Rz | est no Rz | quoted):
+  G1             2135 |     1901 |     1901
+  Q4            11713 |     9843 |     9817
