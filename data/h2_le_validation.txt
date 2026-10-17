@@ -1,4 +1,4 @@
-# H2 local-emulator validation -- 2026-10-17 10:28  (shots 4000)
+# H2 local-emulator validation -- 2026-10-17 10:50  (shots 4000)
 # H2-1LE is an IDEAL state vector (QI-2). Noisy rows use the PECOS depolarizing model with src.backends_qc.Noise rates [ASSUMED]: classical predictions, NOT H2 results.
 
 ## 1. Noiseless transparency: encoded Iceberg on the LE vs the exact logical Z2
@@ -25,16 +25,16 @@ bare 2x3 step 3: Z2 0.5168 +- 0.0065  exact 0.5220  (-0.80 se)
 ## 3. Other codes on the LE (detection only; round-0 feedforward as conditional gates)
 five   1x2 step 1 generic : accept 1.000 Z2 0.7390 +- 0.0139 exact 0.7266 (+0.89 se) [12s, 1000 shots]
 five   1x2 step 1 Clifford: accept 1.000 Z2 0.4970 +- 0.0158 exact 0.5000 (-0.19 se) [12s, 1000 shots]
-five   1x2 step 2 generic : accept 1.000 Z2 0.7400 +- 0.0139 exact 0.7123 (+2.00 se) [19s, 1000 shots]
+five   1x2 step 2 generic : accept 1.000 Z2 0.7400 +- 0.0139 exact 0.7123 (+2.00 se) [18s, 1000 shots]
 five   1x2 step 2 Clifford: accept 1.000 Z2 0.5410 +- 0.0158 exact 0.5000 (+2.60 se) [20s, 1000 shots]
 five   1x2 step 3 generic : accept 1.000 Z2 0.8780 +- 0.0104 exact 0.8736 (+0.42 se) [26s, 1000 shots]
 five   1x2 step 3 Clifford: accept 1.000 Z2 0.4890 +- 0.0158 exact 0.5000 (-0.70 se) [26s, 1000 shots]
 
 ## 4. Noisy emulator vs the repo's local-sim at the same ASSUMED rates (Iceberg 2x2, plain)
 Differences are expected, not errors: local-sim charges rates per authored gate, the LE per COMPILED native gate (CX -> ZZPhase + 1q gates), so its one-qubit exposure is larger.
-p2=0.001 step 1: LE accept 0.927 Z2 0.6586+-0.0069 | local-sim accept 0.947 Z2 0.6702+-0.0067 | exact 0.6683
-p2=0.001 step 3: LE accept 0.861 Z2 0.5935+-0.0072 | local-sim accept 0.894 Z2 0.5733+-0.0071 | exact 0.5888
-p2=0.003 step 1: LE accept 0.810 Z2 0.6567+-0.0073 | local-sim accept 0.849 Z2 0.6641+-0.0071 | exact 0.6683
-p2=0.003 step 3: LE accept 0.639 Z2 0.5882+-0.0084 | local-sim accept 0.703 Z2 0.5768+-0.0081 | exact 0.5888
-bare p2=0.001 step 3: LE Z2 0.5976+-0.0067 | local-sim Z2 0.5804+-0.0068
-bare p2=0.003 step 3: LE Z2 0.5908+-0.0067 | local-sim Z2 0.5981+-0.0067
+p2=0.001 step 1: LE accept 0.929 Z2 0.6700+-0.0067 | local-sim accept 0.947 Z2 0.6702+-0.0067 | exact 0.6683
+p2=0.001 step 3: LE accept 0.859 Z2 0.5876+-0.0073 | local-sim accept 0.894 Z2 0.5733+-0.0071 | exact 0.5888
+p2=0.003 step 1: LE accept 0.810 Z2 0.6593+-0.0072 | local-sim accept 0.849 Z2 0.6641+-0.0071 | exact 0.6683
+p2=0.003 step 3: LE accept 0.632 Z2 0.5763+-0.0085 | local-sim accept 0.703 Z2 0.5768+-0.0081 | exact 0.5888
+bare p2=0.001 step 3: LE Z2 0.5880+-0.0068 | local-sim Z2 0.5804+-0.0068
+bare p2=0.003 step 3: LE Z2 0.5820+-0.0068 | local-sim Z2 0.5981+-0.0067
