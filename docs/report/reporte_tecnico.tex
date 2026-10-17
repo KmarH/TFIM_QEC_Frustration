@@ -60,9 +60,9 @@ La parte cl\'asica del proyecto est\'a terminada y el camino hacia el H2 est\'a 
 capas gratuitas de Quantinuum (el verificador de sintaxis y el emulador sin ruido alojado en Nexus), sin
 gastar un solo cr\'edito.
 
-\textbf{C\'omo se hizo.} Partí de todo lo que habíamos decidido, de la discusión previa, la teoría que conocíamos y lo que le pusimos en la aplicación de Quantinuum, y usé eso para delimitarlo el trabajo usar Claude Code. Yo superviso las decisiones y trabajé con Claude Code. Al principio Kiro
+\textbf{C\'omo se hizo.} Partí de todo lo que habíamos decidido, de la discusión previa, la teoría que conocíamos y lo que le pusimos en la aplicación de Quantinuum, y usé eso para delimitar el trabajo que le di a Claude Code. Yo superviso las decisiones y trabajé con Claude Code. Al principio Kiro
 (otro agente) ayud\'o a planificar, investigar y revisar; desde el 8 de octubre Kiro est\'a fuera, as\'i
-que ahora es solo Claude Code planifica, construye y, para
+que ahora Claude Code planifica, construye y, para
 revisar, lanza revisores independientes ``a ciegas'' (no ven el razonamiento interno, solo buscan errores y corroboran). Lo hice a consciencia, pero por favor rev\'isenlo.
 
 Cada problema que encontré en el software de Quantinuum (Guppy/Selene, qnexus, pytket-quantinuum, PECOS, TKET) está en \code{docs/quantinuum_issues.md} con su reproducción~\cite{qilog}.
@@ -208,7 +208,7 @@ hasta $t\le6$ ahorra 2\,339, Iceberg hasta $t\le3$ ahorra 2\,012, o la mitad de 
 mitad. Es decisi\'on de ustedes (secci\'on~\ref{sec:decisiones}).
 
 La corrida m\'as barata de punta a punta es el circuito sin codificar $2{\times}2$ a un paso: \textbf{23.40 HQC}
-con 1000 shots. Ah\'i empezar\'ia. También dejé estas dimensiones de grillas porque muestran comportamiento interesante y están dentro de los HQCs que tenemos cada uno, pero perfectamente podemos simular Q3-bare con 6x6 en lugar de 3x6, solo que eso tomaría mucho más HQCs.
+con 1000 shots. Ah\'i empezar\'ia. También dejé estas dimensiones de grillas porque muestran comportamiento interesante y están dentro de los HQCs que tenemos cada uno, pero podemos probar Q3-bare con 4x6 o 5x6 en lugar de 3x6 (6x6 son 36 qubits y no cabe en el emulador de 32), con un costo mayor en HQC.
 
 % ============================================================================
 \section{C\'omo encender el emulador}\label{sec:encender}
