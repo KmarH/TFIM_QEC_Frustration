@@ -31,6 +31,7 @@ guppylang 1.1.2, hugr 0.18.8.
 | QI-14 | API/naming | `start_execute_job` takes uploaded refs; raw pytket circuits crash with `AttributeError: ... 'id'` despite the `accept_circuits_for_programs` decorator | no | worked around |
 | QI-15 | docs | the H2 "Hardware Credit Limitations" text (50 HQC/shot, 10,000 shots/job) does not say whether emulators share it, and gives no cost formula | no | note |
 | QI-12 | docs | emulator pages disagree on the Nexus-hosted H2-Emulator width (26 vs 20); "LE" names two different things | no | note |
+| QI-16 | bug (platform) | selene-sim 0.3.4 `.run()` **hangs forever on Windows**: it opens a loopback listener and no simulator process is ever spawned | no | open — Selene tests deselected on Windows, Linux unaffected |
 
 ---
 
@@ -198,6 +199,48 @@ guppylang 1.1.2, hugr 0.18.8.
   conditional gates by the gate they wrap, the offline Rz-free estimate equals the server quote to the cent for all 9
   Steane / five-qubit / concatenated circuits (previously up to 0.5% off). Undocumented; the docs do not say Rz is free.
 - **Upstream:** no   **Status:** note
+
+## QI-16 — selene-sim 0.3.4 `.run()` never returns on Windows (loopback listener, no simulator process)
+- **Component:** selene-sim 0.3.4 with guppylang 1.1.2, hugr 0.18.8, CPython 3.12.15,
+  Windows 11 26200 x86-64. The same versions run fine on Linux (see **Impact**).
+- **Symptom [measured, 2026-10-23]:** a hello-world Guppy program — allocate one qubit, measure it,
+  emit the result — reaches `.run()` and **never returns**. The process is **hard-blocked, not
+  slow**: total CPU 2.8 s and **unchanged over a 20 s sample**, no page faults, normal priority,
+  main thread in a `UserRequest` handle wait. It holds **one loopback TCP socket in `Listen` state**
+  (`127.0.0.1:<ephemeral>`, no peer) and has **no child process at all**, so the Python side appears
+  to open the runtime/simulator socket and then wait for a peer that is never spawned. Killed after
+  4 min; re-killed after 7 min on the earlier pytest attempt. No error, no traceback, no timeout.
+- **Reproduce** (project-independent, no project imports):
+  ```python
+  from guppylang import guppy
+  from guppylang.std.quantum import measure, qubit
+  from selene_sim import Quest
+
+  @guppy
+  def main() -> None:
+      q = qubit()
+      result("m", measure(q).read())
+
+  res = main.emulator(n_qubits=1).with_shots(1).with_simulator(Quest()).with_seed(1).run()
+  print([list(s.entries) for s in res.results])     # never reached on Windows
+  ```
+  Run it with output going **straight to a file** (`python -I selene_min.py > log 2>&1`): a hang
+  behind a shell pipe looks identical to a slow run, which is how this first presented.
+- **Impact on this project:** the three Selene tests hang the local Windows suite —
+  `tests/test_encoded_codes.py::test_selene_generated_program_feedforward`,
+  `tests/test_encoded_tfim.py::test_selene_feedforward_and_consistency`,
+  `tests/test_twirl.py::test_selene_accepts_twirled_program_at_zero_noise`. **No result in the
+  repository is affected**: every Selene number (`data/selene_gap.txt`, `data/encoded_*.txt`) was
+  produced on Linux, and the full suite passes there — **705 passed + 23 skipped on the OVM
+  (aarch64 Linux, Python 3.12.14)** on the current tree, these three tests included. This is a
+  Windows-only execution problem, not a physics or correctness problem.
+- **Workaround:** on Windows run the suite with those three deselected
+  (`--deselect <nodeid>` ×3) and take the Selene coverage from a Linux host. Do **not** mark them
+  skipped in the test files — the tests are correct and must keep running where Selene works.
+- **Ask upstream:** `.run()` should fail with a diagnostic instead of blocking forever when the
+  simulator process cannot be started, and ideally carry a connect timeout; and the Windows support
+  status of selene-sim should be stated in its docs.
+- **Upstream:** no   **Status:** open (worked around on Windows; Linux unaffected)
 
 ---
 
