@@ -30,6 +30,7 @@ ideal / handoff-07 curves are like-for-like.
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Tuple
 
@@ -305,9 +306,16 @@ def _boundaries(prog: TriangularIcebergTFIM) -> Tuple[int, int]:
 
 def run_iceberg(d: TriangularDimers, spins0: np.ndarray, *, J: float, h: float, dt: float, n_steps: int,
                 noise: NoiseRates, n_traj: int, n_batches: int, record_every: int, rng: np.random.Generator,
-                max_spins: int, mem_gb: float = 2.0) -> NoisyRun:
+                max_spins: int, mem_gb: float = 2.0,
+                apply_u: Callable[..., None] | None = None,
+                ) -> NoisyRun:
     """Iceberg-encoded trajectories (src/encoded_codes schedule, syndrome round every step) with
-    post-selection on every detector, and exact logical readout snapshots at step boundaries."""
+    post-selection on every detector, and exact logical readout snapshots at step boundaries.
+
+    `apply_u` is an additive hook (default `apply_segment_biased`, i.e. behaviour unchanged) for
+    applying one unitary segment with its faults. It exists so a noise-SCALED runner can insert
+    amplifying Paulis without duplicating this trajectory loop; see
+    src/noise_scaling.run_iceberg_scaled (decision D6, 2026-10-22)."""
     prog = make_iceberg(d, spins0, J, h, dt)
     check_physical_ceiling(prog.n_phys, max_spins)
     check_exact_ceiling(d.N, max_spins)                 # logical 2^N observable tables
@@ -316,6 +324,7 @@ def run_iceberg(d: TriangularDimers, spins0: np.ndarray, *, J: float, h: float, 
     check_memory(n_batches * n_rec * (1 << d.N) * 8                      # accumulators
                  + (1 << prog.n_phys) * (8 * 3 + 16 * 2),                # lidx, parity work, zdet, state, probs
                  mem_gb, "run_iceberg tables")
+    apply_seg = apply_segment_biased if apply_u is None else apply_u
     sch = prog.schedule(n_steps)
     b1, stride = _boundaries(prog)
     rec = _record_steps(n_steps, record_every)
@@ -372,7 +381,7 @@ def run_iceberg(d: TriangularDimers, spins0: np.ndarray, *, J: float, h: float, 
                     break
             kind = it[0]
             if kind == "U":
-                apply_segment_biased(sv, it[1], rng, noise)
+                apply_seg(sv, it[1], rng, noise)
             elif kind == "M":
                 _, q, key, rb = it
                 if key.startswith("d"):

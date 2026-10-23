@@ -45,8 +45,10 @@ from src.noisy_q3 import (
     _fault_1q,
     _fault_2q,
     _record_steps,
+    apply_segment_biased,
     check_memory,
     readout_flip,
+    run_iceberg,
 )
 
 PauliModel = dict[str, float]
@@ -253,6 +255,77 @@ def run_bare_scaled(d: TriangularDimers, spins0: np.ndarray, *, lam: float, meth
         if noiseless:            # deterministic: one trajectory is the exact answer (as run_bare)
             return NoisyRun("ideal", np.array(rec), dt, acc[b:b + 1], wsum[b:b + 1], 1)
     return NoisyRun("bare", np.array(rec), dt, acc, wsum, n_traj)
+
+
+# --------------------------------------------------------------------------- #
+# Trajectories at scale lam, ENCODED arm (decision D6, 2026-10-22)
+# --------------------------------------------------------------------------- #
+class _OneCommand:
+    """One-command stand-in for a pytket segment.
+
+    It lets `run_iceberg_scaled` reuse noisy_q3.apply_segment_biased — the verified gate dispatch
+    and ZZ-biased fault sampling — command by command, so the amplifying Pauli can go in front of
+    each 2-qubit gate without duplicating either the gate dispatch or the trajectory loop.
+    """
+
+    __slots__ = ("_cmd",)
+
+    def __init__(self, cmd):
+        self._cmd = cmd
+
+    def get_commands(self):
+        return (self._cmd,)
+
+
+def run_iceberg_scaled(d: TriangularDimers, spins0: np.ndarray, *, lam: float, method: str,
+                       J: float, h: float, dt: float, n_steps: int, noise: NoiseRates, n_traj: int,
+                       n_batches: int, record_every: int, rng: np.random.Generator, max_spins: int,
+                       mem_gb: float = 2.0, model: PauliModel | None = None) -> NoisyRun:
+    """noisy_q3.run_iceberg at noise scale lam, by Pauli insertion on the two-qubit gates.
+
+    Before every 2-qubit gate of the encoded circuit — the logical ZZ rotations AND the
+    syndrome-extraction CX gates, i.e. the ("rot-zz", "syn-cx") scope of `scaled_stim_rates` — a
+    Pauli P drawn from `model` (default: the prior channel of `noise`) is inserted with
+    probability (lam-1)*q_P, one draw per gate; then the gate and its usual fault follow. This is
+    the same mechanism and the same channel as `run_bare_scaled(method="insert")`, so the two arms
+    of the lambda ladder are amplified alike: the 2q channel scales, while 1q, SPAM and idle noise
+    stay at lam = 1.
+
+    At lam = 1 no randomness is drawn, so the run is bitwise identical to `run_iceberg` at the
+    same seed and the lam = 1 rung stays comparable to data/q3_noisy.txt.
+
+    `method="fold"` is refused: folding the encoded circuit would also fold the syndrome CX gates,
+    which changes the code's detection structure rather than only its error rate (a separate
+    design question, not an assumption this function may make silently).
+
+    Classical prediction under the ASSUMED noise model; never an H2 result.
+    """
+    if method == "fold":
+        raise NotImplementedError(
+            "folding is not defined for the encoded arm: it would fold the syndrome-extraction "
+            "CX gates too, changing the code's detection structure and not only its error rate. "
+            "Use method='insert' (decision D6, 2026-10-22)."
+        )
+    if method != "insert":
+        raise ValueError(f"method must be 'insert' for the encoded arm, got {method!r}")
+    if lam < 1:
+        raise ValueError(f"lam must be >= 1, got {lam}")
+    model = prior_model(noise) if model is None else model
+
+    def apply_u(sv, seg, rng_, noise_):
+        for cmd in seg.get_commands():
+            qs = [q.index[0] for q in cmd.qubits]
+            if len(qs) == 2:
+                lab = _draw(model, lam - 1, rng_)
+                if lab:
+                    for q, x in zip(qs, lab, strict=True):
+                        if x != "I":
+                            sv.apply1(_PAULI[x], q)
+            apply_segment_biased(sv, _OneCommand(cmd), rng_, noise_)
+
+    return run_iceberg(d, spins0, J=J, h=h, dt=dt, n_steps=n_steps, noise=noise, n_traj=n_traj,
+                       n_batches=n_batches, record_every=record_every, rng=rng,
+                       max_spins=max_spins, mem_gb=mem_gb, apply_u=apply_u)
 
 
 # --------------------------------------------------------------------------- #

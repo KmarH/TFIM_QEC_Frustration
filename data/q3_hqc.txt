@@ -1,0 +1,50 @@
+# Q3 generalization study - OFFLINE HQC estimate. data/q3_hqc.txt
+# CLASSICAL ESTIMATE from compiled gate counts and the standard formula
+#   HQC = 5 + shots * (N1q + 10 N2q + 5 Nm) / 5000 [established, research/07].
+# NO job was submitted, NO login was used, NO HQC was spent. Not an H2 result.
+# Rz-free pricing (DECISIONS D-HQC). Shots per circuit: 500 [assumed].
+# Encoded arm priced over its SURVIVAL-MATCHED window (data/q3_scaling.txt); bare arm
+#   over its physics window qdm_times / h. One circuit per cell per arm.
+# Compile: TKET level 0 against the offline backend for H2-1LE.
+
+     N     h  lam      arm  steps  qubits     n1q    nrz     n2q  nmeas        HQC
+    12   0.1    1     bare    480      12   11525      0   17280     12    18449.5
+    12   0.1    1 bare@ice     48      12    1157      0    1728     12     1860.7
+    12   0.1    1  iceberg     48      16   19057   9553    4520    222     5698.4
+    12   0.2    1     bare    240      12    5765      0    8640     12     9233.5
+    12   0.2    1 bare@ice     48      12    1157      0    1728     12     1860.7
+    12   0.2    1  iceberg     48      16   19057   9553    4520    222     5698.4
+    12   0.3    1     bare    160      12    3845      0    5760     12     6161.5
+    12   0.3    1 bare@ice     48      12    1157      0    1728     12     1860.7
+    12   0.3    1  iceberg     48      16   19057   9553    4520    222     5698.4
+    12   0.5    1     bare     96      12    2309      0    3456     12     3703.9
+    12   0.5    1 bare@ice     48      12    1157      0    1728     12     1860.7
+    12   0.5    1  iceberg     48      16   19057   9553    4520    222     5698.4
+    12   0.3    2     bare    160      12    3845      0    5760     12     6161.5
+    12   0.3    2 bare@ice     28      12     677      0    1008     12     1092.7
+    12   0.3    2  iceberg     28      16   11377   5713    2680    142     3394.4
+    12   0.3    3     bare    160      12    3845      0    5760     12     6161.5
+    12   0.3    3 bare@ice     19      12     461      0     684     12      747.1
+    12   0.3    3  iceberg     19      16    7921   3985    1852    106     2357.6
+    12   0.5    3     bare     96      12    2309      0    3456     12     3703.9
+    12   0.5    3 bare@ice     19      12     461      0     684     12      747.1
+    12   0.5    3  iceberg     19      16    7921   3985    1852    106     2357.6
+    18   0.3    1     bare    160      18    5766      0    8640     18     9239.6
+    18   0.3    1 bare@ice     36      18    1302      0    1944     18     2097.2
+    18   0.3    1  iceberg     36      22   20785  10429    4976    186     6203.6
+    18   0.1    3     bare    480      18   17286      0   25920     18    27671.6
+    18   0.1    3 bare@ice     13      18     474      0     702     18      772.4
+    18   0.1    3  iceberg     13      22    8089   4081    1894     94     2394.8
+    20   0.3    1     bare    160      20    6408      0    9600     20    10265.8
+    20   0.3    1 bare@ice     33      20    1328      0    1980     20     2137.8
+    20   0.3    1  iceberg     33      24   21073  10577    5052    178     6285.6
+    20   0.5    3     bare     96      20    3848      0    5760     20     6169.8
+    20   0.5    3 bare@ice     12      20     488      0     720     20      793.8
+    20   0.5    3  iceberg     12      24    8305   4193    1944     94     2455.2
+
+# Totals over the 11 cells at 500 shots each: bare(full window) 106922 HQC, bare(encoded window) 15831 HQC, Iceberg 48242 HQC, both arms 155164 HQC.
+# For scale: the 50,000 HQC allowance and the 39,853 HQC already planned (docs/h2_budget.md).
+# These are OFFLINE estimates. The free H2-1SC syntax checker would replace them with
+#   server quotes at zero HQC; it needs a NEXUS_REFRESH_TOKEN, absent on this machine.
+# Nothing here is approved to run: every HQC-spending run needs the project lead's
+#   per-run go (CLAUDE.md, docs/nexus_toggle.md).

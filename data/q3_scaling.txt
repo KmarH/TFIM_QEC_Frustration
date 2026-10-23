@@ -1,0 +1,171 @@
+# Q3 generalization study - Stim prefilter (D1-D6, 2026-10-22). data/q3_scaling.txt
+# CLASSICAL PREDICTION under an ASSUMED noise model (research/06 H2 prior, Stim
+#   first-order fault accounting). NOT an H2 / hardware result. No HQC spent.
+# Noise: p2=0.0006, eta=0.05, p1=pm=p_init=6e-05 [assumed].
+# Model: J=-1, dt=0.25; windows in units of 1/|J|. Stim treats Pauli
+#   rotations as identity, so the per-step RATES are h-independent; h enters only
+#   through the window length (qdm_times / h).
+# Ceilings (SCOPE §5): state vector <= 24, ED <= 20; Stim unbounded. The PHYSICAL register (N + 4) is what counts.
+# Survival floor for the keep verdict: 0.05 [assumed]; encoded window cap 48 steps (t = 12).
+
+## 1. First-order per-step rates and Iceberg survival [derived accounting]
+#  lam scope '2q' = ('rot-zz', 'syn-cx') (what insertion amplifies in the trajectory runners);
+#  'all' = every noise class present (research/derivations/01 'all gates' row).
+#  survival(ref) is at the reference window 48 steps (t = 12);
+#  matched window = largest window with survival >= the floor (capped).
+     N               case  phys  lam scope  bare/step  ice det/step  ice undet/step  prep off  surv(ref)  matched steps  t_matched
+    12      3x4 flippable    16    1    2q  2.304e-02     5.428e-02       8.640e-03    0.0653     0.0692             48      12.00
+    12      3x4 flippable    16    1   all  2.304e-02     5.428e-02       8.640e-03    0.0653     0.0692             48      12.00
+    12      3x4 flippable    16    2    2q  4.464e-02     1.005e-01       1.728e-02    0.0821     0.0074             28       7.00
+    12      3x4 flippable    16    2   all  4.608e-02     1.086e-01       1.728e-02    0.1305     0.0048             26       6.50
+    12      3x4 flippable    16    3    2q  6.624e-02     1.467e-01       2.592e-02    0.0989     0.0008             19       4.75
+    12      3x4 flippable    16    3   all  6.912e-02     1.628e-01       2.592e-02    0.1958     0.0003             17       4.25
+    18   3x6 3-sublattice    22    1    2q  3.456e-02     7.876e-02       1.296e-02    0.0956     0.0207             36       9.00
+    18   3x6 3-sublattice    22    1   all  3.456e-02     7.876e-02       1.296e-02    0.0956     0.0207             36       9.00
+    18   3x6 3-sublattice    22    2    2q  6.696e-02     1.458e-01       2.592e-02    0.1189     0.0008             19       4.75
+    18   3x6 3-sublattice    22    2   all  6.912e-02     1.575e-01       2.592e-02    0.1912     0.0004             17       4.25
+    18   3x6 3-sublattice    22    3    2q  9.936e-02     2.129e-01       3.888e-02    0.1422     0.0000             13       3.25
+    18   3x6 3-sublattice    22    3   all  1.037e-01     2.363e-01       3.888e-02    0.2868     0.0000             11       2.75
+    20      4x5 flippable    24    1    2q  3.840e-02     8.692e-02       1.440e-02    0.1057     0.0139             33       8.25
+    20      4x5 flippable    24    1   all  3.840e-02     8.692e-02       1.440e-02    0.1057     0.0139             33       8.25
+    20      4x5 flippable    24    2    2q  7.440e-02     1.610e-01       2.880e-02    0.1312     0.0004             17       4.25
+    20      4x5 flippable    24    2   all  7.680e-02     1.738e-01       2.880e-02    0.2115     0.0002             16       4.00
+    20      4x5 flippable    24    3    2q  1.104e-01     2.350e-01       4.320e-02    0.1567     0.0000             12       3.00
+    20      4x5 flippable    24    3   all  1.152e-01     2.608e-01       4.320e-02    0.3172     0.0000             10       2.50
+    36   6x6 3-sublattice    40    1    2q  6.912e-02     1.522e-01       2.592e-02    0.1867     0.0006             18       4.50
+    36   6x6 3-sublattice    40    1   all  6.912e-02     1.522e-01       2.592e-02    0.1867     0.0006             18       4.50
+    36   6x6 3-sublattice    40    2    2q  1.339e-01     2.819e-01       5.184e-02    0.2295     0.0000              9       2.25
+    36   6x6 3-sublattice    40    2   all  1.382e-01     3.044e-01       5.184e-02    0.3733     0.0000              8       2.00
+    36   6x6 3-sublattice    40    3    2q  1.987e-01     4.116e-01       7.776e-02    0.2724     0.0000              6       1.50
+    36   6x6 3-sublattice    40    3   all  2.074e-01     4.566e-01       7.776e-02    0.5600     0.0000              5       1.25
+    54   9x6 3-sublattice    58    1    2q  1.037e-01     2.256e-01       3.888e-02    0.2777     0.0000             12       3.00
+    54   9x6 3-sublattice    58    1   all  1.037e-01     2.256e-01       3.888e-02    0.2777     0.0000             12       3.00
+    54   9x6 3-sublattice    58    2    2q  2.009e-01     4.180e-01       7.776e-02    0.3401     0.0000              6       1.50
+    54   9x6 3-sublattice    58    2   all  2.074e-01     4.513e-01       7.776e-02    0.5554     0.0000              5       1.25
+    54   9x6 3-sublattice    58    3    2q  2.981e-01     6.103e-01       1.166e-01    0.4025     0.0000              4       1.00
+    54   9x6 3-sublattice    58    3   all  3.110e-01     6.769e-01       1.166e-01    0.8331     0.0000              3       0.75
+
+## 2. Physical time (1/|J|) at which Iceberg survival falls to a level [derived accounting, 2q scope]
+     N  lam    t(0.5)    t(0.1)   t(0.05)   t(0.01)
+    12    1      2.89     10.31     13.50     20.91
+    12    2      1.52      5.53      7.25     11.25
+    12    3      1.01      3.76      4.94      7.68
+    18    1      1.90      7.01      9.21     14.31
+    18    2      0.98      3.74      4.93      7.69
+    18    3      0.65      2.54      3.35      5.24
+    20    1      1.69      6.32      8.31     12.94
+    20    2      0.87      3.37      4.45      6.95
+    20    3      0.57      2.28      3.02      4.73
+    36    1      0.83      3.48      4.61      7.26
+    36    2      0.41      1.84      2.45      3.88
+    36    3      0.26      1.23      1.65      2.63
+    54    1      0.46      2.24      3.01      4.79
+    54    2      0.21      1.17      1.59      2.55
+    54    3      0.12      0.78      1.06      1.72
+
+## 3. Expected bare faults per shot over each field's physics window (qdm_times / h) [derived accounting, 2q scope]
+#  A window carrying >> 1 fault per shot is not a Q3 measurement without mitigation.
+     N  lam        h=0.1        h=0.2        h=0.3        h=0.5
+    12    1        11.06         5.53         3.69         2.21
+    12    2        21.43        10.71         7.14         4.29
+    12    3        31.80        15.90        10.60         6.36
+    18    1        16.59         8.29         5.53         3.32
+    18    2        32.14        16.07        10.71         6.43
+    18    3        47.69        23.85        15.90         9.54
+    20    1        18.43         9.22         6.14         3.69
+    20    2        35.71        17.86        11.90         7.14
+    20    3        52.99        26.50        17.66        10.60
+    36    1        33.18        16.59        11.06         6.64
+    36    2        64.28        32.14        21.43        12.86
+    36    3        95.39        47.69        31.80        19.08
+    54    1        49.77        24.88        16.59         9.95
+    54    2        96.42        48.21        32.14        19.28
+    54    3       143.08        71.54        47.69        28.62
+
+## 4. D1 x D2 x D3 prefilter verdict for the exact-circuit stage [derived]
+#  keep = the encoded arm can still be resolved at the reference window; a dropped cell keeps its BARE arm (bare + Gauss post-selection needs no code survival).
+#  'all'-scope survival is printed beside the deciding 2q value for comparison.
+     N     h  lam  surv 2q  surv all  matched steps  ice verdict  bare window
+    12   0.1    1   0.0692    0.0692             48         KEEP          480
+    12   0.2    1   0.0692    0.0692             48         KEEP          240
+    12   0.3    1   0.0692    0.0692             48         KEEP          160
+    12   0.5    1   0.0692    0.0692             48         KEEP           96
+    12   0.1    2   0.0074    0.0048             28      matched          480
+    12   0.2    2   0.0074    0.0048             28      matched          240
+    12   0.3    2   0.0074    0.0048             28      matched          160
+    12   0.5    2   0.0074    0.0048             28      matched           96
+    12   0.1    3   0.0008    0.0003             19      matched          480
+    12   0.2    3   0.0008    0.0003             19      matched          240
+    12   0.3    3   0.0008    0.0003             19      matched          160
+    12   0.5    3   0.0008    0.0003             19      matched           96
+    18   0.1    1   0.0207    0.0207             36      matched          480
+    18   0.2    1   0.0207    0.0207             36      matched          240
+    18   0.3    1   0.0207    0.0207             36      matched          160
+    18   0.5    1   0.0207    0.0207             36      matched           96
+    18   0.1    2   0.0008    0.0004             19      matched          480
+    18   0.2    2   0.0008    0.0004             19      matched          240
+    18   0.3    2   0.0008    0.0004             19      matched          160
+    18   0.5    2   0.0008    0.0004             19      matched           96
+    18   0.1    3   0.0000    0.0000             13      matched          480
+    18   0.2    3   0.0000    0.0000             13      matched          240
+    18   0.3    3   0.0000    0.0000             13      matched          160
+    18   0.5    3   0.0000    0.0000             13      matched           96
+    20   0.1    1   0.0139    0.0139             33      matched          480
+    20   0.2    1   0.0139    0.0139             33      matched          240
+    20   0.3    1   0.0139    0.0139             33      matched          160
+    20   0.5    1   0.0139    0.0139             33      matched           96
+    20   0.1    2   0.0004    0.0002             17      matched          480
+    20   0.2    2   0.0004    0.0002             17      matched          240
+    20   0.3    2   0.0004    0.0002             17      matched          160
+    20   0.5    2   0.0004    0.0002             17      matched           96
+    20   0.1    3   0.0000    0.0000             12      matched          480
+    20   0.2    3   0.0000    0.0000             12      matched          240
+    20   0.3    3   0.0000    0.0000             12      matched          160
+    20   0.5    3   0.0000    0.0000             12      matched           96
+
+## 5. D4 extreme combinations [derived]
+  N=20  h=0.5  lam=3  ice matched window  12 steps (t = 3.00); bare window 96 steps; bare faults/shot 10.60
+  N=18  h=0.1  lam=3  ice matched window  13 steps (t = 3.25); bare window 480 steps; bare faults/shot 47.69
+  N=12  h=0.5  lam=3  ice matched window  19 steps (t = 4.75); bare window 96 steps; bare faults/shot 6.36
+
+## 6. Cells handed to the expensive stage (scripts/run_q3_sweep.py)
+#  Every cell runs its BARE arm; the encoded arm runs over 'ice steps' (survival-matched).
+#  Per-size trajectory counts and accumulator settings: CONFIG.q3_scaling.per_size, fixed from the D5 timing probe.
+     N     h  lam  ice steps  traj bare  traj ice  batches  rec every
+    12   0.1    1         48        400       300       20          2
+    12   0.2    1         48        400       300       20          2
+    12   0.3    1         48        400       300       20          2
+    12   0.5    1         48        400       300       20          2
+    12   0.1    2         28        400       300       20          2
+    12   0.2    2         28        400       300       20          2
+    12   0.3    2         28        400       300       20          2
+    12   0.5    2         28        400       300       20          2
+    12   0.1    3         19        400       300       20          2
+    12   0.2    3         19        400       300       20          2
+    12   0.3    3         19        400       300       20          2
+    12   0.5    3         19        400       300       20          2
+    18   0.1    1         36        200       100       10          4
+    18   0.2    1         36        200       100       10          4
+    18   0.3    1         36        200       100       10          4
+    18   0.5    1         36        200       100       10          4
+    18   0.1    2         19        200       100       10          4
+    18   0.2    2         19        200       100       10          4
+    18   0.3    2         19        200       100       10          4
+    18   0.5    2         19        200       100       10          4
+    18   0.1    3         13        200       100       10          4
+    18   0.2    3         13        200       100       10          4
+    18   0.3    3         13        200       100       10          4
+    18   0.5    3         13        200       100       10          4
+    20   0.1    1         33        120        48        8          6
+    20   0.2    1         33        120        48        8          6
+    20   0.3    1         33        120        48        8          6
+    20   0.5    1         33        120        48        8          6
+    20   0.1    2         17        120        48        8          6
+    20   0.2    2         17        120        48        8          6
+    20   0.3    2         17        120        48        8          6
+    20   0.5    2         17        120        48        8          6
+    20   0.1    3         12        120        48        8          6
+    20   0.2    3         12        120        48        8          6
+    20   0.3    3         12        120        48        8          6
+    20   0.5    3         12        120        48        8          6
+# 36 cells with an encoded arm, out of 36 in the grid.

@@ -482,6 +482,56 @@ class NoiseScalingConfig:
 
 
 @dataclass
+class Q3ScalingConfig:
+    """Q3 generalization study (src/q3_scaling.py, src/noisy_q3_sweep.py, docs/q3_scaling.md).
+
+    The Iceberg-vs-Gauss-law conclusion of docs/q3_thermalization.md §9.2 rests on ONE cell
+    (N = 12, h = 0.3, lam = 1). This block holds the axes it is generalized over, per the project
+    lead's decision cards D1-D6 of 2026-10-22: D1 size, D2 field, D3 noise scale, D4 Stim
+    prefilter before the expensive stage, D5 timing probe before fixing trajectory counts,
+    D6 build an encoded lambda runner (src/noise_scaling.run_iceberg_scaled).
+
+    Every number produced is a CLASSICAL PREDICTION under the ASSUMED research/06 H2 prior,
+    never an H2 / hardware result.
+    """
+
+    # D1: logical sizes. The exact-circuit stage is limited to those whose PHYSICAL Iceberg
+    # register (N + 4) fits the state-vector ceiling; 36 and 54 are Stim-only (Stim is unbounded).
+    # The (Lx, Ly, start) of each N lives in src/q3_scaling.SIZE_TO_CASE (already-validated cases).
+    sizes_exact: tuple = (12, 18, 20)
+    sizes_stim_only: tuple = (36, 54)
+    # D2: fields, = Q3BaselineConfig.h_curves (no new field values are introduced).
+    # D3: insertion ladder, = NoiseScalingConfig.lams, now on BOTH arms (D6).
+    lams: tuple = (1, 2, 3)
+    # D4: a cell reaches the expensive stage only if its predicted Iceberg post-selection survival
+    # is at least this [assumed threshold: below it the encoded arm cannot resolve anything at any
+    # affordable trajectory count].
+    survival_floor: float = 0.05
+    # Encoded window, per size: the largest number of Trotter steps whose predicted survival is
+    # still >= survival_floor, capped at Q3BaselineConfig.noisy_ice_steps. The comparison is then
+    # reported at MATCHED SURVIVAL rather than a matched window (project lead, 2026-10-22), with
+    # the window stated for every cell; the shrinking encoded reach is itself a result.
+    ice_window_cap: int = 48
+    # D5: timing probe (scripts/probe_q3_scaling_timing.py) before the budget is committed.
+    probe_traj: int = 5
+    probe_steps: int = 8
+    # Trajectory counts and accumulator settings per logical size. The accumulators are
+    # n_batches * n_records * 2^N * 8 bytes, so the published 20 batches / record_every 2 would
+    # need ~4.2 GB at N = 20 and be refused by noisy_mem_gb: larger N trades record density and
+    # batch count for feasibility, and the SE is reported from however many batches remain.
+    # Filled from the D5 probe; N = 12 keeps the published settings exactly.
+    per_size: dict = field(default_factory=lambda: {
+        12: {"traj_bare": 400, "traj_ice": 300, "batches": 20, "record_every": 2, "mem_gb": 2.0},
+        18: {"traj_bare": 200, "traj_ice": 100, "batches": 10, "record_every": 4, "mem_gb": 4.0},
+        20: {"traj_bare": 120, "traj_ice": 48, "batches": 8, "record_every": 6, "mem_gb": 6.0},
+    })
+    # D4: the extreme combinations run on top of the one-axis-at-a-time grid (N, h, lam).
+    extreme_combos: tuple = ((20, 0.5, 3), (18, 0.1, 3), (12, 0.5, 3))
+    # Stim survival levels reported per size (as Q3BaselineConfig.size_survival).
+    survival_levels: tuple = (0.5, 0.1, 0.05, 0.01)
+
+
+@dataclass
 class RunConfig:
     """Top-level run configuration — the one object the rest of the code reads."""
 
@@ -499,6 +549,7 @@ class RunConfig:
     q3: Q3BaselineConfig = field(default_factory=Q3BaselineConfig)
     q2: Q2FrustrationConfig = field(default_factory=Q2FrustrationConfig)
     noise_scaling: NoiseScalingConfig = field(default_factory=NoiseScalingConfig)
+    q3_scaling: Q3ScalingConfig = field(default_factory=Q3ScalingConfig)
 
     # Reproducibility / IO
     seed: int = 1234
