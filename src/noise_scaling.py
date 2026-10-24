@@ -15,22 +15,23 @@ simulates circuits; it has no submission path.
   **Scope caveat [review/18 F6, 2026-10-23].** research/07-noise-scaling.md supports this method
   only before the 2q ROTATIONS (2503.20870 S1.4, "before each U_ZZ ... probability (alpha-1)p_j"),
   and its PEA row records that such a model "is valid only when combined with random Pauli
-  twirls". `insert_paulis` below stays inside that support (ZZPhase only). `run_iceberg_scaled`
-  does NOT: it inserts before every 2q gate of the encoded circuit - syndrome-extraction CX and
-  rotation-gadget CX included - using the rotation-learned channel, in an UNTWIRLED trajectory
-  simulation. That extension is **[inferred], not [derived]**, and the KB does not cover it. It is
+  twirls". Since DECIDED-9 (2026-10-24) BOTH `insert_paulis` and `run_iceberg_scaled` go beyond
+  that support on purpose: they insert before every 2q gate - syndrome-extraction CX and
+  rotation-gadget CX included - using the rotation-learned channel (the trajectory simulation is
+  UNTWIRLED). That extension is **[inferred], not [derived]**, and the KB does not cover it. It is
   also only first-order-faithful for ZZPhase: inserting before the gate while the intrinsic fault
   lands after is exact for ZZPhase (depolarizing is unitarily covariant and ZZ commutes with the
   rotation) but not for CX, where CX (Z x Z) CX = I x Z moves the eta-biased excess into a
   different Iceberg detection class (review/18 F7).
-  **Three lambda scopes coexist in this repository and they are NOT the same set of gates**
-  (review/18 F3): the trajectory simulator and `run_*_scaled` amplify EVERY 2q gate (correct for
-  the model, which charges `_fault_2q` at every 2q location, src/noisy_q3.py:103);
-  `q3_scaling._NAMED_SCOPES["2q"]` is ("rot-zz", "syn-cx") and sets the survival-matched encoded
-  windows; `insert_paulis` and `config.q3_scaling.fold_scope` are rot-zz only and govern the
-  pytket circuit that is compiled, HQC-costed and would be submitted. **Which is canonical is an
-  open decision for the project lead; do not send a lambda point to the emulator before it is
-  settled.**
+  **One lambda scope (DECIDED-9, project lead 2026-10-24): every two-qubit gate.** Until then
+  three scopes coexisted (review/18 F3); now the trajectory simulator, `run_*_scaled`,
+  `q3_scaling._NAMED_SCOPES["2q"]` / `CANONICAL_2Q_SCOPE` (Stim), `insert_paulis` (pytket) and
+  `config.noise_scaling.fold_scope` all mean ("rot-cx", "rot-zz", "syn-cx") - the full set of 2q
+  classes, checked by tests/test_lambda_scope.py. Why this departs from the paper's rotations-only
+  wording: 2503.20870 amplifies the 2Q gates of an UNENCODED circuit, all of which are ZZ
+  rotations; applied to an encoded circuit the same rule reaches the code's own CX gates, and
+  leaving those at lambda = 1 would make a "noisier machine" spare exactly the gates the encoding
+  adds. Assumption carried: the CX channel equals the rotation-learned channel [assumed].
 - Folding [derived; 2005.10921]: ZZPhase(a) -> ZZPhase(a) [ZZPhase(-a) ZZPhase(a)]^k, lam = 2k+1.
   The twirled total error is x lam to first order for any Pauli channel. The Pauli composition is
   x lam only for channels with q_P = q_{P.ZZ} on anticommuting P (true of the prior, not in
@@ -68,6 +69,7 @@ from src.noisy_q3 import (
     check_memory,
     readout_flip,
     run_iceberg,
+    sector_mask,
 )
 
 PauliModel = dict[str, float]
@@ -105,14 +107,26 @@ def _draw(model: PauliModel, scale: float, rng: np.random.Generator) -> str | No
 
 def insert_paulis(circuit: Circuit, lam: float, model: PauliModel,
                   rng: np.random.Generator) -> Circuit:
-    """Copy of `circuit` with, before every ZZPhase, the 2q Pauli P inserted with probability
-    (lam-1)*model[P] (one draw per gate). label[0] acts on the gate's first qubit. The Paulis are
-    emitted as 1q X/Y/Z gates, so the 2q count is unchanged. lam >= 1."""
+    """Copy of `circuit` with, before every TWO-QUBIT gate (DECIDED-9: CX as well as ZZPhase),
+    the 2q Pauli P inserted with probability (lam-1)*model[P] (one draw per gate). label[0] acts
+    on the gate's first qubit. The Paulis are emitted as 1q X/Y/Z gates, so the 2q count is
+    unchanged. lam >= 1. The insertion sits BEFORE the gate, exactly where run_iceberg_scaled
+    puts it, so the circuit and the classical prediction carry the same amplification (for CX
+    this is an excess channel conjugated by the gate relative to the intrinsic fault after it -
+    review/18 F7, a stated modelling caveat). On a ZZPhase-only (bare) circuit the draws are the
+    same as before 2026-10-24."""
     if lam < 1:
         raise ValueError(f"lam must be >= 1, got {lam}")
-    out = Circuit(circuit.n_qubits, circuit.n_bits)
+    # Same registers as the input (2026-10-24), so encoded circuits with named classical registers,
+    # mid-circuit measurements, resets and conditionals pass through unchanged; for a circuit on
+    # the default "q" / "c" registers this is the same as Circuit(n_qubits, n_bits).
+    out = Circuit()
+    for reg in circuit.q_registers:
+        out.add_q_register(reg.name, reg.size)
+    for reg in circuit.c_registers:
+        out.add_c_register(reg.name, reg.size)
     for cmd in circuit.get_commands():
-        if cmd.op.type == OpType.ZZPhase:
+        if _is_2q_gate(cmd):
             lab = _draw(model, lam - 1, rng)
             if lab:
                 for q, x in zip(cmd.qubits, lab, strict=True):
@@ -120,6 +134,14 @@ def insert_paulis(circuit: Circuit, lam: float, model: PauliModel,
                         out.add_gate(_OP1[x], [q])
         out.add_gate(cmd.op, cmd.args)
     return out
+
+
+_NOT_GATES = frozenset({OpType.Barrier, OpType.Measure, OpType.Reset})
+
+
+def _is_2q_gate(cmd) -> bool:
+    """A unitary two-qubit gate (not a barrier, measurement or reset, no classical args)."""
+    return len(cmd.qubits) == 2 and not cmd.bits and cmd.op.type not in _NOT_GATES
 
 
 def fold_circuit(circuit: Circuit, lam: int) -> Circuit:
@@ -167,7 +189,8 @@ def _scaled_stim(lam: float, scope: Sequence[str]):
 
 
 def scaled_stim_rates(prog, noise: NoiseRates, lam: float,
-                      scope: Sequence[str] = ("rot-zz", "syn-cx")) -> dict[str, float]:
+                      scope: Sequence[str] = tuple(sorted(CONFIG.q3_scaling.lambda_scope)),
+                      ) -> dict[str, float]:
     """First-order per-step rates with the `scope` noise classes x lam: 'bare_or_undetected' (the
     bare program's fault rate, or the code's undetected-logical rate) and 'detected' (0 for a
     program without detectors). [derived accounting, ASSUMED noise]
@@ -218,6 +241,9 @@ def run_bare_scaled(d: TriangularDimers, spins0: np.ndarray, *, lam: float, meth
     ZZi = ZZ.conj()
     down = [s for s, v in enumerate(np.asarray(spins0).reshape(-1)) if v < 0]
     acc = np.zeros((n_batches, len(rec), 1 << N))
+    wpsum = np.zeros((n_batches, len(rec)))
+    wp2sum = np.zeros((n_batches, len(rec)))
+    smask = sector_mask(d, spins0)
     wsum = np.zeros((n_batches, len(rec)))
     noiseless = not (noise.p1 or noise.p2 or noise.pm)
 
@@ -241,6 +267,9 @@ def run_bare_scaled(d: TriangularDimers, spins0: np.ndarray, *, lam: float, meth
             p = readout_flip(np.abs(sv.flat()) ** 2, range(N), N, noise.pm)
             acc[b, kk] += p
             wsum[b, kk] += 1.0
+            pin = float(p[smask].sum())
+            wpsum[b, kk] += pin
+            wp2sum[b, kk] += pin * pin
 
         ki = 0
         if rec[0] == 0:
@@ -273,7 +302,7 @@ def run_bare_scaled(d: TriangularDimers, spins0: np.ndarray, *, lam: float, meth
                 ki += 1
         if noiseless:            # deterministic: one trajectory is the exact answer (as run_bare)
             return NoisyRun("ideal", np.array(rec), dt, acc[b:b + 1], wsum[b:b + 1], 1)
-    return NoisyRun("bare", np.array(rec), dt, acc, wsum, n_traj)
+    return NoisyRun("bare", np.array(rec), dt, acc, wsum, n_traj, None, wpsum, wp2sum)
 
 
 # --------------------------------------------------------------------------- #
@@ -302,8 +331,9 @@ def run_iceberg_scaled(d: TriangularDimers, spins0: np.ndarray, *, lam: float, m
                        mem_gb: float = 2.0, model: PauliModel | None = None) -> NoisyRun:
     """noisy_q3.run_iceberg at noise scale lam, by Pauli insertion on the two-qubit gates.
 
-    Before every 2-qubit gate of the encoded circuit — the logical ZZ rotations AND the
-    syndrome-extraction CX gates, i.e. the ("rot-zz", "syn-cx") scope of `scaled_stim_rates` — a
+    Before every 2-qubit gate of the encoded circuit — the logical ZZ rotations, the
+    rotation-gadget CX AND the syndrome-extraction CX gates, i.e. the canonical every-2q scope
+    ("rot-cx", "rot-zz", "syn-cx") of `scaled_stim_rates` (DECIDED-9) — a
     Pauli P drawn from `model` (default: the prior channel of `noise`) is inserted with
     probability (lam-1)*q_P, one draw per gate; then the gate and its usual fault follow. This is
     the same mechanism and the same channel as `run_bare_scaled(method="insert")`, so the two arms

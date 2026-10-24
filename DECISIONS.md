@@ -368,6 +368,78 @@ Offline `hqc_estimate` plus the free H2-1SC quotes; the machine the study ran on
 `NEXUS_REFRESH_TOKEN`, so the server quotes are pending one. **Nothing was submitted to a paying
 tier and no HQC was spent.**
 
+## DECIDED-8 — How a Q3 verdict is called: the 4 × 2 common-estimand table (2026-10-24)
+
+**Why.** The §3 "better by" of `data/q3_sweep.txt` subtracted residuals measured against
+**different** reference curves: raw for the raw modes and Gauss-conditioned for the Gauss modes.
+The gap therefore mixed estimator error with the offset between the two references. On a common
+raw target 1 of 10 verdicts flipped (review/18 F1).
+
+**Decision (project lead, in session).**
+- Score every mode ("bare raw", "bare + Gauss", "Iceberg", "Iceberg + Gauss") against **both** ideal
+  curves.
+- Compare modes only within one reference.
+- Call a winner only when |gap| > `verdict_k` (= 1) × the combined SE.
+- Implemented as `src/q3_rescore.py` (data-file §§5–6). The legacy §9.2 metric (`score_cell`, §§2–3)
+  is kept byte-identical for continuity and marked superseded.
+
+## DECIDED-9 — λ amplifies every two-qubit gate (2026-10-24)
+
+**Why.** Three λ scopes coexisted (review/18 F3):
+- the simulator amplified every 2q gate;
+- the Stim table used `("rot-zz", "syn-cx")`, which left out the 72 rotation-gadget CX of the state PREPARATION (they occur once; each step adds
+  60 ZZPhase + 32 syndrome CX, so the one-step program has 196 locations at N = 12) [measured];
+- the pytket circuit that would be submitted amplified ZZPhase only.
+
+**Decision (project lead, in session, after the reasoning was laid out).** Every two-qubit gate, in
+all three places: `CANONICAL_2Q_SCOPE = ("rot-cx", "rot-zz", "syn-cx")`.
+
+- **Reason:** 2503.20870 amplifies the 2Q gates of an *unencoded* circuit, all of which are ZZ
+  rotations. Applied to an encoded circuit the same rule reaches the code's own CX gates. Leaving
+  them at λ = 1 would make the "noisier machine" spare exactly the gates the encoding adds, which
+  flatters the encoded arm.
+- **Insertion position:** before the gate, as the simulator and its frozen spec
+  (`tests/test_iceberg_scaled.py` S1) already did. The pytket circuit now matches it.
+- **Assumption carried [assumed]:** a CX's error channel equals the rotation-learned channel. For CX,
+  insertion before the gate is a conjugated excess channel relative to the intrinsic fault after it
+  (F7).
+- **Bare programs** carry only `rot-zz`, so no bare number changes. The Stim survival predictions at
+  λ > 1 drop: (20, 0.5, 3) goes from 0.0510 to 0.0446, against a measured 0.0416 on 24 trajectories.
+  At the current trajectory counts, though, the measured survivals do not discriminate between the
+  two scopes (they lie within about 1σ of both). The decision rests on the location count, not on
+  the survival data. Because the left-out gates are in the preparation, the fix moves the Stim
+  survival offset, not the per-step rates (review B, 2026-10-24).
+- The article must explain this and every other departure from the literature (appendix table).
+
+## DECIDED-10 — Pre-declared estimator rules and the re-run budget (2026-10-24)
+
+**Why.** Cell (20, 0.5, 3) kept one surviving trajectory of 24. Its batch SE was 3e-17, and it read
+as "Iceberg better by 0.0008". Both N = 20 cells had silently run at half the declared budget
+(review/18 F13).
+
+**Decision (project lead, in session: "do those 4 steps"; no cherry-picking).** All of the following
+were fixed in `config.Q3ScalingConfig` and in frozen tests **before** any re-score or re-run, and
+apply to every cell alike:
+
+1. **No estimate below the floor.** A mode with Kish ESS < `ess_floor` (= 10, a convention: no
+   source gives a number, `research/08`), a non-finite value, or zero acceptance at **any** window
+   point has no estimate. The window is never shortened.
+2. **Error bar.** The delete-one-batch jackknife of the window-averaged residual. Legacy cells fall
+   back to the mean per-point SE, flagged `lg`.
+3. **Shot cost.** cost = mean(1/acceptance).
+4. **Re-run budget**, solved against the Stim-predicted acceptance at each cell's fixed window:
+   - 20 shards per cell (≥ 10 batches; Schmeiser 1982, `research/08` S10);
+   - margin 2 on the floor, so P(miss) ≈ 0.005 per cell;
+   - result: (18, 0.1, 3) 420 / 200, (18, 0.3, 1) 380 / 200, (20, 0.3, 1) 400 / 120,
+     (20, 0.5, 3) 460 / 120 (Iceberg / bare trajectories);
+   - the N = 12 cells are replayed at their original seed to gain per-batch detail.
+
+Derivation: `research/derivations/02-postselected-estimator.md`. Specs: `tests/test_q3_rescore.py`,
+`tests/test_q3_shards.py`, `tests/test_q3_rerun_budget.py`, `tests/test_lambda_scope.py`.
+
+Provenance fix (F13): every cell file now records its argv, git commit, the source of each setting
+(config or CLI), and any `--allow-reduced` reason. A count below config refuses without a reason.
+
 ---
 
 ## Applied corrections (no decision needed)

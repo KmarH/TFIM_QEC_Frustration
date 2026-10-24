@@ -72,10 +72,19 @@ def _arm(d, s0, sh, run, max_spins: int) -> dict:
     # rows per batch because the JSON writer ravels an ndarray and would lose the (B, T) shape.
     if obs.n_eff is not None:
         out["n_eff"] = np.asarray(obs.n_eff, dtype=float)
+    if obs.ess is not None:
+        out["ess"] = np.asarray(obs.ess, dtype=float)
+    if obs.ess_cond is not None:
+        out["ess_cond"] = np.asarray(obs.ess_cond, dtype=float)
     if obs.per_batch is not None:
-        out["per_batch"] = {mode: {o: [np.asarray(row, dtype=float) for row in arr]
-                                   for o, arr in block.items()}
-                            for mode, block in obs.per_batch.items()}
+        pb = {}
+        for key, block in obs.per_batch.items():
+            if isinstance(block, dict):                 # "raw" / "cond": obs -> (B, T)
+                pb[key] = {o: [np.asarray(row, dtype=float) for row in arr]
+                           for o, arr in block.items()}
+            else:                                       # "wsum" / "p_in" / "w2sum": (B, T)
+                pb[key] = [np.asarray(row, dtype=float) for row in block]
+        out["per_batch"] = pb
     return out
 
 
@@ -84,7 +93,8 @@ def run_noisy_sweep(cases: Sequence[tuple[int, int, str]], h_values: Sequence[fl
                     n_batches: int, seed: int, noise: NoiseRates | None = None,
                     return_meta: bool = False, steps: int | None = None,
                     arms: str = "both", ice_steps: int | None = None,
-                    record_every: int | None = None, mem_gb: float | None = None) -> dict:
+                    record_every: int | None = None, mem_gb: float | None = None,
+                    seed_extra: Sequence[int] = ()) -> dict:
     """Run the bare and Iceberg arms for every (case, h, lam) and return their RAW
     flippable-density curves with batch-means SE.
 
@@ -100,6 +110,9 @@ def run_noisy_sweep(cases: Sequence[tuple[int, int, str]], h_values: Sequence[fl
     record_every, mem_gb
                None = the CONFIG.q3 values. They are per-size settings at larger N, where the
                accumulators (n_batches * n_records * 2^N * 8 bytes) would otherwise be refused.
+    seed_extra extra integers appended to each cell's seed sequence (additive, 2026-10-24): an
+               independent stream per SHARD of a cell (src/q3_shards.py). () is bitwise the
+               pre-2026-10-24 stream.
 
     Classical prediction under an ASSUMED noise model; not an H2 result.
     """
@@ -126,7 +139,7 @@ def run_noisy_sweep(cases: Sequence[tuple[int, int, str]], h_values: Sequence[fl
                       "record_every": q3.noisy_record_every if record_every is None
                       else int(record_every),
                       "mem_gb": q3.noisy_mem_gb if mem_gb is None else float(mem_gb)}
-                rng = np.random.default_rng([seed, ci, hi, li])
+                rng = np.random.default_rng([seed, ci, hi, li, *seed_extra])
                 if lam == 1:
                     bare_run = run_bare(d, s0, n_steps=n_bare, noise=noise, n_traj=n_traj_bare,
                                         n_batches=n_batches, rng=rng,

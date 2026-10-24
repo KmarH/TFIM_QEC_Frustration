@@ -1,0 +1,6 @@
+# data/q3_le_encoded_lambda.txt - exact encoded lambda circuits on the NOISELESS local
+# H2 emulator (PECOS); only the inserted Paulis act. Construction check, NOT an H2
+# result; free tier, no Nexus, no HQC. scripts/le_q3_encoded_lambda.py
+# 3x4 Iceberg, 2 Trotter steps, h = 0.3, lambda = 3, 40 instances x 20 shots
+lambda = 1: acceptance 1.0000 over 20 shots (must be 1: transparency)
+lambda = 3: mean acceptance over instances 0.7000 +- 0.0734; Stim first-order prediction for the inserted channel 0.7424; deviation -0.6 sigma

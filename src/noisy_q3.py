@@ -210,6 +210,14 @@ class NoisyRun:
     acc: np.ndarray                  # (B, T, 2^N): sum over the batch of weight * logical distribution
     wsum: np.ndarray                 # (B, T): sum of weights (post-selection survival) per batch
     n_traj: int
+    # (B, T): sum of squared weights, for the Kish effective sample size (additive, 2026-10-24,
+    # DECIDED-10). None for arms whose weights are all 0 or 1, where Kish ESS = sum of weights.
+    w2sum: Optional[np.ndarray] = None
+    # (B, T): sum over trajectories of w * p_in and of (w * p_in)^2, p_in = the trajectory's weight
+    # in the defect-free W0 sector (review A2 2026-10-24: Gauss conditioning re-weights the
+    # trajectories, so the conditioned curve has its OWN, smaller Kish ESS).
+    wpsum: Optional[np.ndarray] = None
+    wp2sum: Optional[np.ndarray] = None
 
     @property
     def times(self) -> np.ndarray:
@@ -219,11 +227,38 @@ class NoisyRun:
         """Fraction of trajectories surviving post-selection (1 for unencoded arms)."""
         return self.wsum.sum(0) / self.n_traj
 
+    def ess(self) -> np.ndarray:
+        """Kish effective sample size per recorded step, (sum w)^2 / sum w^2, pooled over batches.
+        It is >= sum w for weights in [0, 1], so sum w (n_eff) is a conservative stand-in."""
+        w = self.wsum.sum(0)
+        if self.w2sum is None:
+            return w
+        w2 = self.w2sum.sum(0)
+        with np.errstate(invalid="ignore", divide="ignore"):
+            return np.where(w2 > 0, w * w / w2, 0.0)
+
+    def ess_cond(self) -> Optional[np.ndarray]:
+        """Kish ESS of the Gauss-conditioned curve, (sum w p_in)^2 / sum (w p_in)^2, or None when
+        the run did not record it."""
+        if self.wp2sum is None or self.wpsum is None:
+            return None
+        a, b = self.wpsum.sum(0), self.wp2sum.sum(0)
+        with np.errstate(invalid="ignore", divide="ignore"):
+            return np.where(b > 0, a * a / b, 0.0)
+
     def mixture(self, batch: Optional[int] = None) -> np.ndarray:
         """(T, 2^N) normalised mixture distribution (pooled, or one batch); NaN where no weight."""
         a, w = (self.acc.sum(0), self.wsum.sum(0)) if batch is None else (self.acc[batch], self.wsum[batch])
         with np.errstate(invalid="ignore", divide="ignore"):
             return a / w[:, None]
+
+
+def sector_mask(d: TriangularDimers, spins0: np.ndarray) -> np.ndarray:
+    """Basis states of the defect-free sector with the initial state's winding (W0): the Gauss-law
+    post-selection set, as run_observables uses it."""
+    i0 = d.product_state_index(spins0)
+    wx, wy = d.winding_x(0), d.winding_y(0)
+    return (d.total_defects() == 0) & (wx == wx[i0]) & (wy == wy[i0])
 
 
 def _record_steps(n_steps: int, every: int) -> List[int]:
@@ -248,6 +283,9 @@ def run_bare(d: TriangularDimers, spins0: np.ndarray, *, J: float, h: float, dt:
     down = [s for s, v in enumerate(np.asarray(spins0).reshape(-1)) if v < 0]
     acc = np.zeros((n_batches, len(rec), 1 << N))
     wsum = np.zeros((n_batches, len(rec)))
+    wpsum = np.zeros((n_batches, len(rec)))
+    wp2sum = np.zeros((n_batches, len(rec)))
+    smask = sector_mask(d, spins0)
     noiseless = not (noise.p1 or noise.p2 or noise.pm)
     for tr in range(n_traj):
         b = tr % n_batches
@@ -262,6 +300,9 @@ def run_bare(d: TriangularDimers, spins0: np.ndarray, *, J: float, h: float, dt:
             p = readout_flip(np.abs(sv.flat()) ** 2, range(N), N, noise.pm)
             acc[b, k] += p
             wsum[b, k] += 1.0
+            pin = float(p[smask].sum())
+            wpsum[b, k] += pin
+            wp2sum[b, k] += pin * pin
 
         ki = 0
         if rec[0] == 0:
@@ -289,7 +330,7 @@ def run_bare(d: TriangularDimers, spins0: np.ndarray, *, J: float, h: float, dt:
             acc[:] = acc[b]
             wsum[:] = wsum[b]
             return NoisyRun("ideal", np.array(rec), dt, acc[:1], wsum[:1], 1)
-    return NoisyRun("bare", np.array(rec), dt, acc, wsum, n_traj)
+    return NoisyRun("bare", np.array(rec), dt, acc, wsum, n_traj, None, wpsum, wp2sum)
 
 
 def _boundaries(prog: TriangularIcebergTFIM) -> Tuple[int, int]:
@@ -350,6 +391,10 @@ def run_iceberg(d: TriangularDimers, spins0: np.ndarray, *, J: float, h: float, 
     at = {b1 + (s - 1) * stride: s for s in rec}     # s = 0: right after the prep (start of step 1)
     acc = np.zeros((n_batches, len(rec), 1 << d.N))
     wsum = np.zeros((n_batches, len(rec)))
+    w2sum = np.zeros((n_batches, len(rec)))
+    wpsum = np.zeros((n_batches, len(rec)))
+    wp2sum = np.zeros((n_batches, len(rec)))
+    smask = sector_mask(d, spins0)
     for tr in range(n_traj):
         b = tr % n_batches
         sv = StateVector(n, rng)
@@ -371,8 +416,13 @@ def run_iceberg(d: TriangularDimers, spins0: np.ndarray, *, J: float, h: float, 
             p = np.where(zdet, p, 0.0)
             w = float(p.sum())
             if w > 0:
-                acc[b, k] += np.bincount(lidx, weights=p, minlength=1 << d.N)
+                q = np.bincount(lidx, weights=p, minlength=1 << d.N)
+                acc[b, k] += q
                 wsum[b, k] += w
+                w2sum[b, k] += w * w
+                wp = float(q[smask].sum())
+                wpsum[b, k] += wp
+                wp2sum[b, k] += wp * wp
 
         for i, it in enumerate(sch.items):
             if i in at:
@@ -402,7 +452,7 @@ def run_iceberg(d: TriangularDimers, spins0: np.ndarray, *, J: float, h: float, 
             elif kind == "D":
                 if sum(meas[k] for k in it[1]) % 2:
                     ok = False
-    return NoisyRun("iceberg", np.array(rec), dt, acc, wsum, n_traj)
+    return NoisyRun("iceberg", np.array(rec), dt, acc, wsum, n_traj, w2sum, wpsum, wp2sum)
 
 
 # --------------------------------------------------------------------------- #
@@ -424,15 +474,17 @@ class RunObservables:
     # aggregates were built from, so a later re-score is a pure function of the saved file -- no
     # one has to decide which data to keep, and nothing is selected after the fact.
     n_eff: Optional[np.ndarray] = None        # (T,) surviving trajectory weight per recorded step
-    per_batch: Optional[Dict[str, Dict[str, np.ndarray]]] = None   # "raw"/"cond" -> obs -> (B, T)
+    ess: Optional[np.ndarray] = None          # (T,) Kish effective sample size (NoisyRun.ess)
+    ess_cond: Optional[np.ndarray] = None     # (T,) Kish ESS of the conditioned curve
+    # "raw"/"cond" -> obs -> (B, T); also "wsum", "p_in" (and "w2sum" when known) -> (B, T), so
+    # shards can be pooled exactly (src/q3_shards.py). Present for any number of batches.
+    per_batch: Optional[Dict[str, Dict[str, np.ndarray]]] = None
 
 
 def run_observables(d: TriangularDimers, spins0: np.ndarray, shells: Shells, run: NoisyRun,
                     max_spins: int) -> RunObservables:
     obs = observable_function(d, spins0, shells, max_spins=max_spins)
-    i0 = d.product_state_index(spins0)
-    wx, wy = d.winding_x(0), d.winding_y(0)
-    mask = (d.total_defects() == 0) & (wx == wx[i0]) & (wy == wy[i0])
+    mask = sector_mask(d, spins0)
 
     def evaluate(P):                     # P: (T, 2^N) -> raw, cond dicts of (T,) arrays, p_in
         # raw vs cond is the T-17 caveat made operational. 'raw' is the full noisy mixture; 'cond'
@@ -460,11 +512,15 @@ def run_observables(d: TriangularDimers, spins0: np.ndarray, shells: Shells, run
 
     raw, cond, pin = evaluate(run.mixture())
     nb = run.acc.shape[0]
-    per_batch = None
+    per = [evaluate(run.mixture(b)) for b in range(nb)]
+    per_batch = {"raw": {o: np.array([x[0][o] for x in per]) for o in OBS_N},
+                 "cond": {o: np.array([x[1][o] for x in per]) for o in OBS_N},
+                 "wsum": np.array(run.wsum, dtype=float),
+                 "p_in": np.array([x[2] for x in per])}
+    for name in ("w2sum", "wpsum", "wp2sum"):
+        if getattr(run, name) is not None:
+            per_batch[name] = np.array(getattr(run, name), dtype=float)
     if nb > 1:
-        per = [evaluate(run.mixture(b)) for b in range(nb)]
-        per_batch = {"raw": {o: np.array([x[0][o] for x in per]) for o in OBS_N},
-                     "cond": {o: np.array([x[1][o] for x in per]) for o in OBS_N}}
         def se(vals):
             # batches with no surviving weight are NaN: the SE uses only the finite ones (review M3)
             v = np.array(vals)
@@ -479,7 +535,8 @@ def run_observables(d: TriangularDimers, spins0: np.ndarray, shells: Shells, run
     return RunObservables(run.times, run.acceptance(), pin,
                           {o: (raw[o], se_raw[o]) for o in OBS_N},
                           {o: (cond[o], se_cond[o]) for o in OBS_N},
-                          n_eff=run.wsum.sum(0), per_batch=per_batch)
+                          n_eff=run.wsum.sum(0), ess=run.ess(), ess_cond=run.ess_cond(),
+                          per_batch=per_batch)
 
 
 # --------------------------------------------------------------------------- #

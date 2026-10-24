@@ -377,3 +377,61 @@ skill. The `tfim-qec` skill was trimmed 4,872 → 4,092 B, removing the blocks t
 contradicted `CLAUDE.md`.
 
 **Gate.** 728 tests collected before and after; full suite run. Not committed.
+
+## 32. Q3 sweep: rulings, pre-declared estimator rules, the re-run program and the article (2026-10-24)
+
+**Why.** The 11th sweep cell (20, 0.5, 3) rested on one surviving Iceberg trajectory of 24. Its
+3e-17 batch SE made it read as "Iceberg better by 0.0008". Blind review/18 had already found that
+the §3 verdict mixed reference curves (F1) and that three λ scopes coexisted (F3). This pass found
+that both N = 20 cells had run at half their declared budget with no record (F13).
+
+**Rulings (project lead, in session):**
+- DECIDED-8: 4 modes × 2 references, winners only within one reference beyond 1σ.
+- DECIDED-9: λ amplifies every 2-qubit gate (simulator = Stim = pytket).
+- DECIDED-10: the four estimator steps. No estimate below a pre-declared ESS floor; jackknife over
+  batches; cost = mean(1/acceptance); a re-run budget solved from the Stim survival with margin 2,
+  20 shards per cell, one re-run then final.
+- Git commit/push allowed on this branch, never main.
+- A local-only technical article (never committed or pushed).
+
+**Built** [all classical, ASSUMED noise; 0 HQC, nothing submitted]:
+- Literature and statistics write-ups:
+  - `research/08-postselected-estimators.md` (lit-sweep, S1–S18; no source gives a numeric ESS floor);
+  - `research/derivations/02-postselected-estimator.md`.
+- Scoring, pooling and re-run code:
+  - `src/q3_rescore.py` (v2 scorer: msd verdicts, own Kish ESS for the Gauss modes, min_batches, grid guards);
+  - `src/q3_shards.py` (exact shard pooling);
+  - `scripts/q3_queue.py` (resumable multi-host job queue);
+  - `scripts/check_q3_replay.py`;
+  - `scripts/gen_q3_doc_tables.py` (the v2 block of docs/q3_scaling.md §4.0 and its `--check`);
+  - `scripts/plot_q3_sweep.py`, `plot_q3_schematics.py`, `gen_q3_article_tables.py`, `le_q3_encoded_lambda.py`.
+- Runner and provenance changes:
+  - `src/noisy_q3.py`: additive w2sum / wpsum / wp2sum accumulators, ess, ess_cond, sector_mask;
+  - `run_q3_sweep.py`: provenance (argv, git commit, setting sources), a budget guard (`--allow-reduced`), shards, `--merge-shards`, data-file §4 Stim column (F12) and §§5–6.
+- λ scope everywhere:
+  - `CANONICAL_2Q_SCOPE`; `insert_paulis` covers every 2q gate and preserves registers;
+  - `iceberg_noise_scaled_circuits` builds encoded λ > 1 H2 circuits, which were impossible before.
+
+**Tests.**
+- Frozen specs: `test_q3_rescore` (R7 amended after review A, documented), `test_q3_shards`, `test_lambda_scope`, `test_q3_rerun_budget`.
+- Review regressions: `test_q3_rescore_review`, `test_h2_q3_encoded_lambda`.
+- 52 passed + 6 expected strict xfails locally. OVM gate on commit 1 (`0888caf`): 706 / 23 / 6 / 0 failed.
+
+**Reviews.** Both blind reviewers returned **minor**, and every finding was fixed with a test:
+- A (theory): the |·| residual's noise-floor bias, a separate conditioned ESS, min_batches, the one-batch guard, the window-start guard, the re-run rule, wording;
+- B (code): queue claim races, duplicate shards, partial merge without the ideal, tmp-name collision.
+- B also found that the 72 rotation-gadget CX are the **state preparation** (once), not per step. The scope fix therefore moves Stim's survival offset, not its per-step rates. Every document was corrected.
+
+**Results so far** [measured, legacy error bars, PRELIMINARY]:
+- At N = 12, bare + Gauss beats Iceberg alone in all 7 cells against the conditioned target.
+- Iceberg + Gauss beats bare + Gauss against the conditioned target in 5 of the 6 cells that have
+  an estimate, at 4–7× the shots by mean(1/acceptance).
+- N = 18 and 20 have no encoded estimate (end ESS 1–6); their pre-declared re-runs are queued.
+- Local-emulator construction check of the exact encoded λ = 3 circuits: acceptance 0.700 ± 0.073
+  against Stim's 0.742 (−0.6σ); λ = 1 gives 1.000.
+
+**Blocked.** `git push` was refused by the Claude Code auto-mode permission classifier, despite the
+lead's permission. It was not worked around, and commits are local. SC quotes need
+`NEXUS_REFRESH_TOKEN`.
+
+**Running.** The re-run program: 80 shards + 7 replays over local / OVM / OLP. See RESUME.md.

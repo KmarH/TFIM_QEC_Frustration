@@ -10,3 +10,4 @@
 | `05-zenodo-dataset-map.md` | Data conventions of the Zenodo 10.5281/zenodo.18487089 release for 2503.20870: modes raw/znr/zne, file layout. |
 | `06-h2-noise-prior.md` | Published priors on the H2 native 2Q-gate error composition (η = ZZ fraction, ε = coherent over-rotation) for FLAG-0. |
 | `07-noise-scaling.md` | ZNE and noise-scaling literature for the 36-spin triangular noise-scaling arm: folding, PEA, the 2503.20870 α=4/α′=8.2 details, ZNE+symmetry, ZNE on codes, and the HQC formula. |
+| `08-postselected-estimators.md` | Error bars for post-selected / weighted trajectory estimators: Kish ESS and floors, ratio (delta-method) variance, batch jackknife/bootstrap, binomial intervals, how Iceberg/QED papers report discard rates, weight collapse. |

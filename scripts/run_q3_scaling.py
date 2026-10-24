@@ -14,7 +14,8 @@ It reports, per logical size N and noise scale lam:
   * the keep / drop verdict per cell of the D1 x D2 x D3 grid, and for the D4 extreme combos.
 
 Two lambda scopes are printed, because they are not the same experiment:
-  * "2q"  = ("rot-zz", "syn-cx"), the classes Pauli insertion actually amplifies in the
+  * "2q"  = every 2q class ("rot-cx", "rot-zz", "syn-cx"; DECIDED-9, 2026-10-24; it was
+            ("rot-zz", "syn-cx") before, review/18 F3), the classes Pauli insertion amplifies in the
             trajectory runners (src/noise_scaling.run_bare_scaled / run_iceberg_scaled). THIS is
             the scope the keep/drop verdict uses, since it is what the expensive stage runs.
   * "all" = every noise class present, the "all gates" row of
@@ -39,6 +40,7 @@ if REPO not in sys.path:
 from config import CONFIG
 from src.noisy_q3_sweep import iceberg_physical_qubits, prior_noise
 from src.q3_scaling import (
+    CANONICAL_2Q_SCOPE,
     SIZE_TO_CASE,
     faults_per_window,
     prefilter_grid,
@@ -48,7 +50,7 @@ from src.q3_scaling import (
     window_steps,
 )
 
-SCOPE_2Q = ("rot-zz", "syn-cx")
+SCOPE_2Q = CANONICAL_2Q_SCOPE   # DECIDED-9: every 2q class (was ("rot-zz", "syn-cx"))
 
 
 def matched_window(rates, floor: float, cap: int) -> int:

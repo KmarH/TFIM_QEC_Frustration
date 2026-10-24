@@ -446,7 +446,12 @@ class NoiseScalingConfig:
     fold_lam: int = 3                  # D2: the one folded check point (odd: G (G^-1 G)^k)
     z_min: float = 3.0                 # [assumed] slope "resolved" at |z| >= 3
     p_consistent: float = 0.05         # [assumed] fit reported only if chi2 p-value >= this
-    fold_scope: tuple = ("rot-zz",)    # D2/spec: fold and insert 2q (logical-ZZ) gates only
+    # DECIDED-9 (2026-10-24): lambda amplifies EVERY 2-qubit gate class (= Q3ScalingConfig.
+    # lambda_scope); used for the Stim rate tables. The bare programs only carry "rot-zz", so
+    # their numbers are unchanged; the old value was ("rot-zz",) (review/18 F3). NOTE: folding
+    # (noise_scaling.fold_circuit) still folds ZZPhase only and is defined for BARE circuits only
+    # (run_iceberg_scaled refuses it), so this scope never reaches a folded encoded circuit.
+    fold_scope: tuple = ("rot-cx", "rot-zz", "syn-cx")
     # [measured, offline H2-1 compile, research/derivations/01] TKET optimisation levels 1 and 2
     # (2 = Quantinuum's default) cancel ZZ(a) ZZ(-a) ZZ(a) back to one gate, silently turning the
     # folded lam = 3 point into lam = 1. Folded circuits must compile at level 0 (and be submitted
@@ -532,6 +537,67 @@ class Q3ScalingConfig:
     extreme_combos: tuple = ((20, 0.5, 3), (18, 0.1, 3), (12, 0.5, 3))
     # Stim survival levels reported per size (as Q3BaselineConfig.size_survival).
     survival_levels: tuple = (0.5, 0.1, 0.05, 0.01)
+
+    # ---- DECIDED-9 (project lead, 2026-10-24): the lambda scope -------------------------------
+    # lambda amplifies EVERY two-qubit gate class of the encoded circuit [measured 2026-10-24,
+    # N = 12: the one-step program has 196 two-qubit locations - 72 "rot-cx" in the state
+    # preparation (ONCE), and per step 60 "rot-zz" + 32 "syn-cx" (review B)]. The old Stim scope
+    # ("rot-zz", "syn-cx") left out the preparation CX (review/18 F3), so the fix moves the Stim
+    # survival OFFSET (hence the survival predictions and the re-run budgets), not the per-step
+    # rates.
+    lambda_scope: tuple = ("rot-cx", "rot-zz", "syn-cx")
+
+    # ---- DECIDED-10 (project lead, 2026-10-24): pre-declared estimator rules -------------------
+    # Written down BEFORE any re-score or re-run and applied to every cell alike (no per-cell or
+    # after-the-fact choice). Derivation: research/derivations/02-postselected-estimator.md;
+    # sources: research/08-postselected-estimators.md.
+    # A mode has an estimate only if its effective sample size is >= ess_floor at EVERY point of
+    # the window (src/q3_rescore.py).
+    ess_floor: float = 10.0
+    # A head-to-head winner is called only when |gap| > verdict_k * combined SE (DECIDED-8).
+    verdict_k: float = 1.0
+    # The encoded window (ice_steps) every sweep cell was run with, read from the cell JSONs of
+    # 2026-10-23 (their `cell.ice_steps`). Fixed: re-runs keep them, so nothing moves after the
+    # fact. They were survival-matched under the pre-DECIDED-9 Stim scope.
+    cell_windows: dict = field(default_factory=lambda: {
+        (12, 0.1, 1): 48, (12, 0.2, 1): 48, (12, 0.3, 1): 48, (12, 0.3, 2): 28,
+        (12, 0.3, 3): 19, (12, 0.5, 1): 48, (12, 0.5, 3): 19,
+        (18, 0.1, 3): 13, (18, 0.3, 1): 36,
+        (20, 0.3, 1): 33, (20, 0.5, 3): 12,
+    })
+    # A jackknife needs enough groups: Schmeiser (1982, research/08 S10) finds confidence-interval
+    # effects large below 10 batches and small above 30; Wolff (S7) puts the error-of-error at
+    # ~sqrt(2/B). Re-runs therefore use rerun_shards independent shards = batches per cell, each
+    # shard one process with its own seed stream (seed_extra = (shard,)).
+    min_batches: int = 10
+    rerun_shards: int = 20
+    # The surviving weight at the window end is random (about Poisson): budgeting for an
+    # EXPECTED ESS equal to the floor would miss it with probability 0.46. A margin of 2 makes
+    # the expected ESS ~20 and P(Poisson(20) < 10) = 0.005 per cell [derived], fixed in advance.
+    ess_margin: float = 2.0
+    # The re-run rule (uniform): a cell whose realised ESS meets the floor keeps its data; one
+    # that misses it gets EXACTLY ONE re-run at the margin budget below, and that result is final
+    # (no optional stopping). Derivation 02 section 6.
+    # Re-run budget (step 4), by the rule of tests/test_q3_rerun_budget.py:
+    #   batch_ice = ceil(ess_margin * ess_floor / (rerun_shards * s_pred)), >= per_size / K;
+    #   traj_ice = rerun_shards * batch_ice;  batch_bare = ceil(per_size traj_bare / rerun_shards)
+    # with s_pred the Stim survival at the cell's window under lambda_scope [derived accounting]:
+    #   (18, 0.1, 3) 0.0484 -> 21 x 20 = 420   (18, 0.3, 1) 0.0534 -> 19 x 20 = 380
+    #   (20, 0.3, 1) 0.0511 -> 20 x 20 = 400   (20, 0.5, 3) 0.0446 -> 23 x 20 = 460
+    # So the expected surviving weight at the last window point is ~2 x ess_floor for the CELL;
+    # an individual shard may hold no survivor there, which the pooled jackknife handles.
+    # N = 12 cells already meet the floor at 300 trajectories (s_pred >= 0.0516) in 20 batches
+    # and are not re-budgeted; they are replayed at their original seed only to gain per_batch.
+    rerun: dict = field(default_factory=lambda: {
+        (18, 0.1, 3): {"ice_steps": 13, "batch_ice": 21, "traj_ice": 420,
+                       "batch_bare": 10, "traj_bare": 200},
+        (18, 0.3, 1): {"ice_steps": 36, "batch_ice": 19, "traj_ice": 380,
+                       "batch_bare": 10, "traj_bare": 200},
+        (20, 0.3, 1): {"ice_steps": 33, "batch_ice": 20, "traj_ice": 400,
+                       "batch_bare": 6, "traj_bare": 120},
+        (20, 0.5, 3): {"ice_steps": 12, "batch_ice": 23, "traj_ice": 460,
+                       "batch_bare": 6, "traj_bare": 120},
+    })
 
 
 @dataclass

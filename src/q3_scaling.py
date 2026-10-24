@@ -55,9 +55,13 @@ SIZE_TO_CASE: dict[int, tuple[int, int, str]] = {
 # narrower rows, kept because the derivation defines them.
 _NAMED_SCOPES: dict[str, tuple[str, ...] | None] = {
     "all": None,                              # resolved per program: every tag class present
-    "2q": ("rot-zz", "syn-cx"),               # "all 2Q (incl. syndrome CX)"
+    "2q": tuple(sorted(CONFIG.q3_scaling.lambda_scope)),   # EVERY 2Q class (DECIDED-9)
+    "2q-legacy": ("rot-zz", "syn-cx"),        # the pre-2026-10-24 "2q": no rotation-gadget CX
     "logical-zz": ("rot-zz",),                # "logical ZZ only"
 }
+# DECIDED-9 (2026-10-24): the one lambda scope used by the simulator, the Stim table and the
+# pytket circuit alike - every two-qubit noise class (review/18 F3).
+CANONICAL_2Q_SCOPE: tuple[str, ...] = _NAMED_SCOPES["2q"]
 
 # Step counts at which the prep offset is solved for. detected_total(steps) is exactly affine in
 # steps [measured, 2026-10-22], so two points determine it; these are small enough to stay cheap
@@ -213,19 +217,23 @@ def survival_curve(rates: StimRates, steps) -> np.ndarray:
 
 def prefilter_grid(sizes: Sequence[int], lams: Sequence[float], hs: Sequence[float],
                    noise: NoiseRates, qdm_times: float, dt: float,
-                   survival_floor: float = 0.05) -> list[GridCell]:
+                   survival_floor: float = 0.05,
+                   scope: str | Sequence[str] = "2q") -> list[GridCell]:
     """Cross (sizes x lams x hs) and report the Iceberg survival of every cell.
 
     `survival` / `keep` are at the fixed reference window qdm_times / dt steps; a cell is kept
     when its survival is at or above `survival_floor`, i.e. when the expensive exact-circuit
     stage could still resolve the encoded arm there. `survival_physics` additionally reports the
     h-dependent Q3 physics window (qdm_times / h). Cheap: Stim only, no state vector.
+
+    `scope` is the lambda scope (default the canonical every-2q-gate one, DECIDED-9; it was
+    implicitly "all" before 2026-10-24, review/18 F11).
     """
     ref_steps = round(qdm_times / dt)
     cells: list[GridCell] = []
     for n in sizes:
         for lam in lams:
-            rates = stim_rate_table(n, lam, noise)
+            rates = stim_rate_table(n, lam, noise, scope=scope)
             ref = float(survival_curve(rates, np.array([ref_steps]))[0])
             for h in hs:
                 phys_steps = round((qdm_times / h) / dt)

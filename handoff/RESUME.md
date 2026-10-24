@@ -27,15 +27,19 @@ stage; record each stage's state HERE before ending a turn. This session owns th
 **Stage status:** (update as you go)
 | stage | state |
 |---|---|
-| 0 record F13 + OVM suite + commit 1 | in progress |
-| 1 lit-sweep + derivation | - |
-| 2 frozen tests | - |
-| 3 implementation | - |
-| 4 blind review + gate + commit | - |
-| 5 launch re-run program (OVM/OLP/local) | - |
-| 6 interim rescore, figures, article | - |
-| 6b emulator-readiness | - |
-| 7 handoff + loop | - |
+| 0 record F13 + OVM suite + commit 1 | DONE: commit `0888caf`; OVM suite on it 706 passed / 23 skipped / 6 xfailed / 0 failed (58 min). **PUSH BLOCKED** by the auto-mode permission classifier ("Out-of-Place Publication") despite the lead's in-session permission - NOT worked around; commits stay local until the lead adds an allow rule for `git push origin resultados-espera` |
+| 1 lit-sweep + derivation | DONE: research/08 (S1-S18), research/derivations/02 (revised after review A) |
+| 2 frozen tests | DONE: test_q3_rescore (R7 amended after review A1), test_q3_shards, test_lambda_scope, test_q3_rerun_budget; review regressions test_q3_rescore_review, test_h2_q3_encoded_lambda |
+| 3 implementation | DONE (uncommitted): q3_rescore (msd verdict, cond ESS, min_batches), q3_shards, q3_queue, check_q3_replay, run_q3_sweep (provenance/guard/shards/sections 4-6), noisy_q3 ESS accumulators, lambda scope everywhere incl. encoded H2 circuits; config DECIDED-9/10; DECISIONS 8-10 |
+| 4 blind review + gate + commit | review A = MINOR, all findings fixed; review B interrupted by the session limit at ~16:50, RESUMED (agent ae906e0aba2fd3fc4); then OVM suite on commit 2, then launch |
+| 5 launch re-run program | STAGED, not launched: job lists in scratchpad/jobs (local 18 / ovm 25 / olp 44 = all 87 jobs); local 2 workers (2.4 GB free), OVM 2, OLP 2; each host runs a CLEAN CLONE of commit 2 (never the live working tree) |
+| 6 interim rescore, figures, article | DONE (preliminary): docs/article_q3/main.pdf, 37 pp, compiled on OVM with tectonic, 0 undefined refs; LE check of encoded lambda=3 circuits: acceptance 0.700 +- 0.073 vs Stim 0.742 (-0.6 sigma), lambda=1 = 1.000 |
+| 6b emulator-readiness | DONE as far as free tiers allow: encoded lambda circuits buildable (196 2q locations in the one-step program = sim = Stim; the 72 rot-cx are the PREPARATION, once - review B), LE check passed; SC quotes need NEXUS_REFRESH_TOKEN (absent) |
+| 7 handoff + loop | loop armed; plan.md section 32 + RESUME rewrite pending |
+
+**Frozen spec hashes (sha256, first 16):** test_q3_shards b957326255d258f6, test_lambda_scope (re-hash after L3 attribute fix), test_q3_rerun_budget (re-hash after margin revision), test_q3_rescore (re-hash after R7 amendment). Final hashes are recorded at the commit that freezes them.
+
+**Hosts:** OVM python `~/KiroTest-project/.venv/bin/python`, clone `~/TFIM-q3rerun`; OLP python `~/TFIM-verify/.venv/bin/python` (pins match); local `.venv`.
 
 Everything below this block is the 2026-10-23 history; its "never commit" lines are SUPERSEDED by
 the git permission above.

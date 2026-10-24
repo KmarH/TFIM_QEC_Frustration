@@ -182,3 +182,26 @@ def noise_scaled_circuits(
         rng = np.random.default_rng((seed, i))
         out.append(ScaledCircuit(lam, "insert", i, _with_measures(insert_paulis(body, lam, model, rng), base, meas)))
     return out
+
+
+def iceberg_noise_scaled_circuits(base: Circuit, lam: int, *, instances: int = 1, seed: int = 0,
+                                  model=None) -> list[ScaledCircuit]:
+    """The Iceberg-encoded circuit at noise scale lam by Pauli insertion (DECIDED-9, 2026-10-24):
+    before EVERY two-qubit gate (logical ZZ rotations, rotation-gadget CX, syndrome CX) a Pauli
+    from `model` (default: the research/06 prior channel) with probability (lam - 1) q_P - the
+    same rule, place and channel as the trajectory simulator (src/noise_scaling.run_iceberg_scaled)
+    and the Stim rate table. Mid-circuit syndrome measurements, resets and conditionals are kept
+    as they are. lam = 1 returns the base. Folding is not offered: it would fold the syndrome CX
+    and change the code's detection structure (run_iceberg_scaled refuses it for that reason)."""
+    if isinstance(lam, bool) or int(lam) != lam or lam < 1:
+        raise ValueError(f"lam must be an integer >= 1, got {lam!r}")
+    lam = int(lam)
+    if lam == 1:
+        return [ScaledCircuit(1, "none", 0, base.copy())]
+    if instances < 1:
+        raise ValueError(f"instances must be >= 1, got {instances}")
+    model = default_model() if model is None else model
+    return [ScaledCircuit(lam, "insert", i,
+                          insert_paulis(base, lam, model, np.random.default_rng((seed, i))))
+            for i in range(instances)]
+
