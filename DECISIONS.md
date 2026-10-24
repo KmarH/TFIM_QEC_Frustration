@@ -33,182 +33,10 @@ reproduce the reference — was an over-correction and has been withdrawn from t
 The sequence is kept here deliberately: the conflict was hard to find precisely because earlier
 records were tidied rather than annotated.
 
-### The evidence (2026-10-15)
-
-**The paper** (arXiv:2503.20870v3, read in full):
-
-- §V, *"Emergent gauge theory on a frustrated lattice"*, sets the regime: **"For weak transverse
-  field (0 < h ≪ J)"**. [established]
-- **Figure 4(e) caption: "All data taken at (h/|J|, dt|J|)=(0.3, 0.25)."** [established]
-- The triangular lattice is **9×6** (§V, and again Methods §VII.1) — 54 sites. [established]
-- There is **one** triangular run at **one** field. The maximal and minimal winding sectors are
-  two initial states within it, not separate runs. [established]
-- The paper states the **square** quenches use **h = 2|J|**, explicitly a different system.
-  [established]
-
-Earlier fetch attempts failed only because the HTML is 244,452 characters and truncated before
-Figure 4 — not because the value was missing. `research/04`'s caveat that §V's body was never
-reached is now closed.
-
-**The released circuits** (read from `~/zenodo_18487089/zenodo_data/circuits/`):
-
-| file | rzz | rx (two half-layers) | ry | qreg |
-|---|---|---|---|---|
-| `quench1_step1.qasm` (square 7×8) | 112 × `rzz(0.5)` | 112 × `rx(0.5)` | 56 × `ry(π/6)` | 56 |
-| `quench4_step1.qasm` (triangular 9×6) | **162 × `rzz(0.5)`** | **108 × `rx(0.5)`** | 54 × `ry(0)` | 54 |
-
-- The gate **counts are correct** for 9×6: 162 = 3N bonds, 108 = two half-layers on 54 qubits. The
-  geometry really is the triangular one. [measured]
-- The **angles are the square quench's**. With dt|J| = 0.25 that is h·dt = 0.5, i.e. h/|J| = 2.
-  At the paper's h/|J| = 0.3 each half-layer would be **`rx(0.0375)`**, about 13× smaller.
-  [measured]
-- The dataset's gauge identities only flip **signs** of (J, h, θ); they cannot change a magnitude.
-  So this is not a gauge artefact. [derived]
-- **The release already documents these circuits as not the experiment's.** README, verbatim:
-  *"For quench4, the circuits in the folder are initialized to the |0...0> state, while the
-  experiments initialized to two different bitstring configurations."* The wrong field is a
-  second, undocumented instance. The same README offers the circuits "to cross-check against the
-  gate angles and circuit geometry we used" — which is exactly the use that misled this project.
-  [established]
-
-**The physics agrees with the paper, not the circuits.** §V's whole subject is an emergent Z₂
-Gauss law and dimer description that exists only for h ≪ J. At h/|J| = 2 there is nothing of the
-kind to observe: three independent reviewers measured, noiselessly, that the in-sector probability
-collapses from 1.0 to 0.13–0.63 within a **single** Trotter step, with in-sector weight falling
-with size (0.55 at N = 9, 0.11 at N = 12). A paper reporting dimer correlations relaxing toward
-Markov-chain Monte Carlo values cannot have been at h/|J| = 2. [measured]
-
-### Consequences
-
-- **`research/04` was right.** Its reading stands; the caveat added to it earlier on 2026-10-15 is
-  corrected.
-- **`research/05` read the files correctly**; only its inference about the experiment was wrong,
-  because the files misrepresent the experiment. It is now the detailed home for this finding.
-- **Q3 and the Gauss-law thread may again be described as matching the reference's §V**, now cited
-  to Figure 4(e) rather than assumed.
-- **The weak-field physics argument is kept**, reframed: it explains why the reference's own choice
-  of a weak field is the right regime and why the conclusions are safe at 0.3. It corroborates the
-  value instead of substituting for it.
-- **New finding, recorded in `research/05`:** the released quench4 circuits are inconsistent with
-  the paper's stated parameters in both field and initial state. Do not use them to infer the
-  triangular experiment's parameters; use the paper.
-- **T-5 narrows.** The two winding sectors **are** identified in the release, as the
-  `quench4_min_winding_*` and `quench4_max_winding_*` data files. What is missing is the explicit
-  initial bitstrings and circuits matching them.
-
-### What did not change
-
-No physics constant, no code, no number. `h = 0.3` and `dt = 0.25` were correct before any of
-this and are untouched; the suite stays at 274/274 on three platforms. Only the claims about what
-the work corresponds to moved — back to the project's original position, sourced this time.
-
-### How the conflict arose (history, kept for the record)
-
-Everything from here on describes the state of knowledge **before** the resolution above. It is
-kept because the failure mode is instructive, not because it is current.
-
-Q2, Q3 and the Gauss-law thread all run at h/|J| = 0.3, described in several places as "matching
-arXiv:2503.20870 §V". For a time that description could not be defended, because the project's own
-two research threads independently derived **opposite** values from the same paper and never
-cross-checked each other:
-
-| source | value | basis |
-|---|---|---|
-| the paper's own prose (abstract, intro, §V), read twice independently | h/\|J\| = 0.3 | `research/04-gauss-law-citations.md` item 3 [established] |
-| the paper's own **released quench4 circuits** | **h/\|J\| = 2** | `research/05-zenodo-dataset-map.md`; `rzz(0.5)`, `rx(0.5)`/`rx(1.0)`, identical to the square quenches, in all 80 QASM files [established] |
-
-`research/04` additionally states that §V's body text was never actually reached, which at the time
-appeared to weaken the prose reading — the opposite of the truth, as it turned out: §V's body and
-Figure 4(e) both confirm 0.3. `research/05` concluded "the 0.3 appears to be an error in the brief"
-but that finding never propagated to `GaussLawConfig` / `Q3BaselineConfig`, and every later entry
-kept both the 0.3 value and the "matching the reference" framing. In the end the config was right
-and the propagation failure was harmless, but only by luck: nobody had checked which source was
-authoritative.
-
-**The lesson worth keeping.** A released artefact that *looks* like primary evidence — a circuit
-file, published by the authors, offered expressly for cross-checking gate angles — outranked the
-paper's own text in two independent analyses here. It should not have. When an artefact and the
-publication disagree, the publication describes the experiment; the artefact describes whatever was
-exported. Check the physics for which one is coherent: at h/|J| = 2 the phenomenon §V reports
-cannot occur, and that alone should have settled it without needing the full text at all.
-
-**What the review established about the consequences** (two reviewers, independently, in circuit
-order, noiseless):
-
-- At h/|J| = 2 the dimer / emergent-Gauss-law / B_W₀ framework **does not apply**. The
-  sector-restricted effective theory is first order in h/|J|, so it is not a controlled
-  approximation when the field dominates. Operationally, the probability of remaining in the
-  defect-free sector collapses from 1.0 to 0.13–0.63 within a *single* Trotter step, against the
-  slow O((h/|J|)²) leakage the h ≤ 0.5 design assumes. [measured]
-- Noiseless in-sector weight: 0.55 at N = 9, 0.11 at N = 12 — i.e. falling with system size, so on
-  the reference's 7×8 torus Gauss-law post-selection would keep an exponentially small fraction of
-  shots even at zero noise. [measured]
-- Defect density per triangle at h = 2 reaches 0.11–0.18, up to ~69% of the infinite-temperature
-  value 0.25. [measured]
-- **Q2 is unaffected either way:** it is a ground-state ED statement, and the 3–5× weakening holds
-  at h = 2 as well (ratio 4.98 on the matched 4×4 pair). [measured]
-- The released quench4 circuits also prepare `ry(0)` on all 54 qubits with **zero** `x` gates, so
-  they encode *neither* candidate winding-sector initial state. (Narrowed by the resolution above:
-  the two sectors *are* identified in the release, as the `quench4_min_winding_*` and
-  `quench4_max_winding_*` data files; it is the explicit bitstrings and matching circuits that are
-  absent. See T-5.) [measured]
-
-**The decision taken at the time, since superseded.** With §V's body believed unreadable, the
-options were:
-
-- **(a) CHOSEN 2026-10-15, then WITHDRAWN the same day.** Keep h ≤ 0.5 and state the work as a
-  deliberately chosen, self-contained study of the weak-field regime with no published
-  counterpart, dropping every "matching §V" claim. **Withdrawn** once Figure 4(e) was read: the
-  published counterpart exists and the match is real, so this framing understated the work.
-- **(b) Not chosen, and now moot.** Build a genuine h/|J| = 2 study. There is no reason to: the
-  reference's triangular experiment is itself at 0.3.
-
-**The weak-field argument, which survives the reversal.** It no longer carries the choice of
-h/|J| = 0.3 — Figure 4(e) does that — but it remains true, and it is why the reference's own
-choice of a weak field is the right regime and why this thread's conclusions are safe there:
-
-- The sector-restricted / quantum-dimer description is an effective theory to **first order in
-  h/|J|**. It needs h ≪ |J| to be a controlled approximation at all.
-- Leakage out of the defect-free sector scales as about **h²** (the measured exponent is 2.08),
-  so at h ≤ 0.3 the in-sector population stays dominant and conditioning on it is a correction
-  rather than a reinterpretation.
-- The project's own field scan already shows the in-sector verdicts stable for h ≤ 0.3 and
-  straining at h = 0.5 (26% of the weight out of sector) — so 0.3 sits inside the validated range
-  and 0.5 is its stress point.
-- At h/|J| = 2 none of that holds: noiselessly the in-sector probability collapses to 0.13–0.63
-  within a *single* Trotter step, and the in-sector weight falls with system size (0.55 at N = 9,
-  0.11 at N = 12), so on the reference's 7×8 torus Gauss-law post-selection would retain an
-  exponentially small share of shots even with zero noise. [measured]
-
-This is also the decisive consistency argument: the phenomenon §V reports — dimer correlations
-relaxing toward Markov-chain Monte Carlo values inside winding sectors — cannot occur at
-h/|J| = 2. That alone identified which of the two conflicting sources had to be wrong, before the
-paper's text was ever retrieved.
-
-**Scope of the documentation change, as it now stands.** No physics constant was changed at any
-point, and no number moved: `h = 0.3` and `dt = 0.25` are exactly as they always were, and the
-suite is unchanged at 274/274 on three platforms. The net effect on the documentation is:
-
-- Q3 and the Gauss-law write-ups describe the configuration as matching the reference's §V, cited
-  to Figure 4(e), and additionally carry the weak-field argument above.
-- Q2 is relabelled as a **ground-state** exact-diagonalization result — a genuine improvement that
-  survives independently of all this — and noted to be robust either way: the 3–5× weakening also
-  holds at h/|J| = 2 (4.98 on the matched 4×4 pair, against 4.59 at h = 1). [measured]
-- The released quench4 circuits are documented as unsafe for inferring the experiment's
-  parameters, in `research/05-zenodo-dataset-map.md`.
-- `config.py`'s triangular blocks, the report, the findings map and the README cite the reference
-  for the field again, with Figure 4(e) as the source.
-- The research notes and handoff briefs that recorded the original readings were **not
-  rewritten** — they are dated records, and rewriting them is what would make a conflict like
-  this hard to find again. Each carries a dated note pointing here. The notes added on
-  2026-10-15 under the withdrawn framing were themselves corrected rather than layered over,
-  since they were a day old and wrong.
-
-**T-5, narrowed (independent of the field question).** The released quench4 circuits prepare
-`ry(0)` on all 54 qubits with zero `x` gates, so the circuits encode neither candidate
-winding-sector initial state. But the two sectors **are** identified in the release, as the
-`quench4_min_winding_*` and `quench4_max_winding_*` data files. So what is missing is the explicit
-initial bitstrings and circuits matching them, not the sector identification itself. [measured]
+**The full evidence trail** - the paper quotations, the Zenodo QASM gate-count table, the
+independent cross-checks and the list of corrections applied - was moved to
+[`docs/resolved-1-triangular-field.md`](docs/resolved-1-triangular-field.md) on 2026-10-23
+to cut per-session context. It is unedited; this entry is the summary, that file is the record.
 
 ---
 
@@ -480,6 +308,65 @@ the width the emulator accepts.
 (emulators)**; the syntax checkers are unlimited and free. No real-hardware allowance is shown, so
 every HQC estimate here is for the emulator [inferred from the usage page]. The SC tier is
 pre-approved by the project lead; every HQC-spending run still needs a per-run go.
+
+---
+
+## DECIDED-7 — The Q3 generalization study, and the encoded λ runner (D1–D6, 2026-10-22/23)
+
+**Why.** The Iceberg-vs-Gauss-law conclusion of `docs/q3_thermalization.md` §9.2 — Gauss-law
+post-selection of the bare circuit beats Iceberg encoding for Q3 diagonal observables — rested on
+a **single grid cell** (N = 12, h = 0.3, λ = 1). A single cell cannot separate a general statement
+from an accident of one lattice at one field at one noise strength, and the project's Q3
+recommendation rests on it. Write-up: `docs/q3_scaling.md`; data: `data/q3_scaling.txt`,
+`data/q3_sweep.txt`.
+
+### D1–D5 — The axes and the method (2026-10-22)
+- **D1 sizes:** N = 12 (3×4 flippable), 18 (3×6 3-sublattice), 20 (4×5 flippable), each mapped to
+  an already-validated case; N = 36, 54 in the Stim stage only.
+- **D2 fields:** h = 0.1, 0.2, 0.3, 0.5 (the existing `Q3BaselineConfig.h_curves`).
+- **D3 noise:** the existing λ = 1, 2, 3 insertion ladder, extended to the encoded arm (see D6).
+- **D4:** one axis at a time around the published cell plus three extreme combinations, behind a
+  cheap Stim-only prefilter; the full 36-cell cross product is priced but not run.
+- **D5:** a wall-clock probe before the trajectory budget is committed.
+
+### D6 — Build the encoded λ runner, rather than infer it (2026-10-22)
+**The gap, found during implementation:** the repository could amplify noise on the **bare** arm
+only (`src/noise_scaling.run_bare_scaled`). D-NS3 had scaled "bare + Gauss only" and the exclusion
+was never revisited in code, so the λ ladder had no encoded arm at all. The sweep therefore
+**raised** rather than return λ = 1 Iceberg numbers under a λ > 1 label.
+
+Options put to the project lead: (a) build `run_iceberg_scaled`; (b) drop Iceberg from the λ axis;
+(c) take Iceberg's λ dependence from the Stim prefilter alone. **Decision: (a).** The λ axis is one
+of the three the study exists to test, and a Stim-only answer would have been first-order
+accounting compared against trajectory measurements on the other arm — not a like-for-like
+comparison.
+
+**What was built** (`src/noise_scaling.run_iceberg_scaled`, additive; spec frozen in
+`tests/test_iceberg_scaled.py` **before** the function existed, SHA-256 `30837339…8f99`, verified
+failing on import first; 13/13 pass):
+- Pauli insertion before every 2-qubit gate of the encoded circuit — logical ZZ rotations **and**
+  syndrome-extraction CX gates — the same mechanism and channel as the bare arm, so both arms of
+  the ladder are amplified alike; 1q, SPAM and idle noise stay at λ = 1.
+- **λ = 1 is bitwise identical** to `run_iceberg` at the same seed, so the ladder's λ = 1 rung
+  stays comparable to the published cell.
+- `method="fold"` is **refused**: folding the encoded circuit would fold its syndrome CX gates too,
+  changing the code's detection structure and not only its error rate. That is a separate design
+  question and is not assumed here. **This remains open if a folded encoded point is ever wanted.**
+
+### Comparison rule — matched survival, not matched window (2026-10-22)
+At the assumed prior, Iceberg's detector survival over the published 48-step window is 0.069 at
+N = 12 but 0.021 at N = 18 and 0.014 at N = 20, and each λ step roughly halves the reach
+[derived, `data/q3_scaling.txt`]. Comparing every cell over the same window would pit ~2 %-survival
+noise against 7 %. **Each cell's encoded arm therefore runs to the largest window whose predicted
+survival still clears 5 %, and every cell states its own window.** The shrinking encoded reach is
+reported as a result, not absorbed into the error bars. Consequence to keep in mind when reading
+the λ rows: they cover shorter (easier) windows, so Iceberg's measured λ degradation is if anything
+understated.
+
+### HQC
+Offline `hqc_estimate` plus the free H2-1SC quotes; the machine the study ran on has no
+`NEXUS_REFRESH_TOKEN`, so the server quotes are pending one. **Nothing was submitted to a paying
+tier and no HQC was spent.**
 
 ---
 

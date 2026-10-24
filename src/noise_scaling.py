@@ -12,6 +12,25 @@ simulates circuits; it has no submission path.
   (lam - 1) * q_P insert the 2q Pauli P of the model (one draw per gate). To first order the 2q
   error becomes lam * q_P per component. It scales exactly what the model contains and nothing
   else: not 1q, SPAM or idle noise.
+  **Scope caveat [review/18 F6, 2026-10-23].** research/07-noise-scaling.md supports this method
+  only before the 2q ROTATIONS (2503.20870 S1.4, "before each U_ZZ ... probability (alpha-1)p_j"),
+  and its PEA row records that such a model "is valid only when combined with random Pauli
+  twirls". `insert_paulis` below stays inside that support (ZZPhase only). `run_iceberg_scaled`
+  does NOT: it inserts before every 2q gate of the encoded circuit - syndrome-extraction CX and
+  rotation-gadget CX included - using the rotation-learned channel, in an UNTWIRLED trajectory
+  simulation. That extension is **[inferred], not [derived]**, and the KB does not cover it. It is
+  also only first-order-faithful for ZZPhase: inserting before the gate while the intrinsic fault
+  lands after is exact for ZZPhase (depolarizing is unitarily covariant and ZZ commutes with the
+  rotation) but not for CX, where CX (Z x Z) CX = I x Z moves the eta-biased excess into a
+  different Iceberg detection class (review/18 F7).
+  **Three lambda scopes coexist in this repository and they are NOT the same set of gates**
+  (review/18 F3): the trajectory simulator and `run_*_scaled` amplify EVERY 2q gate (correct for
+  the model, which charges `_fault_2q` at every 2q location, src/noisy_q3.py:103);
+  `q3_scaling._NAMED_SCOPES["2q"]` is ("rot-zz", "syn-cx") and sets the survival-matched encoded
+  windows; `insert_paulis` and `config.q3_scaling.fold_scope` are rot-zz only and govern the
+  pytket circuit that is compiled, HQC-costed and would be submitted. **Which is canonical is an
+  open decision for the project lead; do not send a lambda point to the emulator before it is
+  settled.**
 - Folding [derived; 2005.10921]: ZZPhase(a) -> ZZPhase(a) [ZZPhase(-a) ZZPhase(a)]^k, lam = 2k+1.
   The twirled total error is x lam to first order for any Pauli channel. The Pauli composition is
   x lam only for channels with q_P = q_{P.ZZ} on anticommuting P (true of the prior, not in

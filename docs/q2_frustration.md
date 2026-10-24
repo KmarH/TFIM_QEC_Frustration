@@ -8,6 +8,40 @@ Model: H = −J Σ ZZ − h Σ X with **J = −1** (antiferromagnetic in our sig
 
 > **What kind of result this is (2026-10-15).** Q2 is a **ground-state exact-diagonalization** statement about the two lattices. It is **not quench dynamics**, and it is not a reproduction of any run in arXiv:2503.20870. **The field grid, h/|J| ≤ 1, is this project's own choice** — it was picked to scan the weak-field behaviour, not to match any published field, and that is the only sense in which Q2's parameters are self-chosen. The project's *triangular dynamics* work (Q3, Gauss law), at h/|J| = 0.3, **does** run at the reference's field: Figure 4(e) of 2503.20870 states verbatim "All data taken at (h/|J|, dt|J|)=(0.3, 0.25)" and §V's body sets a weak transverse field on a 9×6 lattice [established]. (The earlier claim here that 0.3 was self-chosen rather than the reference's came from the released `quench4_*.qasm` circuits, which carry the square quench's field angle and are defective — see `research/05-zenodo-dataset-map.md` §3.) **Q2's conclusion depends on none of this:** the 3–5× nearest-neighbour weakening also holds at h/|J| = 2 (A.3), so it stands at either field.
 
+
+## 0. Summary: what Q2 answers, and what it deliberately does not
+
+**Verdict against SCOPE 2's "done when" (a triangular-vs-square comparison on the frustration
+observables): MET**, by ground-state exact diagonalization on the matched 4x4 pair, reviewed
+**ACCEPT** (`review/12`). **Part B (size trend, error bars, winding/defect presence-vs-absence) was
+CANCELLED by the project lead under PROC-2** (no new classical depth after handoff/09). Q2 is
+therefore **deliberately scoped to Part A, not unfinished** - a status line elsewhere calling it
+"thin" describes a decision, not a gap.
+
+| what | result [measured, exact: no sampling error] | where |
+|---|---|---|
+| **the headline: nearest-neighbour suppression** | triangular `C(1)` is **3.01x** (h = 0.1) to **4.59x** (h = 1.0) weaker than on the bipartite square; **4.98x** at h/\|J\| = 2, the reference's square-quench field | A.3 |
+| the frustrated value itself | triangular `C(1)` sits near **-1/3** at small h ("one frustrated bond per triangle"), falling to -0.27 (h = 0.6) and -0.20 (h = 1.0) | A.3 |
+| long distance | the bipartite square **does not decay across the torus** (\|C(r)\| = 0.94-1.00 at every distance and field scanned: finite-size Neel order); the triangular lattice is much weaker and **field-fragile** (`C(2)` +0.44 -> +0.07 from h = 0.1 to 1.0) | A.3 |
+| energy per bond at h = 0 | square 4x4 **-1** (clean bipartite), square 3x4 **-2/3** (odd length, so itself frustrated), triangular **-1/3** | A.2 |
+| sign structure at long distance | **torus-shape dependent** (the sqrt3 shell is +0.46 on 3x4 but -0.04 on 4x4; r = 2 is -0.69 vs +0.41): reported, explicitly not interpreted | A.3 |
+
+**Data:** `data/frustration_correlations.txt` (distance-resolved `C(r)`),
+`data/frustration_compare.txt` (energy, \|M_z\|, mean ZZ, defect density). The **triangular-only**
+observables - dimer occupation, defect density, winding sectors, flippability - are not part of a
+square comparison by construction; they live in `docs/gauss_law_dimers.md`, including the measured
+defect density proportional to (h/\|J\|)^2 (slopes 1.96-1.98).
+
+**Not claimed:** no thermodynamic limit, no phase statement, no dynamics, no clock order (A.5).
+
+### Open flags
+
+| flag | what it is | status |
+|---|---|---|
+| **T-19** | the 3x4 *square* torus was labelled "unfrustrated", but an odd periodic length is not bipartite | **RESOLVED 2026-10-08**: the caveat is in `scripts/compare_frustration.py` (docstring + emitted lines) and the data was regenerated (`handoff/plan-archive-01-23.md`, `review/13`) |
+| **T-20** | the **clock-order parameter K3** - the only observable that separates three-sublattice order from the torus-shape effects of A.3 | **OPEN, the project lead's call.** Not built; PROC-2 bars new classical depth (A.4) |
+| **T-21** | a square-lattice size trend has only **one** clean bipartite torus within ED <= 20 (4x4) | **OPEN and structural**: not fixable below the ceiling, which is why Part B's size trend was cancelled rather than deferred |
+
 ## Part A — distance-resolved connected correlations, square vs triangular (reviewed ACCEPT, review/12)
 
 ### A.1 Method
@@ -38,7 +72,7 @@ Model: H = −J Σ ZZ − h Σ X with **J = −1** (antiferromagnetic in our sig
 
 `data/frustration_compare.txt` (3×4) and the interpretation in `scripts/compare_frustration.py` call the 3×4 square lattice "unfrustrated". **That is not true at 3×4**: its square comparison lattice already carries odd-length frustration. Its −0.667 vs −0.333 energy-per-bond contrast is *partly* boundary frustration.
 
-**The only square torus with both lengths ≥ 3 within the ED ceiling that is a clean unfrustrated baseline is 4×4.** 4×4 is therefore the main matched pair here; 3×4 is kept for continuity and flagged. This was not silently changed in the existing files (they are not this brief's files); it is raised as T-19.
+**The only square torus with both lengths ≥ 3 within the ED ceiling that is a clean unfrustrated baseline is 4×4.** 4×4 is therefore the main matched pair here; 3×4 is kept for continuity and flagged. This was not silently changed in the existing files (they are not this brief's files); it is raised as T-19. **[Dated note, 2026-10-23: T-19 was subsequently APPLIED - the caveat is now in `scripts/compare_frustration.py`'s docstring and emitted lines and `data/frustration_compare.txt` was regenerated. The sentence above records the state at the time of the Part A pass, not today's.]**
 
 ### A.3 Results [measured; data/frustration_correlations.txt]
 

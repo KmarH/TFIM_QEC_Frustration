@@ -67,6 +67,15 @@ def _arm(d, s0, sh, run, max_spins: int) -> dict:
                    for o, (v, s) in obs.raw.items()},
            "cond": {o: (np.asarray(v, dtype=float), np.asarray(s, dtype=float))
                     for o, (v, s) in obs.cond.items()}}
+    # Additive [2026-10-24]: the batch-level detail behind the aggregates, so a re-score under a
+    # different window / cost / SE convention needs no new simulation. Stored as a LIST of 1-D
+    # rows per batch because the JSON writer ravels an ndarray and would lose the (B, T) shape.
+    if obs.n_eff is not None:
+        out["n_eff"] = np.asarray(obs.n_eff, dtype=float)
+    if obs.per_batch is not None:
+        out["per_batch"] = {mode: {o: [np.asarray(row, dtype=float) for row in arr]
+                                   for o, arr in block.items()}
+                            for mode, block in obs.per_batch.items()}
     return out
 
 

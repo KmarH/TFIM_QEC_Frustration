@@ -520,6 +520,9 @@ class Q3ScalingConfig:
     # need ~4.2 GB at N = 20 and be refused by noisy_mem_gb: larger N trades record density and
     # batch count for feasibility, and the SE is reported from however many batches remain.
     # Filled from the D5 probe; N = 12 keeps the published settings exactly.
+    # CORRECTION 2026-10-24 (review/18 F13): the D5 probe never produced output (it was killed by
+    # the memory reaper); the N = 18 / 20 counts came from the 2^(N+4) scaling argument. Both
+    # N = 20 cells were in fact run at 60 / 24 / 6 via CLI overrides (RESUME.md 2026-10-23 07:00).
     per_size: dict = field(default_factory=lambda: {
         12: {"traj_bare": 400, "traj_ice": 300, "batches": 20, "record_every": 2, "mem_gb": 2.0},
         18: {"traj_bare": 200, "traj_ice": 100, "batches": 10, "record_every": 4, "mem_gb": 4.0},

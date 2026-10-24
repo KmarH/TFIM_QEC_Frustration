@@ -1,0 +1,131 @@
+# Q3 generalization study - noisy sweep over (N, h, lam). data/q3_sweep.txt
+# CLASSICAL PREDICTION under an ASSUMED noise model (research/06 H2 prior, Pauli-trajectory MC). NOT an H2 / hardware result.
+# Decision cards D1-D6 (project lead, 2026-10-22). Generalizes the single cell of
+#   docs/q3_thermalization.md §9.2 (N = 12, h = 0.3, lam = 1; data/q3_noisy.txt).
+# Model: J = -1, dt = 0.25; bare window = qdm_times / h; encoded window is
+#   SURVIVAL-MATCHED per size (the largest window whose predicted detector survival
+#   clears the floor; data/q3_scaling.txt), so encoded cells are compared at matched
+#   survival, NOT at a matched window. Each cell states its own window.
+# lam > 1 amplifies the 2q channel by Pauli insertion on BOTH arms (D6:
+#   src/noise_scaling.run_bare_scaled / run_iceberg_scaled); 1q and SPAM stay at lam = 1.
+# 'resolved' = the residual exceeds the mode's own mean batch SE. A residual at or below
+#   the SE is NOT resolved: it is the statistical floor, not a win for either arm.
+
+## 1. Cells run [measured]
+     N               case     h  lam  phys  ice steps   traj b/i  batches             host       py   s noisy
+    12      3x4 flippable   0.1    1    16         48    400/300       20 instance-2026100  3.12.14      2854
+    12      3x4 flippable   0.2    1    16         48    400/300       20 instance-2026100  3.12.14      2673
+    12      3x4 flippable   0.3    1    16         48    400/300       20      pulugungaxu   3.14.4     10571
+    12      3x4 flippable   0.3    2    16         28    400/300       20      pulugungaxu   3.14.4      8538
+    12      3x4 flippable   0.3    3    16         19    400/300       20      pulugungaxu   3.14.4      6799
+    12      3x4 flippable   0.5    1    16         48    400/300       20      pulugungaxu   3.14.4     10578
+    12      3x4 flippable   0.5    3    16         19    400/300       20           Rakata  3.12.15      3224
+    18   3x6 3-sublattice   0.1    3    22         13    200/100       10      pulugungaxu   3.14.4     51906
+    18   3x6 3-sublattice   0.3    1    22         36    200/100       10      pulugungaxu   3.14.4     51732
+    20      4x5 flippable   0.3    1    24         33      60/24        6           Rakata  3.12.15     37531
+    20      4x5 flippable   0.5    3    24         12      60/24        6           Rakata  3.12.15     20302
+
+## 2. Accuracy vs the ideal circuit and shot cost, per mode [measured; classical prediction]
+#  residual = mean |O_noisy - O_ideal| over the window. Raw modes are scored against the
+#  ideal RAW curve; Gauss modes against the ideal SECTOR-CONDITIONED curve (what they
+#  estimate), with [vs raw] alongside. cost = 1/mean(acceptance); final = at the last point.
+     N     h  lam  window             mode  residual  [vs raw]       SE  resolved    cost   final  pts
+    12   0.1    1   early         bare raw    0.0495         -   0.0044      True    1.00     1.0   25
+    12   0.1    1   early     bare + Gauss    0.0010    0.0011   0.0007      True    1.35     2.0   25
+    12   0.1    1    late         bare raw    0.2425         -   0.0010      True    1.00     1.0  121
+    12   0.1    1    late     bare + Gauss    0.0156    0.0150   0.0010      True   36.97    54.8  121
+    12   0.1    1   early          Iceberg    0.0139         -   0.0060      True    2.89    17.7   25
+    12   0.1    1   early  Iceberg + Gauss    0.0012    0.0017   0.0013     False    3.06    18.9   25
+    12   0.2    1   early         bare raw    0.0530         -   0.0038      True    1.00     1.0   25
+    12   0.2    1   early     bare + Gauss    0.0015    0.0021   0.0005      True    1.40     2.1   25
+    12   0.2    1    late         bare raw    0.2078         -   0.0024      True    1.00     1.0   61
+    12   0.2    1    late     bare + Gauss    0.0116    0.0096   0.0012      True    9.34    17.3   61
+    12   0.2    1   early          Iceberg    0.0159         -   0.0080      True    3.06    20.0   25
+    12   0.2    1   early  Iceberg + Gauss    0.0007    0.0032   0.0013     False    3.28    26.4   25
+    12   0.3    1   early         bare raw    0.0514         -   0.0043      True    1.00     1.0   25
+    12   0.3    1   early     bare + Gauss    0.0017    0.0055   0.0004      True    1.43     2.0   25
+    12   0.3    1    late         bare raw    0.1784         -   0.0035      True    1.00     1.0   41
+    12   0.3    1    late     bare + Gauss    0.0109    0.0071   0.0012      True    5.28     8.9   41
+    12   0.3    1   early          Iceberg    0.0222         -   0.0076      True    3.03    14.3   25
+    12   0.3    1   early  Iceberg + Gauss    0.0011    0.0068   0.0008      True    3.42    21.2   25
+    12   0.3    2   early         bare raw    0.0526         -   0.0035      True    1.00     1.0   15
+    12   0.3    2   early     bare + Gauss    0.0018    0.0051   0.0005      True    1.45     2.1   15
+    12   0.3    2    late         bare raw    0.2203         -   0.0020      True    1.00     1.0   41
+    12   0.3    2    late     bare + Gauss    0.0141    0.0089   0.0013      True   15.67    29.4   41
+    12   0.3    2   early          Iceberg    0.0291         -   0.0118      True    3.03    15.8   15
+    12   0.3    2   early  Iceberg + Gauss    0.0012    0.0060   0.0014     False    3.51    20.0   15
+    12   0.3    3   early         bare raw    0.0462         -   0.0036      True    1.00     1.0   10
+    12   0.3    3   early     bare + Gauss    0.0015    0.0055   0.0007      True    1.41     2.0   10
+    12   0.3    3    late         bare raw    0.2351         -   0.0008      True    1.00     1.0   41
+    12   0.3    3    late     bare + Gauss    0.0159    0.0108   0.0010      True   33.91    53.1   41
+    12   0.3    3   early          Iceberg    0.0288         -   0.0090      True    3.17    15.8   11
+    12   0.3    3   early  Iceberg + Gauss    0.0005    0.0068   0.0019     False    3.62    28.0   11
+    12   0.5    1   early         bare raw    0.0508         -   0.0030      True    1.00     1.0   25
+    12   0.5    1   early     bare + Gauss    0.0026    0.0222   0.0004      True    1.66     2.4   25
+    12   0.5    1    late         bare raw    0.1198         -   0.0040      True    1.00     1.0   25
+    12   0.5    1    late     bare + Gauss    0.0073    0.0197   0.0008      True    3.05     4.0   25
+    12   0.5    1   early          Iceberg    0.0152         -   0.0047      True    2.82    14.3   25
+    12   0.5    1   early  Iceberg + Gauss    0.0009    0.0238   0.0006      True    3.57    23.4   25
+    12   0.5    3   early         bare raw    0.0440         -   0.0032      True    1.00     1.0   10
+    12   0.5    3   early     bare + Gauss    0.0018    0.0215   0.0004      True    1.58     2.3   10
+    12   0.5    3    late         bare raw    0.1947         -   0.0022      True    1.00     1.0   25
+    12   0.5    3    late     bare + Gauss    0.0141    0.0140   0.0011      True   12.26    23.5   25
+    12   0.5    3   early          Iceberg    0.0224         -   0.0111      True    3.70    18.8   11
+    12   0.5    3   early  Iceberg + Gauss    0.0012    0.0224   0.0012     False    4.58    30.6   11
+    18   0.1    3   early         bare raw    0.0742         -   0.0089      True    1.00     1.0    4
+    18   0.1    3   early     bare + Gauss    0.0185    0.0182   0.0030      True    1.24     1.6    4
+    18   0.1    3    late         bare raw    0.3513         -   0.0001      True    1.00     1.0   61
+    18   0.1    3    late     bare + Gauss    0.0525    0.0519   0.0003      True  303.94   308.2   61
+    18   0.1    3   early          Iceberg    0.0163         -   0.0079      True    3.11    20.0    5
+    18   0.1    3   early  Iceberg + Gauss    0.0024    0.0025   0.0022      True    3.25    20.1    5
+    18   0.3    1   early         bare raw    0.0611         -   0.0036      True    1.00     1.0   10
+    18   0.3    1   early     bare + Gauss    0.0032    0.0043   0.0005      True    1.41     2.0   10
+    18   0.3    1    late         bare raw    0.2684         -   0.0049      True    1.00     1.0   21
+    18   0.3    1    late     bare + Gauss    0.0321    0.0266   0.0023      True    8.10    18.1   21
+    18   0.3    1   early          Iceberg    0.0241         -   0.0144      True    2.80    16.7   10
+    18   0.3    1   early  Iceberg + Gauss    0.0012    0.0050   0.0019     False    3.04    23.7   10
+    20   0.3    1   early         bare raw    0.0342         -   0.0056      True    1.00     1.0    6
+    20   0.3    1   early     bare + Gauss    0.0006    0.0061   0.0005      True    1.42     2.1    6
+    20   0.3    1    late         bare raw    0.1926         -   0.0038      True    1.00     1.0   14
+    20   0.3    1    late     bare + Gauss    0.0089    0.0020   0.0016      True   13.79    36.9   14
+    20   0.3    1   early          Iceberg    0.0066         -   0.0046      True    2.63     8.0    7
+    20   0.3    1   early  Iceberg + Gauss    0.0020    0.0048   0.0013      True    2.85     8.8    7
+    20   0.5    3   early         bare raw    0.0331         -   0.0041      True    1.00     1.0    3
+    20   0.5    3   early     bare + Gauss    0.0008    0.0194   0.0005      True    1.59     2.8    3
+    20   0.5    3    late         bare raw    0.1870         -   0.0027      True    1.00     1.0    9
+    20   0.5    3    late     bare + Gauss    0.0077    0.0308   0.0015      True   52.51   264.9    9
+    20   0.5    3   early          Iceberg    0.0000         -   0.0000      True    3.28    24.0    3
+    20   0.5    3   early  Iceberg + Gauss    0.0000    0.0189   0.0000      True    3.44    32.2    3
+
+## 3. Iceberg vs bare + Gauss, head to head (the §9.2 question) [measured; classical prediction]
+#  The published N = 12, h = 0.3, lam = 1 cell: bare + Gauss 0.0017 +- 0.0004 at x1.43
+#  shots vs Iceberg 0.019 +- 0.008 at x3.1. 'verdict' compares the early-window residuals
+#  with both SEs: a gap smaller than the combined SE is reported as unresolved.
+     N     h  lam             bare+Gauss                Iceberg              Ice+Gauss                      verdict
+    12   0.1    1   0.0010+-0.0007 x1.35   0.0139+-0.0060 x2.89   0.0012+-0.0013 x3.06  bare+Gauss better by 0.0129
+    12   0.2    1   0.0015+-0.0005 x1.40   0.0159+-0.0080 x3.06   0.0007+-0.0013 x3.28  bare+Gauss better by 0.0143
+    12   0.3    1   0.0017+-0.0004 x1.43   0.0222+-0.0076 x3.03   0.0011+-0.0008 x3.42  bare+Gauss better by 0.0205
+    12   0.3    2   0.0018+-0.0005 x1.45   0.0291+-0.0118 x3.03   0.0012+-0.0014 x3.51  bare+Gauss better by 0.0273
+    12   0.3    3   0.0015+-0.0007 x1.41   0.0288+-0.0090 x3.17   0.0005+-0.0019 x3.62  bare+Gauss better by 0.0273
+    12   0.5    1   0.0026+-0.0004 x1.66   0.0152+-0.0047 x2.82   0.0009+-0.0006 x3.57  bare+Gauss better by 0.0126
+    12   0.5    3   0.0018+-0.0004 x1.58   0.0224+-0.0111 x3.70   0.0012+-0.0012 x4.58  bare+Gauss better by 0.0206
+    18   0.1    3   0.0185+-0.0030 x1.24   0.0163+-0.0079 x3.11   0.0024+-0.0022 x3.25 unresolved (within combined SE)
+    18   0.3    1   0.0032+-0.0005 x1.41   0.0241+-0.0144 x2.80   0.0012+-0.0019 x3.04  bare+Gauss better by 0.0209
+    20   0.3    1   0.0006+-0.0005 x1.42   0.0066+-0.0046 x2.63   0.0020+-0.0013 x2.85  bare+Gauss better by 0.0060
+    20   0.5    3   0.0008+-0.0005 x1.59   0.0000+-0.0000 x3.28   0.0000+-0.0000 x3.44     Iceberg better by 0.0008
+
+## 4. Measured Iceberg survival vs the Stim first-order prediction [independent cross-check]
+#  Stim's exp(-detected_total) is a different code path (fault propagation, not
+#  trajectories); data/q3_scaling.txt holds the predictions. Reported here: measured only.
+     N     h  lam  t_end  survival(end)   traj
+    12   0.1    1  12.00         0.0566    300
+    12   0.2    1  12.00         0.0500    300
+    12   0.3    1  12.00         0.0699    300
+    12   0.3    2   7.00         0.0633    300
+    12   0.3    3   4.75         0.0633    300
+    12   0.5    1  12.00         0.0699    300
+    12   0.5    3   4.75         0.0533    300
+    18   0.1    3   3.25         0.0499    100
+    18   0.3    1   9.00         0.0599    100
+    20   0.3    1   8.25         0.1248     24
+    20   0.5    3   3.00         0.0416     24

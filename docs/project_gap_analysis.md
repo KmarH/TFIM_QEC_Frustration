@@ -125,23 +125,44 @@ one-sided statement, and it is the honest completion of the claim.
 at the rates in §4. No HQC. Afterwards the calibrated version is the emulator run at
 4×5 (**11,636 HQC**) or 4×6 (**13,679 HQC**), both already SC-quoted [measured].
 
-### Gap D — frustration, the least pre-empted contribution
+### Gap D — frustration: NOT a gap. **Correction to an earlier version of this document.**
 
-**Where it stands.** SCOPE §2's own status line says the dimer-correlation and winding-vs-square
-contrasts are **"still thin"**, and the ground-state frustration signature is measured at 3×4 only.
-The project's prior-art sweep (`research/scout/sweeps/03-prior-art-logical-vs-physical.md`)
-recommends resting the referee-facing novelty **on the frustration spine**, because the triangular
-lattice with dimer/winding observables under logical encoding is the part no competitor touches
-[KB triage, explicitly not graduated to a project claim].
+**An earlier version of this section called Q2 "thin" and recommended triangular-vs-square dimer
+and winding contrasts at matched N plus larger sizes. That was wrong on two counts** and is
+withdrawn:
 
-**What to run.**
-- triangular-vs-square on dimer correlations and winding sectors at **matched N**, exact to 20
-  spins, against the MCMC baselines already available out to N = 144;
-- winding-sector leakage under noise vs size (partly covered by `gauss_law_scaling.txt`'s `leak`
-  columns, not yet assembled into a size story);
-- the ground-state degeneracy signature at more than one size.
+1. **Q2 already meets its own definition of done.** `docs/q2_frustration.md` Part A is the
+   triangular-vs-square comparison, by exact diagonalization on the matched **4×4** pair, and it is
+   **reviewed ACCEPT** (`review/12`). `docs/findings_vs_questions.md`'s Q2 row records the
+   "done when" as satisfied. Headline [measured]: the triangular nearest-neighbour ⟨ZZ⟩_c is
+   **3.01× (h = 0.1) to 4.59× (h = 1.0)** weaker than on the bipartite square, and **4.98×** at
+   h/|J| = 2, while the bipartite square shows no decay across the torus at all.
+2. **The work it recommended was cancelled by the project lead, not left undone.** Part B (size
+   trend, error bars, winding/defect presence-vs-absence) was **CANCELLED under PROC-2** (no new
+   classical depth after handoff/09). Recommending it back is relitigating a decision.
 
-**Cost.** Exact ED/state-vector at ≤ 20 spins plus existing MCMC output: hours, not days. No HQC.
+Two further facts make the recommendation ill-posed as well as out of scope: the dimer, defect and
+winding observables are **triangular-only by construction**, so there is no square counterpart to
+compare them against (they belong to `docs/gauss_law_dimers.md`, where the defect density
+∝ (h/|J|)² law, slopes 1.96–1.98, already lives); and within the ED ≤ 20 ceiling there is exactly
+**one** clean bipartite square torus, 4×4 (T-21), so a square size trend has a single point — which
+is *why* Part B was cancelled rather than deferred.
+
+**What is genuinely open on Q2**, both recorded as flags in `docs/q2_frustration.md` §0:
+
+- **T-20, the clock-order parameter K3** — the only observable that separates genuine
+  three-sublattice (clock) order from the torus-shape sign effects Part A reports but declines to
+  interpret. Not built; **the project lead's call**, since PROC-2 bars new classical depth.
+- **T-21** — structural, not fixable below the ceiling.
+
+So the only Q2 decision available is whether to revisit PROC-2 for K3. If the article's novelty is
+to rest on the frustration spine, that is the one measurement that would strengthen it — but it is
+a scope decision, not a gap I can close.
+
+**Note on wording elsewhere:** SCOPE §2's Q2 status line reads "dimer-correlation/winding-vs-square
+contrasts and larger sizes still thin", which reads as unfinished when it is in fact scoped down by
+decision. SCOPE is the contract and has not been edited; the discrepancy is flagged here so the
+next reader does not repeat this mistake.
 
 ---
 
@@ -225,7 +246,8 @@ transparency and Stim cross-checks re-run. The project lead's call.
 2. **Gap C** — non-diagonal observables (derivation first). Fixes the one-sided headline.
 3. **Gap B** — noise-model sensitivity sweep. Fixes the single-prior exposure.
 4. **Gap A** — code head-to-head + Stim distance curves. Makes Q4 definite.
-5. **Gap D** — frustration contrasts. Builds the novelty spine.
+5. **Gap D is withdrawn** (Q2 is done and Part B was cancelled). If the frustration spine is to
+   carry the novelty, the live question is **T-20 / K3**, which is a PROC-2 scope decision.
 6. **Then** emulator credits, each step gated on the project lead's go: G1 (1,901 HQC) first, compare
    against the local emulator and Selene, then Q1 at 4×5 (11,636) or 4×6 (13,679).
 

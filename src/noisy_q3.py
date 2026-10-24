@@ -418,6 +418,13 @@ class RunObservables:
     p_in: np.ndarray                          # weight in the defect-free W0 sector (Gauss-law post-selection acceptance)
     raw: Dict[str, Tuple[np.ndarray, np.ndarray]]    # obs -> (value, batch SE)
     cond: Dict[str, Tuple[np.ndarray, np.ndarray]]   # sector-conditioned
+    # Re-scoring inputs, additive [2026-10-24]. (value, SE) alone is a LOSSY summary: a different
+    # window, cost convention or shot-noise-aware SE cannot be recomputed from it, so changing any
+    # of them used to mean re-running the simulation. These two carry the batch-level detail the
+    # aggregates were built from, so a later re-score is a pure function of the saved file -- no
+    # one has to decide which data to keep, and nothing is selected after the fact.
+    n_eff: Optional[np.ndarray] = None        # (T,) surviving trajectory weight per recorded step
+    per_batch: Optional[Dict[str, Dict[str, np.ndarray]]] = None   # "raw"/"cond" -> obs -> (B, T)
 
 
 def run_observables(d: TriangularDimers, spins0: np.ndarray, shells: Shells, run: NoisyRun,
@@ -453,8 +460,11 @@ def run_observables(d: TriangularDimers, spins0: np.ndarray, shells: Shells, run
 
     raw, cond, pin = evaluate(run.mixture())
     nb = run.acc.shape[0]
+    per_batch = None
     if nb > 1:
         per = [evaluate(run.mixture(b)) for b in range(nb)]
+        per_batch = {"raw": {o: np.array([x[0][o] for x in per]) for o in OBS_N},
+                     "cond": {o: np.array([x[1][o] for x in per]) for o in OBS_N}}
         def se(vals):
             # batches with no surviving weight are NaN: the SE uses only the finite ones (review M3)
             v = np.array(vals)
@@ -467,7 +477,9 @@ def run_observables(d: TriangularDimers, spins0: np.ndarray, shells: Shells, run
         se_raw = {o: np.zeros(len(run.steps)) for o in OBS_N}
         se_cond = {o: np.zeros(len(run.steps)) for o in OBS_N}
     return RunObservables(run.times, run.acceptance(), pin,
-                          {o: (raw[o], se_raw[o]) for o in OBS_N}, {o: (cond[o], se_cond[o]) for o in OBS_N})
+                          {o: (raw[o], se_raw[o]) for o in OBS_N},
+                          {o: (cond[o], se_cond[o]) for o in OBS_N},
+                          n_eff=run.wsum.sum(0), per_batch=per_batch)
 
 
 # --------------------------------------------------------------------------- #
