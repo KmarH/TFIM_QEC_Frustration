@@ -213,13 +213,13 @@ Rules (DECIDED-8, DECIDED-10, fixed before rescoring): Kish ESS >= 10 at every w
 
 | N | h | λ | bare raw (raw) | bare + Gauss (raw) | Iceberg (raw) | Iceberg + Gauss (raw) | bare raw (cond) | bare + Gauss (cond) | Iceberg (cond) | Iceberg + Gauss (cond) |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 12 | 0.1 | 1 | 0.0551 | 0.0010 | 0.0142 | ≲0.0013 | 0.0557 | 0.0010 | 0.0149 | ≲0.0012 |
-| 12 | 0.2 | 1 | 0.0613 | 0.0023 | 0.0184 | 0.0029 | 0.0640 | 0.0020 | 0.0211 | ≲0.0015 |
-| 12 | 0.3 | 1 | 0.0597 | 0.0061 | 0.0254 | 0.0070 | 0.0660 | 0.0025 | 0.0319 | ≲0.0012 |
-| 12 | 0.3 | 2 | 0.0625 | 0.0056 | 0.0311 | 0.0061 | 0.0685 | 0.0025 | 0.0378 | ≲0.0017 |
-| 12 | 0.3 | 3 | 0.0586 | 0.0059 | 0.0346 | 0.0065 | 0.0648 | 0.0019 | 0.0406 | ≲0.0028 |
-| 12 | 0.5 | 1 | 0.0586 | 0.0227 | 0.0177 | 0.0243 | 0.0820 | 0.0035 | 0.0418 | 0.0014 |
-| 12 | 0.5 | 3 | 0.0565 | 0.0230 | 0.0232 | n.e. | 0.0793 | 0.0024 | 0.0480 | n.e. |
+| 12 | 0.1 | 1 | 0.0551 | 0.0011 | 0.0144 | ≲0.0017 | 0.0557 | 0.0010 | 0.0151 | ≲0.0013 |
+| 12 | 0.2 | 1 | 0.0613 | 0.0023 | 0.0191 | 0.0033 | 0.0640 | 0.0020 | 0.0217 | ≲0.0006 |
+| 12 | 0.3 | 1 | 0.0597 | 0.0061 | 0.0259 | 0.0071 | 0.0660 | 0.0025 | 0.0323 | 0.0013 |
+| 12 | 0.3 | 2 | 0.0625 | 0.0056 | 0.0306 | 0.0063 | 0.0685 | 0.0025 | 0.0374 | ≲0.0013 |
+| 12 | 0.3 | 3 | 0.0586 | 0.0059 | 0.0344 | 0.0071 | 0.0648 | 0.0019 | 0.0405 | ≲0.0009 |
+| 12 | 0.5 | 1 | 0.0586 | 0.0227 | 0.0177 | 0.0243 | 0.0820 | 0.0035 | 0.0418 | 0.0015 |
+| 12 | 0.5 | 3 | 0.0565 | 0.0230 | 0.0248 | 0.0236 | 0.0793 | 0.0024 | 0.0488 | 0.0016 |
 | 18 | 0.1 | 3 | 0.0993 | 0.0220 | n.e. | n.e. | 0.0998 | 0.0225 | n.e. | n.e. |
 | 18 | 0.3 | 1 | 0.0738 | 0.0052 | n.e. | n.e. | 0.0789 | 0.0045 | n.e. | n.e. |
 | 20 | 0.3 | 1 | 0.0497 | 0.0067 | n.e. | n.e. | 0.0566 | 0.0009 | n.e. | n.e. |
@@ -229,34 +229,34 @@ Rules (DECIDED-8, DECIDED-10, fixed before rescoring): Kish ESS >= 10 at every w
 
 | N | h | λ | ref | pair | gap/σ | verdict |
 |---|---|---|---|---|---|---|
-| 12 | 0.1 | 1 | raw | bare + Gauss vs Iceberg | +3.1 | bare + Gauss better: rms 0.0010 vs 0.0142 |
-| 12 | 0.1 | 1 | raw | bare + Gauss vs Iceberg + Gauss | +0.3 | unresolved |
-| 12 | 0.1 | 1 | cond | bare + Gauss vs Iceberg | +3.3 | bare + Gauss better: rms 0.0010 vs 0.0149 |
-| 12 | 0.1 | 1 | cond | bare + Gauss vs Iceberg + Gauss | -0.7 | unresolved |
-| 12 | 0.2 | 1 | raw | bare + Gauss vs Iceberg | +2.2 | bare + Gauss better: rms 0.0023 vs 0.0184 |
-| 12 | 0.2 | 1 | raw | bare + Gauss vs Iceberg + Gauss | +0.9 | unresolved |
-| 12 | 0.2 | 1 | cond | bare + Gauss vs Iceberg | +2.7 | bare + Gauss better: rms 0.0020 vs 0.0211 |
-| 12 | 0.2 | 1 | cond | bare + Gauss vs Iceberg + Gauss | -3.0 | Iceberg + Gauss better: rms <noise vs 0.0020 |
-| 12 | 0.3 | 1 | raw | bare + Gauss vs Iceberg | +3.7 | bare + Gauss better: rms 0.0061 vs 0.0254 |
-| 12 | 0.3 | 1 | raw | bare + Gauss vs Iceberg + Gauss | +4.3 | bare + Gauss better: rms 0.0061 vs 0.0070 |
-| 12 | 0.3 | 1 | cond | bare + Gauss vs Iceberg | +5.4 | bare + Gauss better: rms 0.0025 vs 0.0319 |
-| 12 | 0.3 | 1 | cond | bare + Gauss vs Iceberg + Gauss | -3.4 | Iceberg + Gauss better: rms 0.0010 vs 0.0025 |
-| 12 | 0.3 | 2 | raw | bare + Gauss vs Iceberg | +2.7 | bare + Gauss better: rms 0.0056 vs 0.0311 |
-| 12 | 0.3 | 2 | raw | bare + Gauss vs Iceberg + Gauss | +1.2 | bare + Gauss better: rms 0.0056 vs 0.0061 |
-| 12 | 0.3 | 2 | cond | bare + Gauss vs Iceberg | +3.5 | bare + Gauss better: rms 0.0025 vs 0.0378 |
-| 12 | 0.3 | 2 | cond | bare + Gauss vs Iceberg + Gauss | -2.1 | Iceberg + Gauss better: rms <noise vs 0.0025 |
-| 12 | 0.3 | 3 | raw | bare + Gauss vs Iceberg | +2.6 | bare + Gauss better: rms 0.0059 vs 0.0346 |
-| 12 | 0.3 | 3 | raw | bare + Gauss vs Iceberg + Gauss | +0.5 | unresolved |
-| 12 | 0.3 | 3 | cond | bare + Gauss vs Iceberg | +3.4 | bare + Gauss better: rms 0.0019 vs 0.0406 |
-| 12 | 0.3 | 3 | cond | bare + Gauss vs Iceberg + Gauss | -1.5 | Iceberg + Gauss better: rms <noise vs 0.0019 |
-| 12 | 0.5 | 1 | raw | bare + Gauss vs Iceberg | -2.7 | Iceberg better: rms 0.0177 vs 0.0227 |
-| 12 | 0.5 | 1 | raw | bare + Gauss vs Iceberg + Gauss | +7.1 | bare + Gauss better: rms 0.0227 vs 0.0243 |
-| 12 | 0.5 | 1 | cond | bare + Gauss vs Iceberg | +13.2 | bare + Gauss better: rms 0.0035 vs 0.0418 |
-| 12 | 0.5 | 1 | cond | bare + Gauss vs Iceberg + Gauss | -5.0 | Iceberg + Gauss better: rms 0.0014 vs 0.0035 |
-| 12 | 0.5 | 3 | raw | bare + Gauss vs Iceberg | +0.0 | unresolved |
-| 12 | 0.5 | 3 | raw | bare + Gauss vs Iceberg + Gauss | - | no estimate |
-| 12 | 0.5 | 3 | cond | bare + Gauss vs Iceberg | +4.4 | bare + Gauss better: rms 0.0024 vs 0.0480 |
-| 12 | 0.5 | 3 | cond | bare + Gauss vs Iceberg + Gauss | - | no estimate |
+| 12 | 0.1 | 1 | raw | bare + Gauss vs Iceberg | +1.5 | bare + Gauss better: rms 0.0011 vs 0.0144 |
+| 12 | 0.1 | 1 | raw | bare + Gauss vs Iceberg + Gauss | +0.2 | unresolved |
+| 12 | 0.1 | 1 | cond | bare + Gauss vs Iceberg | +1.6 | bare + Gauss better: rms 0.0010 vs 0.0151 |
+| 12 | 0.1 | 1 | cond | bare + Gauss vs Iceberg + Gauss | -0.5 | unresolved |
+| 12 | 0.2 | 1 | raw | bare + Gauss vs Iceberg | +1.3 | bare + Gauss better: rms 0.0023 vs 0.0191 |
+| 12 | 0.2 | 1 | raw | bare + Gauss vs Iceberg + Gauss | +3.1 | bare + Gauss better: rms 0.0023 vs 0.0033 |
+| 12 | 0.2 | 1 | cond | bare + Gauss vs Iceberg | +1.5 | bare + Gauss better: rms 0.0020 vs 0.0217 |
+| 12 | 0.2 | 1 | cond | bare + Gauss vs Iceberg + Gauss | -3.1 | Iceberg + Gauss better: rms 0.0000 vs 0.0020 |
+| 12 | 0.3 | 1 | raw | bare + Gauss vs Iceberg | +2.1 | bare + Gauss better: rms 0.0061 vs 0.0259 |
+| 12 | 0.3 | 1 | raw | bare + Gauss vs Iceberg + Gauss | +3.8 | bare + Gauss better: rms 0.0061 vs 0.0071 |
+| 12 | 0.3 | 1 | cond | bare + Gauss vs Iceberg | +2.9 | bare + Gauss better: rms 0.0025 vs 0.0323 |
+| 12 | 0.3 | 1 | cond | bare + Gauss vs Iceberg + Gauss | -2.4 | Iceberg + Gauss better: rms 0.0013 vs 0.0025 |
+| 12 | 0.3 | 2 | raw | bare + Gauss vs Iceberg | +1.2 | bare + Gauss better: rms 0.0056 vs 0.0306 |
+| 12 | 0.3 | 2 | raw | bare + Gauss vs Iceberg + Gauss | +1.5 | bare + Gauss better: rms 0.0056 vs 0.0063 |
+| 12 | 0.3 | 2 | cond | bare + Gauss vs Iceberg | +1.5 | bare + Gauss better: rms 0.0025 vs 0.0374 |
+| 12 | 0.3 | 2 | cond | bare + Gauss vs Iceberg + Gauss | -1.6 | Iceberg + Gauss better: rms 0.0012 vs 0.0025 |
+| 12 | 0.3 | 3 | raw | bare + Gauss vs Iceberg | +1.5 | bare + Gauss better: rms 0.0059 vs 0.0344 |
+| 12 | 0.3 | 3 | raw | bare + Gauss vs Iceberg + Gauss | +2.0 | bare + Gauss better: rms 0.0059 vs 0.0071 |
+| 12 | 0.3 | 3 | cond | bare + Gauss vs Iceberg | +1.9 | bare + Gauss better: rms 0.0019 vs 0.0405 |
+| 12 | 0.3 | 3 | cond | bare + Gauss vs Iceberg + Gauss | -2.0 | Iceberg + Gauss better: rms <noise vs 0.0019 |
+| 12 | 0.5 | 1 | raw | bare + Gauss vs Iceberg | -1.3 | Iceberg better: rms 0.0177 vs 0.0227 |
+| 12 | 0.5 | 1 | raw | bare + Gauss vs Iceberg + Gauss | +3.6 | bare + Gauss better: rms 0.0227 vs 0.0243 |
+| 12 | 0.5 | 1 | cond | bare + Gauss vs Iceberg | +5.4 | bare + Gauss better: rms 0.0035 vs 0.0418 |
+| 12 | 0.5 | 1 | cond | bare + Gauss vs Iceberg + Gauss | -2.8 | Iceberg + Gauss better: rms 0.0015 vs 0.0035 |
+| 12 | 0.5 | 3 | raw | bare + Gauss vs Iceberg | +0.2 | unresolved |
+| 12 | 0.5 | 3 | raw | bare + Gauss vs Iceberg + Gauss | +1.3 | bare + Gauss better: rms 0.0230 vs 0.0236 |
+| 12 | 0.5 | 3 | cond | bare + Gauss vs Iceberg | +3.2 | bare + Gauss better: rms 0.0024 vs 0.0488 |
+| 12 | 0.5 | 3 | cond | bare + Gauss vs Iceberg + Gauss | -1.4 | Iceberg + Gauss better: rms 0.0016 vs 0.0024 |
 | 18 | 0.1 | 3 | raw | bare + Gauss vs Iceberg | - | no estimate |
 | 18 | 0.1 | 3 | raw | bare + Gauss vs Iceberg + Gauss | - | no estimate |
 | 18 | 0.1 | 3 | cond | bare + Gauss vs Iceberg | - | no estimate |

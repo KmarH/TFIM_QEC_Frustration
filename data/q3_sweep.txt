@@ -13,13 +13,13 @@
 
 ## 1. Cells run [measured]
      N               case     h  lam  phys  ice steps   traj b/i  batches             host       py   s noisy
-    12      3x4 flippable   0.1    1    16         48    400/300       20 instance-2026100  3.12.14      2854
-    12      3x4 flippable   0.2    1    16         48    400/300       20 instance-2026100  3.12.14      2673
-    12      3x4 flippable   0.3    1    16         48    400/300       20      pulugungaxu   3.14.4     10571
-    12      3x4 flippable   0.3    2    16         28    400/300       20      pulugungaxu   3.14.4      8538
-    12      3x4 flippable   0.3    3    16         19    400/300       20      pulugungaxu   3.14.4      6799
-    12      3x4 flippable   0.5    1    16         48    400/300       20      pulugungaxu   3.14.4     10578
-    12      3x4 flippable   0.5    3    16         19    400/300       20           Rakata  3.12.15      3224
+    12      3x4 flippable   0.1    1    16         48    400/300       20 instance-2026100  3.12.14      1194
+    12      3x4 flippable   0.2    1    16         48    400/300       20 instance-2026100  3.12.14       947
+    12      3x4 flippable   0.3    1    16         48    400/300       20      pulugungaxu   3.14.4       941
+    12      3x4 flippable   0.3    2    16         28    400/300       20      pulugungaxu   3.14.4       756
+    12      3x4 flippable   0.3    3    16         19    400/300       20      pulugungaxu   3.14.4       559
+    12      3x4 flippable   0.5    1    16         48    400/300       20      pulugungaxu   3.14.4      1207
+    12      3x4 flippable   0.5    3    16         19    400/300       20           Rakata  3.12.15       634
     18   3x6 3-sublattice   0.1    3    22         13    200/100       10      pulugungaxu   3.14.4     51906
     18   3x6 3-sublattice   0.3    1    22         36    200/100       10      pulugungaxu   3.14.4     51732
     20      4x5 flippable   0.3    1    24         33      60/24        6           Rakata  3.12.15     37531
@@ -147,34 +147,34 @@
 #  Gauss modes use their own Kish ESS (sum w p_in)^2 / sum (w p_in)^2, or the lower bound
 #  acceptance x p_in x trajectories. 'no estimate' is a result, not a missing row.
      N     h  lam             mode     |res| vs raw    |res| vs cond  rms raw rms cond  SE   B   ESSmin    cost   final  pts  note
-    12   0.1    1         bare raw   0.0495+-0.0044   0.0502+-0.0044   0.0551   0.0557  lg   0    400.0    1.00     1.0   25  
-    12   0.1    1     bare + Gauss   0.0011+-0.0007   0.0010+-0.0007   0.0010   0.0010  lg   0    204.9    1.40     2.0   25  
-    12   0.1    1          Iceberg   0.0139+-0.0060   0.0145+-0.0060   0.0142   0.0149  lg   0     17.0    5.03    17.7   25  
-    12   0.1    1  Iceberg + Gauss   0.0017+-0.0013   0.0012+-0.0013   0.0013  -0.0002  lg   0     15.9    5.68    18.9   25  
-    12   0.2    1         bare raw   0.0530+-0.0038   0.0559+-0.0038   0.0613   0.0640  lg   0    400.0    1.00     1.0   25  
-    12   0.2    1     bare + Gauss   0.0021+-0.0005   0.0015+-0.0005   0.0023   0.0020  lg   0    189.6    1.47     2.1   25  
-    12   0.2    1          Iceberg   0.0159+-0.0080   0.0188+-0.0080   0.0184   0.0211  lg   0     15.0    6.10    20.0   25  
-    12   0.2    1  Iceberg + Gauss   0.0032+-0.0013   0.0007+-0.0013   0.0029  -0.0016  lg   0     11.4    7.36    26.4   25  
-    12   0.3    1         bare raw   0.0514+-0.0043   0.0583+-0.0043   0.0597   0.0660  lg   0    400.0    1.00     1.0   25  
-    12   0.3    1     bare + Gauss   0.0055+-0.0004   0.0017+-0.0004   0.0061   0.0025  lg   0    196.5    1.49     2.0   25  
-    12   0.3    1          Iceberg   0.0222+-0.0076   0.0291+-0.0076   0.0254   0.0319  lg   0     21.0    5.28    14.3   25  
-    12   0.3    1  Iceberg + Gauss   0.0068+-0.0008   0.0011+-0.0008   0.0070   0.0010  lg   0     14.1    6.78    21.2   25  
-    12   0.3    2         bare raw   0.0526+-0.0035   0.0593+-0.0035   0.0625   0.0685  lg   0    400.0    1.00     1.0   15  
-    12   0.3    2     bare + Gauss   0.0051+-0.0005   0.0018+-0.0005   0.0056   0.0025  lg   0    187.6    1.52     2.1   15  
-    12   0.3    2          Iceberg   0.0291+-0.0118   0.0358+-0.0118   0.0311   0.0378  lg   0     19.0    5.86    15.8   15  
-    12   0.3    2  Iceberg + Gauss   0.0060+-0.0014   0.0012+-0.0014   0.0061  -0.0006  lg   0     15.0    7.69    20.0   15  
-    12   0.3    3         bare raw   0.0508+-0.0037   0.0573+-0.0037   0.0586   0.0648  lg   0    400.0    1.00     1.0   11  
-    12   0.3    3     bare + Gauss   0.0055+-0.0007   0.0016+-0.0007   0.0059   0.0019  lg   0    192.2    1.53     2.1   11  
-    12   0.3    3          Iceberg   0.0288+-0.0090   0.0353+-0.0090   0.0346   0.0406  lg   0     19.0    6.25    15.8   11  
-    12   0.3    3  Iceberg + Gauss   0.0068+-0.0019   0.0005+-0.0019   0.0065  -0.0029  lg   0     10.7    9.10    28.0   11  
-    12   0.5    1         bare raw   0.0508+-0.0030   0.0754+-0.0030   0.0586   0.0820  lg   0    400.0    1.00     1.0   25  
-    12   0.5    1     bare + Gauss   0.0222+-0.0004   0.0026+-0.0004   0.0227   0.0035  lg   0    169.4    1.74     2.4   25  
-    12   0.5    1          Iceberg   0.0152+-0.0047   0.0398+-0.0047   0.0177   0.0418  lg   0     21.0    5.03    14.3   25  
-    12   0.5    1  Iceberg + Gauss   0.0238+-0.0006   0.0009+-0.0006   0.0243   0.0014  lg   0     12.8    7.05    23.4   25  
-    12   0.5    3         bare raw   0.0478+-0.0033   0.0709+-0.0033   0.0565   0.0793  lg   0    400.0    1.00     1.0   11  
-    12   0.5    3     bare + Gauss   0.0219+-0.0004   0.0018+-0.0004   0.0230   0.0024  lg   0    168.8    1.74     2.4   11  
-    12   0.5    3          Iceberg   0.0224+-0.0111   0.0456+-0.0111   0.0232   0.0480  lg   0     16.0    7.66    18.8   11  
-    12   0.5    3  Iceberg + Gauss      no estimate      no estimate        -        -  lg   0      9.8   11.51    30.6   11  ESS 9.81 < floor 10 at t = [4.75]
+    12   0.1    1         bare raw   0.0495+-0.0038   0.0502+-0.0038   0.0551   0.0557  jk  20    400.0    1.00     1.0   25  
+    12   0.1    1     bare + Gauss   0.0011+-0.0003   0.0010+-0.0003   0.0011   0.0010  jk  20    223.3    1.40     2.0   25  
+    12   0.1    1          Iceberg   0.0139+-0.0039   0.0145+-0.0039   0.0144   0.0151  jk  20     17.0    5.03    17.7   25  
+    12   0.1    1  Iceberg + Gauss   0.0017+-0.0007   0.0012+-0.0006   0.0013  -0.0001  jk  20     16.0    5.68    18.9   25  
+    12   0.2    1         bare raw   0.0530+-0.0033   0.0559+-0.0033   0.0613   0.0640  jk  20    400.0    1.00     1.0   25  
+    12   0.2    1     bare + Gauss   0.0021+-0.0001   0.0015+-0.0003   0.0023   0.0020  jk  20    222.3    1.47     2.1   25  
+    12   0.2    1          Iceberg   0.0159+-0.0052   0.0188+-0.0052   0.0191   0.0217  jk  20     15.0    6.10    20.0   25  
+    12   0.2    1  Iceberg + Gauss   0.0032+-0.0003   0.0007+-0.0002   0.0033   0.0000  jk  20     12.2    7.36    26.4   25  
+    12   0.3    1         bare raw   0.0514+-0.0039   0.0583+-0.0039   0.0597   0.0660  jk  20    400.0    1.00     1.0   25  
+    12   0.3    1     bare + Gauss   0.0055+-0.0002   0.0017+-0.0002   0.0061   0.0025  jk  20    238.3    1.49     2.0   25  
+    12   0.3    1          Iceberg   0.0222+-0.0041   0.0291+-0.0041   0.0259   0.0323  jk  20     21.0    5.28    14.3   25  
+    12   0.3    1  Iceberg + Gauss   0.0068+-0.0002   0.0011+-0.0004   0.0071   0.0013  jk  20     15.9    6.78    21.2   25  
+    12   0.3    2         bare raw   0.0526+-0.0030   0.0593+-0.0030   0.0625   0.0685  jk  20    400.0    1.00     1.0   15  
+    12   0.3    2     bare + Gauss   0.0051+-0.0004   0.0018+-0.0004   0.0056   0.0025  jk  20    224.0    1.52     2.1   15  
+    12   0.3    2          Iceberg   0.0291+-0.0114   0.0358+-0.0114   0.0306   0.0374  jk  20     19.0    5.86    15.8   15  
+    12   0.3    2  Iceberg + Gauss   0.0060+-0.0004   0.0012+-0.0007   0.0063   0.0012  jk  20     16.2    7.69    20.0   15  
+    12   0.3    3         bare raw   0.0508+-0.0031   0.0573+-0.0031   0.0586   0.0648  jk  20    400.0    1.00     1.0   11  
+    12   0.3    3     bare + Gauss   0.0055+-0.0004   0.0016+-0.0004   0.0059   0.0019  jk  20    226.9    1.53     2.1   11  
+    12   0.3    3          Iceberg   0.0288+-0.0078   0.0353+-0.0078   0.0344   0.0405  jk  20     19.0    6.25    15.8   11  
+    12   0.3    3  Iceberg + Gauss   0.0068+-0.0005   0.0005+-0.0003   0.0071  -0.0008  jk  20     12.8    9.10    28.0   11  
+    12   0.5    1         bare raw   0.0508+-0.0026   0.0754+-0.0026   0.0586   0.0820  jk  20    400.0    1.00     1.0   25  
+    12   0.5    1     bare + Gauss   0.0222+-0.0003   0.0026+-0.0003   0.0227   0.0035  jk  20    248.9    1.74     2.4   25  
+    12   0.5    1          Iceberg   0.0152+-0.0032   0.0398+-0.0032   0.0177   0.0418  jk  20     21.0    5.03    14.3   25  
+    12   0.5    1  Iceberg + Gauss   0.0238+-0.0003   0.0009+-0.0003   0.0243   0.0015  jk  20     17.8    7.05    23.4   25  
+    12   0.5    3         bare raw   0.0478+-0.0029   0.0709+-0.0029   0.0565   0.0793  jk  20    400.0    1.00     1.0   11  
+    12   0.5    3     bare + Gauss   0.0219+-0.0003   0.0018+-0.0002   0.0230   0.0024  jk  20    240.9    1.74     2.4   11  
+    12   0.5    3          Iceberg   0.0224+-0.0066   0.0456+-0.0066   0.0248   0.0488  jk  20     16.0    7.66    18.8   11  
+    12   0.5    3  Iceberg + Gauss   0.0224+-0.0003   0.0012+-0.0004   0.0236   0.0016  jk  20     13.0   11.51    30.6   11  
     18   0.1    3         bare raw   0.0860+-0.0096   0.0864+-0.0096   0.0993   0.0998  lg   0    200.0    1.00     1.0    5  
     18   0.1    3     bare + Gauss   0.0196+-0.0033   0.0200+-0.0033   0.0220   0.0225  lg   0    117.9    1.36     1.7    5  
     18   0.1    3          Iceberg      no estimate      no estimate        -        -  lg   0      5.0    9.08    20.0    5  ESS 4.99 < floor 10 at t = [3.0, 3.25]
@@ -197,34 +197,34 @@
 #  Winner only when |gap| > 1 sigma (DECIDED-8). Under the null about 32 %
 #  of pairs cross 1 sigma by chance; read every verdict with its gap/s.
      N     h  lam  ref                               pair       gap    sigma  gap/s  verdict
-    12   0.1    1  raw            bare + Gauss vs Iceberg +2.02e-04 6.47e-05   +3.1  bare + Gauss better: rms 0.0010 vs 0.0142
-    12   0.1    1  raw    bare + Gauss vs Iceberg + Gauss +5.57e-07 1.76e-06   +0.3  unresolved
-    12   0.1    1 cond            bare + Gauss vs Iceberg +2.22e-04 6.66e-05   +3.3  bare + Gauss better: rms 0.0010 vs 0.0149
-    12   0.1    1 cond    bare + Gauss vs Iceberg + Gauss -1.04e-06 1.57e-06   -0.7  unresolved
-    12   0.2    1  raw            bare + Gauss vs Iceberg +3.33e-04 1.53e-04   +2.2  bare + Gauss better: rms 0.0023 vs 0.0184
-    12   0.2    1  raw    bare + Gauss vs Iceberg + Gauss +3.04e-06 3.50e-06   +0.9  unresolved
-    12   0.2    1 cond            bare + Gauss vs Iceberg +4.41e-04 1.64e-04   +2.7  bare + Gauss better: rms 0.0020 vs 0.0211
-    12   0.2    1 cond    bare + Gauss vs Iceberg + Gauss -6.80e-06 2.23e-06   -3.0  Iceberg + Gauss better: rms <noise vs 0.0020
-    12   0.3    1  raw            bare + Gauss vs Iceberg +6.11e-04 1.64e-04   +3.7  bare + Gauss better: rms 0.0061 vs 0.0254
-    12   0.3    1  raw    bare + Gauss vs Iceberg + Gauss +1.24e-05 2.92e-06   +4.3  bare + Gauss better: rms 0.0061 vs 0.0070
-    12   0.3    1 cond            bare + Gauss vs Iceberg +1.01e-03 1.89e-04   +5.4  bare + Gauss better: rms 0.0025 vs 0.0319
-    12   0.3    1 cond    bare + Gauss vs Iceberg + Gauss -5.35e-06 1.59e-06   -3.4  Iceberg + Gauss better: rms 0.0010 vs 0.0025
-    12   0.3    2  raw            bare + Gauss vs Iceberg +9.34e-04 3.51e-04   +2.7  bare + Gauss better: rms 0.0056 vs 0.0311
-    12   0.3    2  raw    bare + Gauss vs Iceberg + Gauss +6.33e-06 5.20e-06   +1.2  bare + Gauss better: rms 0.0056 vs 0.0061
-    12   0.3    2 cond            bare + Gauss vs Iceberg +1.42e-03 4.00e-04   +3.5  bare + Gauss better: rms 0.0025 vs 0.0378
-    12   0.3    2 cond    bare + Gauss vs Iceberg + Gauss -6.54e-06 3.09e-06   -2.1  Iceberg + Gauss better: rms <noise vs 0.0025
-    12   0.3    3  raw            bare + Gauss vs Iceberg +1.16e-03 4.38e-04   +2.6  bare + Gauss better: rms 0.0059 vs 0.0346
-    12   0.3    3  raw    bare + Gauss vs Iceberg + Gauss +7.67e-06 1.52e-05   +0.5  unresolved
-    12   0.3    3 cond            bare + Gauss vs Iceberg +1.65e-03 4.86e-04   +3.4  bare + Gauss better: rms 0.0019 vs 0.0406
-    12   0.3    3 cond    bare + Gauss vs Iceberg + Gauss -1.21e-05 8.04e-06   -1.5  Iceberg + Gauss better: rms <noise vs 0.0019
-    12   0.5    1  raw            bare + Gauss vs Iceberg -2.04e-04 7.42e-05   -2.7  Iceberg better: rms 0.0177 vs 0.0227
-    12   0.5    1  raw    bare + Gauss vs Iceberg + Gauss +7.38e-05 1.03e-05   +7.1  bare + Gauss better: rms 0.0227 vs 0.0243
-    12   0.5    1 cond            bare + Gauss vs Iceberg +1.73e-03 1.32e-04  +13.2  bare + Gauss better: rms 0.0035 vs 0.0418
-    12   0.5    1 cond    bare + Gauss vs Iceberg + Gauss -1.06e-05 2.13e-06   -5.0  Iceberg + Gauss better: rms 0.0014 vs 0.0035
-    12   0.5    3  raw            bare + Gauss vs Iceberg +8.76e-06 3.16e-04   +0.0  unresolved
-    12   0.5    3  raw    bare + Gauss vs Iceberg + Gauss         -        -      -  no estimate
-    12   0.5    3 cond            bare + Gauss vs Iceberg +2.29e-03 5.20e-04   +4.4  bare + Gauss better: rms 0.0024 vs 0.0480
-    12   0.5    3 cond    bare + Gauss vs Iceberg + Gauss         -        -      -  no estimate
+    12   0.1    1  raw            bare + Gauss vs Iceberg +2.05e-04 1.33e-04   +1.5  bare + Gauss better: rms 0.0011 vs 0.0144
+    12   0.1    1  raw    bare + Gauss vs Iceberg + Gauss +5.34e-07 2.97e-06   +0.2  unresolved
+    12   0.1    1 cond            bare + Gauss vs Iceberg +2.26e-04 1.38e-04   +1.6  bare + Gauss better: rms 0.0010 vs 0.0151
+    12   0.1    1 cond    bare + Gauss vs Iceberg + Gauss -1.06e-06 2.02e-06   -0.5  unresolved
+    12   0.2    1  raw            bare + Gauss vs Iceberg +3.59e-04 2.86e-04   +1.3  bare + Gauss better: rms 0.0023 vs 0.0191
+    12   0.2    1  raw    bare + Gauss vs Iceberg + Gauss +5.68e-06 1.85e-06   +3.1  bare + Gauss better: rms 0.0023 vs 0.0033
+    12   0.2    1 cond            bare + Gauss vs Iceberg +4.67e-04 3.17e-04   +1.5  bare + Gauss better: rms 0.0020 vs 0.0217
+    12   0.2    1 cond    bare + Gauss vs Iceberg + Gauss -4.16e-06 1.35e-06   -3.1  Iceberg + Gauss better: rms 0.0000 vs 0.0020
+    12   0.3    1  raw            bare + Gauss vs Iceberg +6.33e-04 2.98e-04   +2.1  bare + Gauss better: rms 0.0061 vs 0.0259
+    12   0.3    1  raw    bare + Gauss vs Iceberg + Gauss +1.31e-05 3.48e-06   +3.8  bare + Gauss better: rms 0.0061 vs 0.0071
+    12   0.3    1 cond            bare + Gauss vs Iceberg +1.03e-03 3.54e-04   +2.9  bare + Gauss better: rms 0.0025 vs 0.0323
+    12   0.3    1 cond    bare + Gauss vs Iceberg + Gauss -4.65e-06 1.95e-06   -2.4  Iceberg + Gauss better: rms 0.0013 vs 0.0025
+    12   0.3    2  raw            bare + Gauss vs Iceberg +9.04e-04 7.80e-04   +1.2  bare + Gauss better: rms 0.0056 vs 0.0306
+    12   0.3    2  raw    bare + Gauss vs Iceberg + Gauss +8.17e-06 5.43e-06   +1.5  bare + Gauss better: rms 0.0056 vs 0.0063
+    12   0.3    2 cond            bare + Gauss vs Iceberg +1.39e-03 9.40e-04   +1.5  bare + Gauss better: rms 0.0025 vs 0.0374
+    12   0.3    2 cond    bare + Gauss vs Iceberg + Gauss -4.70e-06 2.96e-06   -1.6  Iceberg + Gauss better: rms 0.0012 vs 0.0025
+    12   0.3    3  raw            bare + Gauss vs Iceberg +1.15e-03 7.48e-04   +1.5  bare + Gauss better: rms 0.0059 vs 0.0344
+    12   0.3    3  raw    bare + Gauss vs Iceberg + Gauss +1.56e-05 7.64e-06   +2.0  bare + Gauss better: rms 0.0059 vs 0.0071
+    12   0.3    3 cond            bare + Gauss vs Iceberg +1.64e-03 8.57e-04   +1.9  bare + Gauss better: rms 0.0019 vs 0.0405
+    12   0.3    3 cond    bare + Gauss vs Iceberg + Gauss -4.23e-06 2.14e-06   -2.0  Iceberg + Gauss better: rms <noise vs 0.0019
+    12   0.5    1  raw            bare + Gauss vs Iceberg -2.05e-04 1.56e-04   -1.3  Iceberg better: rms 0.0177 vs 0.0227
+    12   0.5    1  raw    bare + Gauss vs Iceberg + Gauss +7.42e-05 2.06e-05   +3.6  bare + Gauss better: rms 0.0227 vs 0.0243
+    12   0.5    1 cond            bare + Gauss vs Iceberg +1.73e-03 3.22e-04   +5.4  bare + Gauss better: rms 0.0035 vs 0.0418
+    12   0.5    1 cond    bare + Gauss vs Iceberg + Gauss -1.01e-05 3.55e-06   -2.8  Iceberg + Gauss better: rms 0.0015 vs 0.0035
+    12   0.5    3  raw            bare + Gauss vs Iceberg +8.59e-05 3.95e-04   +0.2  unresolved
+    12   0.5    3  raw    bare + Gauss vs Iceberg + Gauss +2.63e-05 2.09e-05   +1.3  bare + Gauss better: rms 0.0230 vs 0.0236
+    12   0.5    3 cond            bare + Gauss vs Iceberg +2.37e-03 7.43e-04   +3.2  bare + Gauss better: rms 0.0024 vs 0.0488
+    12   0.5    3 cond    bare + Gauss vs Iceberg + Gauss -3.37e-06 2.46e-06   -1.4  Iceberg + Gauss better: rms 0.0016 vs 0.0024
     18   0.1    3  raw            bare + Gauss vs Iceberg         -        -      -  no estimate
     18   0.1    3  raw    bare + Gauss vs Iceberg + Gauss         -        -      -  no estimate
     18   0.1    3 cond            bare + Gauss vs Iceberg         -        -      -  no estimate
