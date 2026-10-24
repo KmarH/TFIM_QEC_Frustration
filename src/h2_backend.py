@@ -265,6 +265,7 @@ def submit_nexus(
     estimated_hqc: float,
     allow_real_hardware: bool = False,
     ledger: Path | None = None,
+    job_name: str | None = None,
 ):
     """HQC tier: submit to a Nexus H2 EMULATOR (or hardware). NOTHING in this repo calls this; it
     needs the project lead's explicit go for each run (SCOPE §5, CLAUDE.md).
@@ -274,6 +275,8 @@ def submit_nexus(
     the whole job is within it; the device is an E emulator (or hardware with allow_real_hardware);
     and the widest circuit fits H2's 56 qubits. Submits with no_opt=True and the cap passed as
     `max_cost`, which Nexus enforces server-side, and records the job in the ledger.
+    `job_name` (additive, 2026-10-24): a deterministic name, so an interrupted submission can be
+    found again by name instead of being paid for twice (src/h2_resume.py).
     [unverified against the live server; written from qnexus 0.51.1.]"""
     if device in SC_DEVICES or device in LE_DEVICES:
         raise DeviceRefused(
@@ -323,7 +326,7 @@ def submit_nexus(
         n_shots=[shots] * len(circuits),
         backend_config=cfg,
         project=proj,
-        name=f"{project}-{device}-{int(time.time())}",
+        name=job_name or f"{project}-{device}-{int(time.time())}",
         max_cost=max_cost_hqc,
     )
     entry = {
@@ -335,6 +338,7 @@ def submit_nexus(
         "max_cost_hqc": max_cost_hqc,
         "approval": NEXUS_APPROVAL,
         "job_id": str(getattr(job, "id", "")),
+        "job_name": job_name,
     }
     try:
         _ledger(entry, ledger)

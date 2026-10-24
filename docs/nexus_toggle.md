@@ -104,3 +104,30 @@ once interactively on your own machine. The container's network policy must allo
   say. The HQC formula and Nm convention are [established] from the docs.)
 - The SC accepted every circuit as authored, including mid-circuit measure + reset and classically
   conditioned X/Y/Z gates [measured, 18 circuits]. That is a syntax check, not a run.
+
+## Resumable emulator runs (timeouts, dropped connections) — added 2026-10-24
+
+`scripts/h2_run_resumable.py` (`src/h2_resume.py`) runs a plan group through the same gates as
+`src/h2_driver.py`, but stage by stage with a checkpoint in `runs/nexus_runs/<run_id>/`:
+quote (free) → submit (spends) → wait → fetch, each step saved before the next.
+
+```
+python -I scripts/h2_run_resumable.py --group Q3-iceberg --shots 500 --run-id q3ice-01 --approval <token>
+python -I scripts/h2_run_resumable.py --run-id q3ice-01 --status      # offline, nothing sent
+```
+
+- **Resume = re-run the same command.** Exit code 3 means "stopped at a safe point"; finished
+  batches are never repeated.
+- **Read-only calls are retried** (quote, wait, results, job lookup) with exponential backoff on
+  transient errors only: timeouts, dropped connections, HTTP 429 / 5xx.
+- **A submission is never retried blindly.** Each batch has a deterministic job name, recorded
+  before submitting. After an interrupted submit, the resume first looks the job up by that name.
+  If Nexus accepted it, it is adopted and not paid for again; only if no such job exists is it
+  submitted.
+- **Jobs that fail on the server** (ERROR / CANCELLED / DEPLETED / TERMINATED) are recorded and left
+  alone. `--retry-failed` resubmits them under `-r1`, `-r2`, … names, and passes the spending gates
+  again.
+- **Every resume re-checks the emulator gates**, including the per-run approval token. A changed plan
+  is refused under an existing run id.
+- **Tests** (offline fakes): `tests/test_h2_resume.py`. **Unverified against the live server**: the
+  job lookup by name uses `qnexus.jobs.get(name=...)` as read in qnexus 0.51.1.
