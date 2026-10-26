@@ -250,7 +250,7 @@ Rules (DECIDED-8, DECIDED-10, fixed before rescoring): Kish ESS >= 10 at every w
 | 12 | 0.5 | 1 | 0.0586 | 0.0227 | 0.0177 | 0.0243 | 0.0820 | 0.0035 | 0.0418 | 0.0015 |
 | 12 | 0.5 | 3 | 0.0565 | 0.0230 | 0.0248 | 0.0236 | 0.0793 | 0.0024 | 0.0488 | 0.0016 |
 | 18 | 0.1 | 3 | 0.1097 | 0.0199 | 0.0650 | 0.0037 | 0.1102 | 0.0204 | 0.0656 | 0.0032 |
-| 18 | 0.3 | 1 | 0.0738 | 0.0052 | n.e. | n.e. | 0.0789 | 0.0045 | n.e. | n.e. |
+| 18 | 0.3 | 1 | 0.0681 | 0.0052 | 0.0238 | 0.0062 | 0.0734 | 0.0048 | 0.0295 | 0.0022 |
 | 20 | 0.3 | 1 | 0.0497 | 0.0067 | n.e. | n.e. | 0.0566 | 0.0009 | n.e. | n.e. |
 | 20 | 0.5 | 3 | 0.0449 | 0.0231 | 0.0185 | 0.0227 | 0.0676 | 0.0010 | 0.0419 | ≲0.0008 |
 
@@ -290,10 +290,10 @@ Rules (DECIDED-8, DECIDED-10, fixed before rescoring): Kish ESS >= 10 at every w
 | 18 | 0.1 | 3 | raw | bare + Gauss vs Iceberg + Gauss | -3.0 | Iceberg + Gauss better: rms 0.0037 vs 0.0199 |
 | 18 | 0.1 | 3 | cond | bare + Gauss vs Iceberg | +1.4 | bare + Gauss better: rms 0.0204 vs 0.0656 |
 | 18 | 0.1 | 3 | cond | bare + Gauss vs Iceberg + Gauss | -3.2 | Iceberg + Gauss better: rms 0.0032 vs 0.0204 |
-| 18 | 0.3 | 1 | raw | bare + Gauss vs Iceberg | - | no estimate |
-| 18 | 0.3 | 1 | raw | bare + Gauss vs Iceberg + Gauss | - | no estimate |
-| 18 | 0.3 | 1 | cond | bare + Gauss vs Iceberg | - | no estimate |
-| 18 | 0.3 | 1 | cond | bare + Gauss vs Iceberg + Gauss | - | no estimate |
+| 18 | 0.3 | 1 | raw | bare + Gauss vs Iceberg | +1.0 | bare + Gauss better: rms 0.0052 vs 0.0238 |
+| 18 | 0.3 | 1 | raw | bare + Gauss vs Iceberg + Gauss | +1.6 | bare + Gauss better: rms 0.0052 vs 0.0062 |
+| 18 | 0.3 | 1 | cond | bare + Gauss vs Iceberg | +1.4 | bare + Gauss better: rms 0.0048 vs 0.0295 |
+| 18 | 0.3 | 1 | cond | bare + Gauss vs Iceberg + Gauss | -3.1 | Iceberg + Gauss better: rms 0.0022 vs 0.0048 |
 | 20 | 0.3 | 1 | raw | bare + Gauss vs Iceberg | - | no estimate |
 | 20 | 0.3 | 1 | raw | bare + Gauss vs Iceberg + Gauss | - | no estimate |
 | 20 | 0.3 | 1 | cond | bare + Gauss vs Iceberg | - | no estimate |
