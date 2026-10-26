@@ -237,7 +237,7 @@ Rules (DECIDED-8, DECIDED-10, fixed before rescoring): Kish ESS >= 10 at every w
 | 18 | 0.1 | 3 | 0.1097 | 0.0199 | 0.0650 | 0.0037 | 0.1102 | 0.0204 | 0.0656 | 0.0032 |
 | 18 | 0.3 | 1 | 0.0738 | 0.0052 | n.e. | n.e. | 0.0789 | 0.0045 | n.e. | n.e. |
 | 20 | 0.3 | 1 | 0.0497 | 0.0067 | n.e. | n.e. | 0.0566 | 0.0009 | n.e. | n.e. |
-| 20 | 0.5 | 3 | 0.0432 | 0.0237 | n.e. | n.e. | 0.0657 | ≲0.0011 | n.e. | n.e. |
+| 20 | 0.5 | 3 | 0.0449 | 0.0231 | 0.0185 | 0.0227 | 0.0676 | 0.0010 | 0.0419 | ≲0.0008 |
 
 **Head to head within each reference** (gap/σ of the msd's; negative = the second mode is closer)
 
@@ -283,10 +283,10 @@ Rules (DECIDED-8, DECIDED-10, fixed before rescoring): Kish ESS >= 10 at every w
 | 20 | 0.3 | 1 | raw | bare + Gauss vs Iceberg + Gauss | - | no estimate |
 | 20 | 0.3 | 1 | cond | bare + Gauss vs Iceberg | - | no estimate |
 | 20 | 0.3 | 1 | cond | bare + Gauss vs Iceberg + Gauss | - | no estimate |
-| 20 | 0.5 | 3 | raw | bare + Gauss vs Iceberg | - | no estimate |
-| 20 | 0.5 | 3 | raw | bare + Gauss vs Iceberg + Gauss | - | no estimate |
-| 20 | 0.5 | 3 | cond | bare + Gauss vs Iceberg | - | no estimate |
-| 20 | 0.5 | 3 | cond | bare + Gauss vs Iceberg + Gauss | - | no estimate |
+| 20 | 0.5 | 3 | raw | bare + Gauss vs Iceberg | -1.3 | Iceberg better: rms 0.0185 vs 0.0231 |
+| 20 | 0.5 | 3 | raw | bare + Gauss vs Iceberg + Gauss | -0.7 | unresolved |
+| 20 | 0.5 | 3 | cond | bare + Gauss vs Iceberg | +5.7 | bare + Gauss better: rms 0.0010 vs 0.0419 |
+| 20 | 0.5 | 3 | cond | bare + Gauss vs Iceberg + Gauss | -0.6 | unresolved |
 <!-- v2-tables:end -->
 
 ### 4.1 Continuity: the published cell reproduces, on a different machine

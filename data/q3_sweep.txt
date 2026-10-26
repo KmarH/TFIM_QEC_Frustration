@@ -23,7 +23,7 @@
     18   3x6 3-sublattice   0.1    3    22         13    200/420       20           Rakata  3.12.15    130233
     18   3x6 3-sublattice   0.3    1    22         36    200/100       10      pulugungaxu   3.14.4     51732
     20      4x5 flippable   0.3    1    24         33      60/24        6           Rakata  3.12.15     37531
-    20      4x5 flippable   0.5    3    24         12      60/24        6           Rakata  3.12.15     20302
+    20      4x5 flippable   0.5    3    24         12    120/460       20           Rakata  3.12.15    275310
 
 ## 2. Accuracy vs the ideal circuit and shot cost, per mode [measured; classical prediction]
 #  residual = mean |O_noisy - O_ideal| over the window. Raw modes are scored against the
@@ -90,12 +90,12 @@
     20   0.3    1    late     bare + Gauss    0.0089    0.0020   0.0016      True   13.79    36.9   14
     20   0.3    1   early          Iceberg    0.0066         -   0.0046      True    2.63     8.0    7
     20   0.3    1   early  Iceberg + Gauss    0.0020    0.0048   0.0013      True    2.85     8.8    7
-    20   0.5    3   early         bare raw    0.0331         -   0.0041      True    1.00     1.0    3
-    20   0.5    3   early     bare + Gauss    0.0008    0.0194   0.0005      True    1.59     2.8    3
-    20   0.5    3    late         bare raw    0.1870         -   0.0027      True    1.00     1.0    9
-    20   0.5    3    late     bare + Gauss    0.0077    0.0308   0.0015      True   52.51   264.9    9
-    20   0.5    3   early          Iceberg    0.0000         -   0.0000      True    3.28    24.0    3
-    20   0.5    3   early  Iceberg + Gauss    0.0000    0.0189   0.0000      True    3.44    32.2    3
+    20   0.5    3   early         bare raw    0.0349         -   0.0038      True    1.00     1.0    3
+    20   0.5    3   early     bare + Gauss    0.0009    0.0189   0.0006      True    1.62     2.8    3
+    20   0.5    3    late         bare raw    0.1946         -   0.0017      True    1.00     1.0    9
+    20   0.5    3    late     bare + Gauss    0.0098    0.0288   0.0008      True  103.61   403.5    9
+    20   0.5    3   early          Iceberg    0.0159         -   0.0042      True    3.03    21.9    3
+    20   0.5    3   early  Iceberg + Gauss    0.0008    0.0186   0.0010     False    3.42    39.2    3
 
 ## 3. Iceberg vs bare + Gauss, head to head (the §9.2 question) [measured; classical prediction]
 #  The published N = 12, h = 0.3, lam = 1 cell: bare + Gauss 0.0017 +- 0.0004 at x1.43
@@ -112,7 +112,7 @@
     18   0.1    3   0.0168+-0.0030 x1.29   0.0620+-0.0217 x3.61   0.0043+-0.0112 x3.91  bare+Gauss better by 0.0452
     18   0.3    1   0.0032+-0.0005 x1.41   0.0241+-0.0144 x2.80   0.0012+-0.0019 x3.04  bare+Gauss better by 0.0209
     20   0.3    1   0.0006+-0.0005 x1.42   0.0066+-0.0046 x2.63   0.0020+-0.0013 x2.85  bare+Gauss better by 0.0060
-    20   0.5    3   0.0008+-0.0005 x1.59   0.0000+-0.0000 x3.28   0.0000+-0.0000 x3.44     Iceberg better by 0.0008
+    20   0.5    3   0.0009+-0.0006 x1.62   0.0159+-0.0042 x3.03   0.0008+-0.0010 x3.42  bare+Gauss better by 0.0150
 
 ## 4. Measured Iceberg survival vs the Stim first-order prediction [independent cross-check]
 #  Stim's exp(-(offset + detect rate * steps)) is a different code path (fault
@@ -131,7 +131,7 @@
     18   0.1    3   3.25         0.0380    420   0.0484   -1.0s
     18   0.3    1   9.00         0.0599    100   0.0534   +0.3s
     20   0.3    1   8.25         0.1248     24   0.0511   +1.6s
-    20   0.5    3   3.00         0.0416     24   0.0446   -0.1s
+    20   0.5    3   3.00         0.0456    460   0.0446   +0.1s
 
 ## 5. v2 scores: 4 modes x 2 references, pre-declared rules (DECIDED-8, DECIDED-10) [measured; classical prediction]
 #  Every mode against BOTH ideal curves (raw | Gauss-conditioned), on ONE window (the
@@ -187,10 +187,10 @@
     20   0.3    1     bare + Gauss   0.0062+-0.0005   0.0008+-0.0005   0.0067   0.0009  lg   0     27.6    1.60     2.2    7  
     20   0.3    1          Iceberg      no estimate      no estimate        -        -  lg   0      3.0    4.24     8.0    7  ESS 3 < floor 10 at t = [3.0, 4.5, 6.0, 7.5, 8.25]
     20   0.3    1  Iceberg + Gauss      no estimate      no estimate        -        -  lg   0      2.7    4.72     8.8    7  ESS 2.73 < floor 10 at t = [3.0, 4.5, 6.0, 7.5, 8.25]
-    20   0.5    3         bare raw   0.0331+-0.0041   0.0520+-0.0041   0.0432   0.0657  lg   0     60.0    1.00     1.0    3  
-    20   0.5    3     bare + Gauss   0.0194+-0.0005   0.0008+-0.0005   0.0237   0.0010  lg   0     21.5    1.89     2.8    3  
-    20   0.5    3          Iceberg      no estimate      no estimate        -        -  lg   0      1.0   11.13    24.0    3  ESS 0.999 < floor 10 at t = [1.5, 3.0]
-    20   0.5    3  Iceberg + Gauss      no estimate      no estimate        -        -  lg   0      0.7   14.84    32.2    3  ESS 0.745 < floor 10 at t = [1.5, 3.0]
+    20   0.5    3         bare raw   0.0349+-0.0036   0.0537+-0.0036   0.0449   0.0676  jk  20    120.0    1.00     1.0    3  
+    20   0.5    3     bare + Gauss   0.0189+-0.0002   0.0009+-0.0004   0.0231   0.0010  jk  20     67.4    1.94     2.8    3  
+    20   0.5    3          Iceberg   0.0159+-0.0028   0.0348+-0.0028   0.0185   0.0419  jk  20     21.0    9.35    21.9    3  
+    20   0.5    3  Iceberg + Gauss   0.0186+-0.0005   0.0008+-0.0005   0.0227   0.0006  jk  20     16.7   16.16    39.2    3  
 
 ## 6. v2 head to head, within each reference [measured; classical prediction]
 #  gap = msd(second) - msd(first) (bias-corrected mean squares); sigma = combined SE.
@@ -237,7 +237,7 @@
     20   0.3    1  raw    bare + Gauss vs Iceberg + Gauss         -        -      -  no estimate
     20   0.3    1 cond            bare + Gauss vs Iceberg         -        -      -  no estimate
     20   0.3    1 cond    bare + Gauss vs Iceberg + Gauss         -        -      -  no estimate
-    20   0.5    3  raw            bare + Gauss vs Iceberg         -        -      -  no estimate
-    20   0.5    3  raw    bare + Gauss vs Iceberg + Gauss         -        -      -  no estimate
-    20   0.5    3 cond            bare + Gauss vs Iceberg         -        -      -  no estimate
-    20   0.5    3 cond    bare + Gauss vs Iceberg + Gauss         -        -      -  no estimate
+    20   0.5    3  raw            bare + Gauss vs Iceberg -1.93e-04 1.45e-04   -1.3  Iceberg better: rms 0.0185 vs 0.0231
+    20   0.5    3  raw    bare + Gauss vs Iceberg + Gauss -2.08e-05 2.95e-05   -0.7  unresolved
+    20   0.5    3 cond            bare + Gauss vs Iceberg +1.76e-03 3.09e-04   +5.7  bare + Gauss better: rms 0.0010 vs 0.0419
+    20   0.5    3 cond    bare + Gauss vs Iceberg + Gauss -6.52e-07 1.15e-06   -0.6  unresolved
