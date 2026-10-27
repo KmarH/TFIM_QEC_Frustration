@@ -229,7 +229,7 @@ window end 21.0 for Iceberg, 16.7 conditioned for Iceberg + Gauss, above the flo
 - measured survival at the window end is 0.046, against Stim's 0.045 (+0.1σ).
 
 The 2026-10-23 run of this cell had a single surviving Iceberg trajectory out of 24, so it had no
-estimate. At the pre-declared budget the encoded arm is measured, and within the short 3-step
+estimate. At the pre-declared budget the encoded arm is measured, and within the short 12-step (t = 3.0)
 window it neither beats nor loses to bare + Gauss.
 
 **Size axis, third re-run cell — (18, 0.3, 1)**, pooled 2026-10-26 from 20 shards (380 Iceberg /
