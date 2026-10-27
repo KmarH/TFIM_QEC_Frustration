@@ -435,3 +435,44 @@ lead's permission. It was not worked around, and commits are local. SC quotes ne
 `NEXUS_REFRESH_TOKEN`.
 
 **Running.** The re-run program: 80 shards + 7 replays over local / OVM / OLP. See RESUME.md.
+
+## 33. Q3 re-run program complete; size axis measured; article final (2026-10-27)
+
+**What landed** [measured; classical prediction under the ASSUMED noise model; 0 HQC]. All 80
+pre-declared shards and all 7 N = 12 replays finished on 24–27 Oct over local / OVM / OLP. Each size
+cell was pooled once by the unattended autopilot (`--merge-shards`, `--merge`, checked doc tables) and
+pushed: 617e2ba (18, 0.1, 3), 82ddb49 (20, 0.5, 3), c67b0d1 (18, 0.3, 1), 9ea2661 (20, 0.3, 1). No cell
+was re-run after its result was seen.
+
+| cell | Ice+G vs bare+G, cond | raw | bare+G vs Ice, cond | cost Ice+G / bare+G | survival vs Stim | end ESS |
+|---|---|---|---|---|---|---|
+| (18, 0.1, 3) | −3.2σ Ice+G | −3.0σ Ice+G | +1.4σ | 15.9 / 1.44 | −1.0σ | 16.0 / 11.3 |
+| (18, 0.3, 1) | −3.1σ Ice+G | +1.6σ bare+G | +1.4σ | 11.8 / 1.42 | −1.9σ | 12.0 / 11.0 |
+| (20, 0.3, 1) | +0.3σ unresolved | +0.5σ unresolved | +2.9σ | 9.50 / 1.63 | +0.6σ | 23.0 / 17.7 |
+| (20, 0.5, 3) | −0.6σ unresolved | −0.7σ unresolved | +5.7σ | 16.2 / 1.94 | +0.1σ | 21.0 / 16.7 |
+
+**Reading** [inferred]. The N = 12 conclusion (Gauss check beats error detection alone; the
+combination is the most accurate against the in-sector target, at a multiple of the shots) carries to
+N = 18. At N = 20 the combination's edge is not resolved at these budgets; it does not reverse. The
+cost multiple grows to 5.8–11.1×.
+
+**Docs.** `docs/q3_scaling.md` §4.0 carries one paragraph per cell and a four-cell summary; the
+PRELIMINARY marks are gone (§4.4 keeps its placeholder with a dated pointer). Correction: the
+(20, 0.5, 3) window is 12 Trotter steps (t = 3.0), first written as "3 steps" (a misread column);
+fixed with a dated note. The local article (`docs/article_q3/`, never committed) is final, dated
+27 Oct, compiled clean on the OVM.
+
+**Gate.** OVM suite on 9ea2661: 770 passed / 23 skipped / 6 xfailed / 0 failed (62 min). No code
+changed since bd7d20d; only data and docs.
+
+**Ops.** The autopilot (`C:/Work/~/TFIM-q3run-ops/autopilot.sh`, outside the repo) had a bug from
+the start: its scp of the steal list passed the host as a source file, so every remote steal worker
+died at once; fixed 26 Oct with per-host steal lists. It wrote `DONE` at 04:05 on 27 Oct.
+
+**Open for the lead.**
+- Unregister the scheduled task: `Unregister-ScheduledTask -TaskName q3-sweep-autopilot -Confirm:$false`.
+- Duplicate shard workers (s12/s13 copies) were still running on the laptop and OLP; stopping them
+  was refused by the auto-mode permission classifier and is left to the lead.
+- A larger N = 20 budget is the obvious next step if the size question matters (a new decision).
+- Unchanged: which N = 12 cells go to H2-1E, `NEXUS_REFRESH_TOKEN`, a pilot before any 24-qubit job,
+  D-RC-Q3.
