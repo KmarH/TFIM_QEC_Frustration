@@ -1,4 +1,6 @@
 # TFIM with logical vs physical qubits, aimed at Quantinuum H2
+Este branch es más para los andamios del proyecto. Para agregar contexto, obtuve una cosa llamada Oracle Cloud, que me dejaba correr una máquina virtual en servidores de Amazon, lo que hice para hacer algunas pruebas pequeñas remotas. El resto está en inglés porque me gusta que el main esté en inglés, me tiene sentido, pero ahora que ya no lo estoy usando (pero igual no planeo borrarlo por si acaso) dejo esta nota
+
 
 > **Start here.** [`DECISIONS.md`](DECISIONS.md) is the single source of truth for what is decided,
 > what is still open and why. [`handoff/plan.md`](handoff/plan.md) is the numbered journal — one
