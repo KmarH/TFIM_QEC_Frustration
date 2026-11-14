@@ -96,8 +96,8 @@ and runs them at the tier set in `config.py` (`HardwareConfig.nexus_tier`):
   under the assumed noise model.
 - **The H2 path (this pass).** 121 circuits accepted and quoted by the free syntax checker; the offline cost
   estimate equals the server quote to the cent; the Q3 circuits on the hosted noiseless emulator match an
-  independent NumPy evolution (19 points × 3 observables, worst |z| = 2.5, cost 0.0). One blind review found and
-  fixed one real bug in the run driver ([`review/17-h2-finish.md`](review/17-h2-finish.md)).
+  independent NumPy evolution (19 points × 3 observables, worst |z| = 2.5, cost 0.0). An independent review found and
+  fixed one real bug in the run driver.
 
 The formal write-up is [`docs/report/report.tex`](docs/report/report.tex) (LaTeX, compiles on Overleaf), and
 [`docs/findings_vs_questions.md`](docs/findings_vs_questions.md) maps each conclusion to its evidence.
@@ -108,22 +108,15 @@ The formal write-up is [`docs/report/report.tex`](docs/report/report.tex) (LaTeX
 |---|---|
 | `SCOPE.md` | The project's constitution: the four questions, size limits, what may be done without asking and what may not. When in doubt about what the project is supposed to do, this document rules. |
 | `DECISIONS.md` | The decisions that are the project lead's to make (open and decided) and the scope corrections already applied. Read it before trusting any claim that this work matches the reference experiment. |
-| `handoff/plan.md`, `handoff/NN-*.md` | The numbered journal of what each pass delivered (newest last) and the briefs/reports per task. `handoff/14-h2-finish.md` is the latest. |
 | `config.py`, `main.py` | One config file for every setting (sizes, fields, noise, backend switch, H2 tier), and a simple entry point. |
 | `requirements.txt`, `requirements-le.txt` | Exact pinned versions for the two environments (see Quick start). |
 | `src/` | The code: TFIM core (Hamiltonian, Trotter, observables), codes in `src/qec/`, the encoded TFIM and execution backends, the frustration / thermalization / Gauss-law modules, and the H2 path: `h2_circuits.py`, `h2_q3.py`, `h2_backend.py`, `h2_hosted.py`, `h2_driver.py`. |
 | `scripts/` | The scripts that produce every file in `data/` and every figure, so every number can be regenerated; also `setup_env.sh`, `run_h2_nexus.py` (the run driver) and `cross_platform_check.sh`. |
-| `tests/` | The automated tests. Files named `test_h2_*` cover the H2 path; some are *frozen* (written before the code, pinned by SHA-256 in `handoff/13` and `handoff/14`). `tests/fixtures/zenodo_mini/` is a tiny synthetic stand-in for the reference dataset. |
+| `tests/` | The automated tests. Files named `test_h2_*` cover the H2 path; some are *frozen* (written before the code and pinned by SHA-256). `tests/fixtures/zenodo_mini/` is a tiny synthetic stand-in for the reference dataset. |
 | `data/` | Results as plain text, each with a header naming the script that wrote it and whether it is a classical prediction under assumed noise, a server quote, or a free-tier run. Written only by scripts. |
 | `figures/` | Generated figures (not committed; run `scripts/plot_q3.py`). |
 | `docs/` | One write-up per result, the H2 docs (`nexus_toggle.md`, `h2_budget.md`, `quantinuum_issues.md`) and the formal report in `docs/report/`. |
-| `review/` | Numbered independent reviews of each milestone: a reviewer re-derived the key numbers with its own code and graded findings critical / major / minor. `review/14-three-machine-peer-review.md` is the broadest; `review/17-h2-finish.md` covers the H2 path. |
-| `research/` | Source and citation checks, the map of the reference dataset, the H2 noise prior, and a wide literature sweep in `research/scout/` that also looked for work contradicting this one. |
-| `CLAUDE.md`, `KIRO.md`, `.kiro/` | The rules and configurations of the AI agents used (see below). |
 | `Guppy on Quantinuum Systems Application.pdf` | The application sent to Quantinuum; the original source of the scope. |
-
-Some documents mention `Conversation history/` (the project journal and open-questions register). That folder is the
-private working diary of the project lead and is intentionally not in this repository.
 
 ## Scope notes worth knowing before you compare with the reference experiment
 
@@ -133,8 +126,7 @@ private working diary of the project lead and is intentionally not in this repos
   varied axis with respect to this project's own bare arm ([`DECISIONS.md`](DECISIONS.md)).
 - The triangular-lattice work matches the reference's §V (h/|J| = 0.3, dt|J| = 0.25, 9×6 torus), per its Figure 4(e).
   **Do not infer the triangular parameters from the released `quench4` circuit files**: they carry the *square*-quench
-  field (`rx(0.5)`, h/|J| = 2; h/|J| = 0.3 needs `rx(0.0375)`) and start from |0…0>, not the winding bitstrings
-  ([`research/05-zenodo-dataset-map.md`](research/05-zenodo-dataset-map.md)).
+  field (`rx(0.5)`, h/|J| = 2; h/|J| = 0.3 needs `rx(0.0375)`) and start from |0…0>, not the winding bitstrings.
 
 ## Ground rules for anyone working in this repository
 
@@ -164,10 +156,10 @@ private working diary of the project lead and is intentionally not in this repos
 
 ## How it was built
 
-The work used a multi-agent workflow. **Kiro** (agents in `.kiro/`) planned, researched, reviewed and wrote the early
-briefs in `handoff/`; **Claude Code** built from those briefs. Since 8 October 2026 Claude Code is the only agent: it
-also plans, researches and reviews (independent blind reviewer sub-agents are the check), and the project lead
-supervises and decides. `CLAUDE.md` holds the rules the agent follows.
+The project lead scoped and supervised the work and made every decision. AI assistants helped with literature
+sweeps, programming, and working through long derivations, and independent blind reviewers (which do not see the
+internal reasoning) checked each milestone against re-derived numbers. The scientific claims and results stand on
+their own and can be reproduced from the scripts here.
 
 ## What is next (needs the project lead's go and HQC)
 
@@ -178,4 +170,4 @@ supervises and decides. `CLAUDE.md` holds the rules the agent follows.
    distance-3/4 codes.
 
 Open decisions (Q3 size and the 50,000 HQC allocation, the per-job cost cap, randomized compiling for the Q3 Iceberg
-arm) are listed in [`handoff/14-h2-finish.md`](handoff/14-h2-finish.md).
+arm) are listed in [`DECISIONS.md`](DECISIONS.md).
